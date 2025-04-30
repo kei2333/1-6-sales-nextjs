@@ -1,0 +1,21 @@
+# Next.js build output
+.next/
+
+# Node.js modules
+node_modules/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.*  # 例: .env.local, .env.production など
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Optional: OS/Editor-specific
+.DS_Store
+.vscode/
