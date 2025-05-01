@@ -33,10 +33,16 @@ jobs:
           npm run build --if-present
           npm run test --if-present
 
+      - name: Create startup command file
+        run: |
+          echo "cd frontend && npm start" > startup.sh
+          chmod +x startup.sh
+
       - name: Zip artifact for deployment
         run: |
+          cp startup.sh frontend/
           cd frontend
-          zip -r ../release.zip ./*
+          zip -r ../release.zip ./* ../startup.sh
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -68,3 +74,4 @@ jobs:
           slot-name: 'Production'
           package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_D07F44070A4848FFBD85D53FC3794651 }}
+          startup-command: 'sh startup.sh'
