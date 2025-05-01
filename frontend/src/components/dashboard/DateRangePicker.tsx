@@ -19,6 +19,12 @@ export function DateRangePicker({
 
   return (
     <div className={cn("grid gap-2", className)}>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">日付範囲を選択</h2>
+            <Button variant="outline" className="text-sm" onClick={() => setDate(undefined)}>
+                リセット
+            </Button>
+        </div>
       <Popover>
         <PopoverTrigger asChild>
           <Button
