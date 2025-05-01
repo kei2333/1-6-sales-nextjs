@@ -4,6 +4,7 @@ from datetime import date
 from sqlalchemy import create_engine, Column, Integer, String, Date, Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from enum import Enum
 
 # FastAPIインスタンス作成
 app = FastAPI()
@@ -15,39 +16,70 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 # SQLAlchemyモデル定義
-class Expense(Base):
-    __tablename__ = "expenses"
+class Sales(Base):
+    __tablename__ = "sales_report"
 
     id = Column(Integer, primary_key=True, index=True)
-    date = Column(Date, nullable=False)
-    amount = Column(Float, nullable=False)
-    employee_number = Column(String, nullable=False)
-    category = Column(String, nullable=False)
-    location = Column(String, nullable=True)
+    sales_date = Column(Date, nullable=False)
+    location_id = Column(Integer, nullable=False)
+    amount = Column(Integer, nullable=False)
+    sales_channel = Column(Enum, nullable=False)
+    category = Column(Enum, nullable=False)    
+    tactics = Column(Enum, nullable=False)
+    employee_number = Column(Integer, nullable=False)
     memo = Column(String, nullable=True)
 
 # テーブル作成
 Base.metadata.create_all(bind=engine)
 
+class Channel(Enum):
+    SM=0
+    HC=1
+    CVS=2
+    DRUG=3
+    EC=4
+
+class Category(Enum):
+    Drink=0
+    Alchohol=1
+    Food=2
+    Other=3
+
+class Tactics(Enum):
+    Chirashi=0
+    End=1
+    Kikaku=2
+
+class Location(Enum):
+    KAT=0
+    HOK=1
+    TOK=2
+    KIN=3
+    CHU=4
+    KYU=5
+
+
 # Pydanticモデル定義（リクエスト用）
-class ExpenseCreate(BaseModel):
-    date: date
-    amount: float
-    employee_number: str
-    category: str
-    location: str = None
-    memo: str = None
+class SalesCreate(BaseModel):
+    sales_date: date
+    location_id: int
+    amount: int
+    sales_channel: Enum
+    category: Enum
+    tactics: Enum    
+    employee_number: int
+    memo: str
 
 # POSTエンドポイント
-@app.post("/expenses/")
-def create_expense(expense: ExpenseCreate):
+@app.post("/sales_report/")
+def create_sales(expense: SalesCreate):
     db = SessionLocal()
     try:
-        db_expense = Expense(**expense.dict())
-        db.add(db_expense)
+        db_sales_report = Sales(**expense.dict())
+        db.add(db_sales_report)
         db.commit()
-        db.refresh(db_expense)
-        return {"message": "Expense recorded", "id": db_expense.id}
+        db.refresh(db_sales_report)
+        return {"message": "Expense recorded", "id": db_sales_report.id}
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
