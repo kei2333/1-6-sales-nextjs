@@ -66,6 +66,10 @@ def ensure_sales_report_table_exists_and_seed(conn):
             conn.commit()
             logging.info("Inserted initial dummy data into sales_report table.")
             
+class DateEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, date):
+            return obj.isoformat() # 将日期转换为ISO格式字符串 return super().default(obj)
 
 @app.route(route="create_sales")
 def create_sales(req: func.HttpRequest) -> func.HttpResponse:
@@ -82,7 +86,7 @@ def create_sales(req: func.HttpRequest) -> func.HttpResponse:
         conn.close()
 
         return func.HttpResponse(
-            json.dumps(sales_report, ensure_ascii=False),
+            json.dumps(sales_report, ensure_ascii=False, cls=DateEncoder),
             status_code=200,
             mimetype="application/json",
         )
