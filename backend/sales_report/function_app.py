@@ -26,8 +26,7 @@ def get_db_connection():
             cursorclass=pymysql.cursors.DictCursor,
             connect_timeout=5,
             ssl={"fake_flag_to_enable_tls": True},
-        )        
-        logging.info("データベースがつながりました。")
+        )
         return conn
     except pymysql.MySQLError as e:
         logging.error(f"MySQL connection error: {e}")
