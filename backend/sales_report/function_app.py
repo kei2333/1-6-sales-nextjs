@@ -81,7 +81,7 @@ def create_sales(req: func.HttpRequest) -> func.HttpResponse:
         ensure_sales_report_table_exists_and_seed(conn)
 
         with conn.cursor() as cursor:
-            cursor.execute("SELECT id, sales_date, location_id, amount FROM sales_report;")
+            cursor.execute("SELECT id, sales_date, location_id, amount, sales_channel, category, tactics, employee_number FROM sales_report;")
             sales_report = cursor.fetchall()
 
         conn.close()
