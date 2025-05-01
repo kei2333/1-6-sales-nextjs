@@ -9,6 +9,33 @@ import { DateRangePicker } from "@/components/dashboard/DateRangePicker"
 
 
 export default function SalesDashboard() {
+    const salesData = [
+        {
+          task: "FIG-001",
+          name: "田中一郎",
+          category: "SNS広告",
+          amount: 150000,
+          date: "2025-05-01",
+          branch: "東京支店",
+        },
+        {
+          task: "FIG-002",
+          name: "鈴木花子",
+          category: "メール",
+          amount: 80000,
+          date: "2025-05-01",
+          branch: "名古屋支店",
+        },
+        {
+          task: "FIG-003",
+          name: "山田太郎",
+          category: "キャンペーン",
+          amount: 120000,
+          date: "2025-05-02",
+          branch: "大阪支店",
+        },
+      ]
+      
     return (
         <main className="flex flex-col gap-6 p-6 md:ml">
             {/* 売上カード 3つ */}
@@ -63,6 +90,18 @@ export default function SalesDashboard() {
                                         <td className="p-2 text-muted">...</td>
                                         <td className="p-2 text-muted">...</td>
                                     </tr>
+                                </tbody>
+                                <tbody>
+                                    {salesData.map((sale, idx) => (
+                                        <tr key={idx} className="border-b">
+                                            <td className="p-2">{sale.task}</td>
+                                            <td className="p-2">{sale.name}</td>
+                                            <td className="p-2">{sale.category}</td>
+                                            <td className="p-2">¥{sale.amount.toLocaleString()}</td>
+                                            <td className="p-2">{sale.date}</td>
+                                            <td className="p-2">{sale.branch}</td>
+                                        </tr>
+                                    ))}
                                 </tbody>
                             </table>
                         </div>
