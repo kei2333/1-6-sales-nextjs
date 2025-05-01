@@ -108,7 +108,7 @@ def get_sales(req: func.HttpRequest) -> func.HttpResponse:
         logging.error(f"Unexpected error: {e}")
         return func.HttpResponse(f"Unexpected error: {str(e)}", status_code=500)
 
-
+# 新しいデータをDBに送って登録する機能
 @app.route(route="send_sales")
 def send_sales(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("Processing send_sales HTTP request.")
