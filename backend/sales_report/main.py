@@ -30,7 +30,6 @@ Base = declarative_base()
 # SQLAlchemyモデル定義
 class Sales(Base):
     __tablename__ = "sales_report"
-
     id = Column(Integer, primary_key=True, index=True)
     sales_date = Column(Date, nullable=False)
     location_id = Column(Integer, nullable=False)
@@ -83,7 +82,7 @@ class SalesCreate(BaseModel):
     memo: str
 
 # POSTエンドポイント
-@app.post("/sales_report/")
+@app.post("/create_sales/")
 def create_sales(expense: SalesCreate):
     db = SessionLocal()
     try:
