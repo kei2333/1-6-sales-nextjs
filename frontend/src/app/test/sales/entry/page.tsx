@@ -5,13 +5,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+// import { Calendar } from "@/components/ui/calendar";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { useState } from "react";
 import { Filter } from "lucide-react";
 
+
+
 export default function ReportEntryDashboard() {
-  const [date, setDate] = useState(new Date());
+  // const [date, setDate] = useState(new Date());
 
   const taskData = [
     { task: "FIG-123", title: "Task 1", project: "Project 1", priority: "High", date: "Dec 5", owner: "🧑" },
@@ -28,12 +30,6 @@ export default function ReportEntryDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="rounded-3xl bg-purple-100 flex items-center justify-center min-h-[300px]">
           <CardContent className="p-0">
-            <Calendar
-              selected={date}
-              onSelect={(selected) => selected && setDate(selected)}
-              mode="single"
-              className="rounded-md border scale-120"
-            />
           </CardContent>
         </Card>
         <Card className="md:col-span-2 bg-white rounded-3xl border">
