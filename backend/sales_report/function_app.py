@@ -1,3 +1,4 @@
+from email import message
 import azure.functions as func
 import logging
 import pymysql
@@ -25,44 +26,45 @@ def get_db_connection():
             cursorclass=pymysql.cursors.DictCursor,
             connect_timeout=5,
             ssl={"fake_flag_to_enable_tls": True},
-        )
+        )        
+        logging.info("データベースがつながりました。")
         return conn
     except pymysql.MySQLError as e:
         logging.error(f"MySQL connection error: {e}")
         raise
 
-def ensure_sales_management_table_exists_and_seed(conn):
-    create_table_sql = """
-    CREATE TABLE IF NOT EXISTS sales_management (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        sales_date DATE NOT NULL,
-        location_id INT NOT NULL,
-        amount INT NOT NULL,
-        sales_channel ENUM NOT NULL,
-        category ENUM NOT NULL,    
-        tactics ENUM NOT NULL,
-        employee_number INT NOT NULL,
-        memo VARCHAR(300) NOT NULL
-    );
-    """
-    with conn.cursor() as cursor:
-        cursor.execute(create_table_sql)
-    conn.commit()
+# def ensure_sales_report_table_exists_and_seed(conn):
+#     create_table_sql = """
+#     CREATE TABLE IF NOT EXISTS sales_report (
+#         id INT AUTO_INCREMENT PRIMARY KEY,
+#         sales_date DATE NOT NULL,
+#         location_id INT NOT NULL,
+#         amount INT NOT NULL,
+#         sales_channel ENUM NOT NULL,
+#         category ENUM NOT NULL,    
+#         tactics ENUM NOT NULL,
+#         employee_number INT NOT NULL,
+#         memo VARCHAR(300) NOT NULL
+#     );
+#     """
+#     with conn.cursor() as cursor:
+#         cursor.execute(create_table_sql)
+#     conn.commit()
 
-    # すでにデータが存在するかチェック
-    with conn.cursor() as cursor:
-        cursor.execute("SELECT COUNT(*) as cnt FROM sales_management;")
-        result = cursor.fetchone()
-        if result["cnt"] == 0:
-            # ダミーデータ挿入
-            seed_sql = """
-            INSERT INTO sales_management (sales_date, location_id, amount, 
-            sales_channel, category, tactics, employee_number, memo) VALUES
-            ('2025-03-02', 1, 40000, 0, 0, 0, 0, '');
-            """
-            cursor.execute(seed_sql)
-            conn.commit()
-            logging.info("Inserted initial dummy data into sales_management table.")
+#     # すでにデータが存在するかチェック
+#     with conn.cursor() as cursor:
+#         cursor.execute("SELECT COUNT(*) as cnt FROM sales_report;")
+#         result = cursor.fetchone()
+#         if result["cnt"] == 0:
+#             # ダミーデータ挿入
+#             seed_sql = """
+#             INSERT INTO sales_report (sales_date, location_id, amount, 
+#             sales_channel, category, tactics, employee_number, memo) VALUES
+#             ('2025-03-02', 1, 40000, 0, 0, 0, 0, '');
+#             """
+#             cursor.execute(seed_sql)
+#             conn.commit()
+#             logging.info("Inserted initial dummy data into sales_report table.")
 
 @app.route(route="create_sales")
 def create_sales(req: func.HttpRequest) -> func.HttpResponse:
@@ -70,16 +72,16 @@ def create_sales(req: func.HttpRequest) -> func.HttpResponse:
 
     try:
         conn = get_db_connection()
-        ensure_sales_management_table_exists_and_seed(conn)
+        # ensure_sales_report_table_exists_and_seed(conn)
 
         with conn.cursor() as cursor:
-            cursor.execute("SELECT id, title, is_completed FROM sales_management;")
-            sales_management = cursor.fetchall()
+            cursor.execute("SELECT id, sales_date, location_id, amount FROM sales_report;")
+            sales_report = cursor.fetchall()
 
         conn.close()
 
         return func.HttpResponse(
-            json.dumps(sales_management, ensure_ascii=False),
+            json.dumps(sales_report, ensure_ascii=False, message="データベースつながったよ。"),
             status_code=200,
             mimetype="application/json",
         )
