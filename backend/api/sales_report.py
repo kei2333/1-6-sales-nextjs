@@ -1,16 +1,28 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from datetime import date
-from sqlalchemy import create_engine, Column, Integer, String, Date, Float
+from sqlalchemy import create_engine, Column, Integer, String, Date, Enum
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from enum import Enum
+from dotenv import load_dotenv
+from pathlib import Path
+import os
+
+# 環境変数の読み込み
+load_dotenv()
+
+# SSL証明書パス（絶対パスに変換）
+ssl_ca_path = Path(os.getenv("SSL_CA_PATH")).resolve()
 
 # FastAPIインスタンス作成
 app = FastAPI()
 
-# DB設定（ここではSQLiteを使用）
-DATABASE_URL = "sqlite:///./test.db"
+# DB設定（ここではAzure MySQLフレキシブルサーバーを使用）
+DATABASE_URL = (
+    f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}"
+    f"@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}?ssl_ca={ssl_ca_path}"
+)
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
@@ -27,7 +39,7 @@ class Sales(Base):
     category = Column(Enum, nullable=False)    
     tactics = Column(Enum, nullable=False)
     employee_number = Column(Integer, nullable=False)
-    memo = Column(String, nullable=True)
+    memo = Column(String(300), nullable=True)
 
 # テーブル作成
 Base.metadata.create_all(bind=engine)
