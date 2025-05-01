@@ -71,9 +71,10 @@ class DateEncoder(json.JSONEncoder):
         if isinstance(obj, date):
             return obj.isoformat()
 
-@app.route(route="create_sales")
-def create_sales(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info("Processing create_sales HTTP request.")
+# 一番初めに書いたやつ。DBに接続し、データがあるか確認して、それを表示します。
+@app.route(route="get_sales")
+def get_sales(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info("Processing get_sales HTTP request.")
 
     try:
         conn = get_db_connection()
@@ -106,3 +107,22 @@ def create_sales(req: func.HttpRequest) -> func.HttpResponse:
     except Exception as e:
         logging.error(f"Unexpected error: {e}")
         return func.HttpResponse(f"Unexpected error: {str(e)}", status_code=500)
+
+
+@app.route(route="send_sales")
+def send_sales(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info("Processing send_sales HTTP request.")
+    try:
+        conn = get_db_connection()
+        ensure_sales_report_table_exists_and_seed(conn)
+
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT id, sales_date, location_id, amount, sales_channel, category, tactics, employee_number FROM sales_report;")
+            sales_report = cursor.fetchall()
+
+        conn.close()
+
+    finally:
+        return func.HttpResponse(
+            status_code=200
+        )
