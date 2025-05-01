@@ -65,6 +65,7 @@ def ensure_sales_report_table_exists_and_seed(conn):
             cursor.execute(seed_sql)
             conn.commit()
             logging.info("Inserted initial dummy data into sales_report table.")
+            
 
 @app.route(route="create_sales")
 def create_sales(req: func.HttpRequest) -> func.HttpResponse:
