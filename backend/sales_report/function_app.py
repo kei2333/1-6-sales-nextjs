@@ -114,7 +114,12 @@ def send_sales(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("Processing send_sales HTTP request.")
     try:
         conn = get_db_connection()
-        ensure_sales_report_table_exists_and_seed(conn)
+        send_sql = """
+            INSERT INTO sales_report (sales_date, location_id, amount, 
+            sales_channel, category, tactics, employee_number, memo) VALUES
+            ('2025-03-02', 1, 40000, 'SM', '飲料', 'チラシ', 0, '');  
+            """
+        conn.cursor.execute(send_sql)
 
         with conn.cursor() as cursor:
             cursor.execute("SELECT id, sales_date, location_id, amount, sales_channel, category, tactics, employee_number FROM sales_report;")
