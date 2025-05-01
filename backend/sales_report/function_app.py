@@ -66,10 +66,11 @@ def ensure_sales_report_table_exists_and_seed(conn):
             conn.commit()
             logging.info("Inserted initial dummy data into sales_report table.")
             
+# sales_dateをjsonに対応させるためにstring型に変換して表示する
 class DateEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, date):
-            return obj.isoformat() # 将日期转换为ISO格式字符串 return super().default(obj)
+            return obj.isoformat()
 
 @app.route(route="create_sales")
 def create_sales(req: func.HttpRequest) -> func.HttpResponse:
