@@ -104,7 +104,7 @@ def get_sales(req: func.HttpRequest) -> func.HttpResponse:
             conn = get_db_connection()
 
             with conn.cursor() as cursor:
-                cursor.execute("SELECT s.id, s.sales_date, s.location_id, s.amount, s.sales_channel, s.category, s.tactics, s.employee_number, s.memo, u.employee_name FROM sales_report s LEFT JOIN users u ON s.employee_number = u.employee_number WHERE sales_date BETWEEN %s AND %s AND location_id=%s; ",(sales_date_from, sales_date_until, location,))
+                cursor.execute("SELECT s.id, s.sales_date, s.location_id, s.amount, s.sales_channel, s.category, s.tactics, s.employee_number, s.memo, u.employee_name FROM sales_report s LEFT JOIN users u ON s.employee_number = u.employee_number WHERE s.sales_date BETWEEN %s AND %s AND s.location_id=%s; ",(sales_date_from, sales_date_until, location,))
                 sales_report = cursor.fetchall()
 
             conn.close()
