@@ -63,7 +63,6 @@ export default function SalesReportPage() {
       <TableHeader>
         <TableRow>
           <TableHead>報告者</TableHead>
-          <TableHead>時間</TableHead>
           <TableHead>売り上げ</TableHead>
           <TableHead>チャネル</TableHead>
           <TableHead>商品カテゴリ</TableHead>
@@ -76,7 +75,6 @@ export default function SalesReportPage() {
           reports.map((row, i) => (
             <TableRow key={i}>
               <TableCell>{row.employee_name}</TableCell>
-              <TableCell>{row.sales_date}</TableCell>
               <TableCell>{row.amount}円</TableCell>
               <TableCell>{row.sales_channel}</TableCell>
               <TableCell>{row.category}</TableCell>
