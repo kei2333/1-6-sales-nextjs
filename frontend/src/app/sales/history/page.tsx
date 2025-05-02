@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -26,8 +26,19 @@ export default function AdminPage() {
   useEffect(() => {
     async function fetchSales() {
       try {
+        if (selectedMonth === 1||3||5||7||8||10||12) {
+          var selectedDay = 31;
+        } else if (selectedMonth === 2) {
+          if (selectedYear % 4 === 0 && selectedYear % 100 !== 0) {
+            var selectedDay = 29;
+          } else {
+            var selectedDay = 28;
+          }
+        } else {
+          var selectedDay = 30;
+        }
         const res = await fetch(
-          "/api/get-sales?sales_date=2025-03-03&location_id=2"
+          `https://team6-sales-function.azurewebsites.net/api/get_sales?sales_date_from=${selectedYear}-${selectedMonth}-1&sales_date_until=${selectedYear}-${selectedMonth}-${selectedDay}&location_id=1`
         );
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
@@ -41,7 +52,7 @@ export default function AdminPage() {
     }
 
     fetchSales();
-  }, []);
+  }, [selectedMonth, selectedYear]);
 
   const filteredReports = reports.filter((r) => {
     const date = new Date(r.sales_date);
