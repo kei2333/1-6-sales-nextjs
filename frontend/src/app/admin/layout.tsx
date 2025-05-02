@@ -2,7 +2,7 @@
 
 import "@/app/globals.css";
 import StickyHeader from "@/components/dashboard/sticky-header";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/dashboard/dashboard-sidebar";
 import type { ReactNode } from "react";
 
