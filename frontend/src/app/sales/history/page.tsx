@@ -12,8 +12,19 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 
+// fetchするデータの型を定義
+type SalesReport = {
+  employee_name: string;
+  sales_date: string;
+  amount: number;
+  sales_channel: string;
+  category: string;
+  tactics: string;
+  memo: string|null;
+}
+
 export default function AdminPage() {
-  const [reports, setReports] = useState<any[]>([]);
+  const [reports, setReports] = useState<SalesReport[]>([]);
   const [error, setError] = useState("");
   const [selectedMonth, setSelectedMonth] = useState<number>(
     new Date().getMonth() + 1
@@ -106,15 +117,15 @@ export default function AdminPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredReports.map((r) => (
-                  <TableRow key={r.id}>
+                {filteredReports.sort((a, b) => a.sales_date.localeCompare(b.sales_date)).map((r, index) => (
+                  <TableRow key={index}>
                     <TableCell>{r.sales_date}</TableCell>
-                    <TableCell>{r.reporter_name || "田中健太郎"}</TableCell>
+                    <TableCell>{r.employee_name || "田中健太郎"}</TableCell>
                     <TableCell>{r.amount}円</TableCell>
                     <TableCell>{r.sales_channel}</TableCell>
                     <TableCell>{r.category}</TableCell>
                     <TableCell>{r.tactics}</TableCell>
-                    <TableCell>メモ</TableCell>
+                    <TableCell>{r.memo}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
