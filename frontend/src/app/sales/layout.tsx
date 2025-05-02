@@ -1,3 +1,4 @@
+"use client";
 // app/sales/layout.tsx
 
 import "@/app/globals.css";

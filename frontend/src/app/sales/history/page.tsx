@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -12,8 +12,19 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 
+// fetchするデータの型を定義
+type SalesReport = {
+  employee_name: string;
+  sales_date: string;
+  amount: number;
+  sales_channel: string;
+  category: string;
+  tactics: string;
+  memo: string|null;
+}
+
 export default function AdminPage() {
-  const [reports, setReports] = useState<any[]>([]);
+  const [reports, setReports] = useState<SalesReport[]>([]);
   const [error, setError] = useState("");
   const [selectedMonth, setSelectedMonth] = useState<number>(
     new Date().getMonth() + 1
@@ -26,8 +37,19 @@ export default function AdminPage() {
   useEffect(() => {
     async function fetchSales() {
       try {
+        if (selectedMonth === 1||3||5||7||8||10||12) {
+          var lastDayOfMonth = 31;
+        } else if (selectedMonth === 2) {
+          if (selectedYear % 4 === 0 && selectedYear % 100 !== 0) {
+            var lastDayOfMonth = 29;
+          } else {
+            var lastDayOfMonth = 28;
+          }
+        } else {
+          var lastDayOfMonth = 30;
+        }
         const res = await fetch(
-          "/api/get-sales?sales_date=2025-03-03&location_id=2"
+          `https://team6-sales-function.azurewebsites.net/api/get_sales?sales_date_from=${selectedYear}-${selectedMonth}-1&sales_date_until=${selectedYear}-${selectedMonth}-${lastDayOfMonth}&location_id=1`
         );
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
@@ -41,7 +63,7 @@ export default function AdminPage() {
     }
 
     fetchSales();
-  }, []);
+  }, [selectedMonth, selectedYear]);
 
   const filteredReports = reports.filter((r) => {
     const date = new Date(r.sales_date);
@@ -86,7 +108,6 @@ export default function AdminPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>日付</TableHead>
-                  <TableHead>時間</TableHead>
                   <TableHead>報告者</TableHead>
                   <TableHead>売り上げ</TableHead>
                   <TableHead>チャネル</TableHead>
@@ -96,16 +117,15 @@ export default function AdminPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredReports.map((r) => (
-                  <TableRow key={r.id}>
+                {filteredReports.sort((a, b) => a.sales_date.localeCompare(b.sales_date)).map((r, index) => (
+                  <TableRow key={index}>
                     <TableCell>{r.sales_date}</TableCell>
-                    <TableCell>{r.time || "12:35"}</TableCell>
-                    <TableCell>{r.reporter_name || "田中健太郎"}</TableCell>
+                    <TableCell>{r.employee_name || "田中健太郎"}</TableCell>
                     <TableCell>{r.amount}円</TableCell>
                     <TableCell>{r.sales_channel}</TableCell>
                     <TableCell>{r.category}</TableCell>
                     <TableCell>{r.tactics}</TableCell>
-                    <TableCell>メモ</TableCell>
+                    <TableCell>{r.memo}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
