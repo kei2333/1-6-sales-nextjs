@@ -1,9 +1,9 @@
 // app/sales/layout.tsx
 
 import "@/app/globals.css";
-import StickyHeader from "@/components/dashboard/sticky-header";
+import StickyHeader from "@/components/users/sticky-header";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/dashboard/dashboard-sidebar";
+import { AppSidebar } from "@/components/users/UsersSidebar";
 import type { ReactNode } from "react";
 
 export default function SalesLayout({ children }: { children: ReactNode }) {
