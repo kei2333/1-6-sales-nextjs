@@ -42,9 +42,7 @@ export default function SalesReportPage() {
         // レスポンスのデータをjsonに変換
         const json = await res.json();
         setReports(json);
-        console.log(today_year, today_month, today_day);
       } catch (err) {
-        console.error(err);
         setError('データ取得に失敗しました');
       }
     }
