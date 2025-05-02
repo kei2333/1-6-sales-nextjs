@@ -97,7 +97,6 @@ export default function AdminPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>日付</TableHead>
-                  <TableHead>時間</TableHead>
                   <TableHead>報告者</TableHead>
                   <TableHead>売り上げ</TableHead>
                   <TableHead>チャネル</TableHead>
@@ -110,7 +109,6 @@ export default function AdminPage() {
                 {filteredReports.map((r) => (
                   <TableRow key={r.id}>
                     <TableCell>{r.sales_date}</TableCell>
-                    <TableCell>{r.time || "12:35"}</TableCell>
                     <TableCell>{r.reporter_name || "田中健太郎"}</TableCell>
                     <TableCell>{r.amount}円</TableCell>
                     <TableCell>{r.sales_channel}</TableCell>
