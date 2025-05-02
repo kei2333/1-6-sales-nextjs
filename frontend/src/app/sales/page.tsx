@@ -12,6 +12,7 @@ import {
   } from "@/components/ui/table"
 import { useState, useEffect } from "react";
 
+// fetchするデータの型を定義
 type SalesReport = {
   employee_name: string;
   sales_date: string;
@@ -19,6 +20,7 @@ type SalesReport = {
   sales_channel: string;
   category: string;
   tactics: string;
+  memo: string|null;
 }
 
 export default function SalesReportPage() {
@@ -31,6 +33,7 @@ export default function SalesReportPage() {
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
+        // レスポンスのデータをjsonに変換
         const json = await res.json();
         setReports(json);
         console.log(json);
@@ -79,7 +82,7 @@ export default function SalesReportPage() {
               <TableCell>{row.sales_channel}</TableCell>
               <TableCell>{row.category}</TableCell>
               <TableCell>{row.tactics}</TableCell>
-              <TableCell>メモ</TableCell>
+              <TableCell>{row.memo}</TableCell>
             </TableRow>
           ))
         ) : (
