@@ -254,3 +254,36 @@ def add_employee(req: func.HttpRequest) -> func.HttpResponse:
         )
     finally:
         conn.close()
+
+@app.route(route="edit_employee_role")
+def edit_employee_role(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info("Processing edit_employee_role HTTP request.")
+    conn = get_db_connection()
+    try:
+        employee_number = req.params.get('employee_number')
+        employee_role = req.params.get('employee_role')
+
+        if not employee_number or not employee_role:
+            return func.HttpResponse(
+                "Missing required parameters.",
+                status_code=400
+            )
+
+        with conn.cursor() as cursor:
+            update_sql = """
+                UPDATE users SET employee_role = %s WHERE employee_number = %s;
+            """
+            cursor.execute(update_sql,(employee_role, employee_number,))
+            conn.commit()
+        return func.HttpResponse(
+            "Employee role updated successfully.",
+            status_code=200
+        )
+    except Exception as e:
+        logging.error(f"Error updating employee role: {str(e)}")
+        return func.HttpResponse(
+            f"Failed to update employee role. Error: {str(e)}",
+            status_code=500
+        )
+    finally:
+        conn.close()
