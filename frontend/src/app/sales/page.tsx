@@ -26,6 +26,7 @@ type SalesReport = {
 export default function SalesReportPage() {
   const [reports, setReports] = useState<SalesReport[]>([]);
   const [error, setError] = useState("");
+  // useEffectを使ってページ読み込み時にデータを取得
   useEffect(() => {
     async function fetchSales() {
       try {
