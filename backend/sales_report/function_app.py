@@ -287,3 +287,36 @@ def edit_employee_role(req: func.HttpRequest) -> func.HttpResponse:
         )
     finally:
         conn.close()
+
+
+@app.route(route="delete_employee")
+def delete_employee(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info("Processing delete_employee HTTP request.")
+    conn = get_db_connection()
+    try:
+        employee_number = req.params.get('employee_number')
+
+        if not employee_number:
+            return func.HttpResponse(
+                "Missing required parameters.",
+                status_code=400
+            )
+
+        with conn.cursor() as cursor:
+            delete_sql = """
+                DELETE FROM users WHERE employee_number = %s;
+            """
+            cursor.execute(delete_sql,(employee_number,))
+            conn.commit()
+        return func.HttpResponse(
+            "Employee data deleted successfully.",
+            status_code=200
+        )
+    except Exception as e:
+        logging.error(f"Error deleting employee data: {str(e)}")
+        return func.HttpResponse(
+            f"Failed to delete employee data. Error: {str(e)}",
+            status_code=500
+        )
+    finally:
+        conn.close()
