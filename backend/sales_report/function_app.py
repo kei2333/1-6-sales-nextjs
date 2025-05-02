@@ -80,7 +80,7 @@ def get_sales(req: func.HttpRequest) -> func.HttpResponse:
         date=req.params.get('sales_date')
         location=req.params.get('location_id')
         if date and location:
-
+            #日付、拠点を指定してデータを見る
             conn = get_db_connection()
             ensure_sales_report_table_exists_and_seed(conn)
 
@@ -95,6 +95,28 @@ def get_sales(req: func.HttpRequest) -> func.HttpResponse:
                 status_code=200,
                 mimetype="application/json",
             )
+        # elif date:
+        #     #日付の区間を設定して全拠点のデータを見るよう
+        #     #あとで
+        #     conn = get_db_connection()
+        #     ensure_sales_report_table_exists_and_seed(conn)
+
+        #     with conn.cursor() as cursor:
+        #         cursor.execute("SELECT id, sales_date, location_id, amount, sales_channel, category, tactics, employee_number FROM sales_report WHERE sales_date = %s; ",(date,))
+        #         sales_report = cursor.fetchall()
+
+        #     conn.close()
+
+        #     return func.HttpResponse(
+        #         json.dumps(sales_report, ensure_ascii=False, cls=DateEncoder),
+        #         status_code=200,
+        #         mimetype="application/json",
+        #     )
+        # else:
+        #     logging.error(f"Operational error: {e}")
+        #     return func.HttpResponse(
+        #         f"Database operational error: {str(e)}", status_code=500
+        #     )
 
     except pymysql.err.OperationalError as e:
         logging.error(f"Operational error: {e}")
@@ -117,23 +139,45 @@ def get_sales(req: func.HttpRequest) -> func.HttpResponse:
 def send_sales(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("Processing send_sales HTTP request.")
     try:
+        date=req.params.get('sales_date')
+        location=req.params.get('location_id')
+        amount=req.params.get('amount')
+        sales_channel=req.params.get('sales_channel')
+        category=req.params.get('category')
+        tactics=req.params.get('tactics')
+        employee_number=req.params.get('employee_number')
+        memo=req.params.get('memo')
+
+        if not date or not location or not amount:
+            return func.HttpResponse(
+                "Missing required parameters.",
+                status_code=400
+            )
+
         conn = get_db_connection()
         cursor = conn.cursor()
         send_sql = """
             INSERT INTO sales_report (sales_date, location_id, amount, 
             sales_channel, category, tactics, employee_number, memo) VALUES
-            ('2025-03-03', 2, 40000, 'SM', '飲料', 'チラシ', 0, '');  
+            (%s, %s, %s, %s, %s, %s, %s, %s);  
             """
-        cursor.execute(send_sql)
+        cursor.execute(send_sql,(date,location,amount,sales_channel,category,tactics,employee_number,memo,))
         conn.commit()
-        cursor.execute("SELECT id, sales_date, location_id, amount, sales_channel, category, tactics, employee_number FROM sales_report;")
-        sales_report = cursor.fetchall()
-        cursor.close()
-        conn.close()
-
-    finally:
         return func.HttpResponse(
+            "Sales data inserted successfully.",
             status_code=200
         )
+    except Exception as e:
+        logging.error(f"Error inserting sales data: {str(e)}")
+        return func.HttpResponse(
+            f"Failed to insert sales data. Error: {str(e)}",
+            status_code=500
+        )
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
     
 
