@@ -218,4 +218,39 @@ def get_employee(req: func.HttpRequest) -> func.HttpResponse:
     finally:
         conn.close()
 
-    
+@app.route(route="add_employee")
+def add_employee(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info("Processing add_employee HTTP request.")
+    conn = get_db_connection()
+    try:
+        employee_number = req.params.get('employee_number')
+        employee_name = req.params.get('employee_name')
+        location_id = req.params.get('location_id')
+        employee_role = req.params.get('employee_role')
+        employee_password = req.params.get('employee_password')
+
+        if not employee_number or not employee_name or not location_id or not employee_role:
+            return func.HttpResponse(
+                "Missing required parameters.",
+                status_code=400
+            )
+
+        with conn.cursor() as cursor:
+            insert_sql = """
+                INSERT INTO users (employee_number, employee_name, location_id, employee_role, employee_password) VALUES
+                (%s, %s, %s, %s, %s);
+            """
+            cursor.execute(insert_sql,(employee_number, employee_name, location_id, employee_role, employee_password,))
+            conn.commit()
+        return func.HttpResponse(
+            "Employee data inserted successfully.",
+            status_code=200
+        )
+    except Exception as e:
+        logging.error(f"Error inserting employee data: {str(e)}")
+        return func.HttpResponse(
+            f"Failed to insert employee data. Error: {str(e)}",
+            status_code=500
+        )
+    finally:
+        conn.close()
