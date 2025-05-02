@@ -32,6 +32,7 @@ export default function SalesReportPage() {
   const today_month = now.getMonth() + 1;
   const today_day = now.getDate();
   // useEffectを使ってページ読み込み時にデータを取得
+  // TODO: ユーザーのデータを取得し、ユーザーの所属する拠点に一致するデータを取得
   useEffect(() => {
     async function fetchSales() {
       try {
@@ -102,6 +103,7 @@ export default function SalesReportPage() {
 </Card>
 
       {/* User Sales History */}
+      {/* TODO: ユーザーのデータを取得し、ユーザーの所属する拠点とemployee_idに一致するデータを取得 */}
       <Card>
         <CardHeader>
           <CardTitle>今日のあなたの報告履歴</CardTitle>
