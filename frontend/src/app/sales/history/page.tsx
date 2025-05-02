@@ -40,7 +40,7 @@ export default function AdminPage() {
         if (selectedMonth === 1||3||5||7||8||10||12) {
           var lastDayOfMonth = 31;
         } else if (selectedMonth === 2) {
-          if (selectedYear % 4 === 0 && selectedYear % 100 !== 0) {
+          if (selectedYear % 4 === 0) {
             var lastDayOfMonth = 29;
           } else {
             var lastDayOfMonth = 28;
@@ -49,7 +49,7 @@ export default function AdminPage() {
           var lastDayOfMonth = 30;
         }
         const res = await fetch(
-          `https://team6-sales-function.azurewebsites.net/api/get_sales?sales_date_from=${selectedYear}-${selectedMonth}-1&sales_date_until=${selectedYear}-${selectedMonth}-${lastDayOfMonth}&location_id=1`
+          `https://team6-sales-function.azurewebsites.net/api/get_sales?sales_date_from=${selectedYear}-${selectedMonth}-1&sales_date_until=${selectedYear}-${selectedMonth}-${lastDayOfMonth}&location_id=${LocationID}`
         );
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
