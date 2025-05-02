@@ -77,20 +77,23 @@ def get_sales(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("Processing get_sales HTTP request.")
 
     try:
-        conn = get_db_connection()
-        ensure_sales_report_table_exists_and_seed(conn)
+        date=req.params.get('sales_date')
+        if date:
 
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT id, sales_date, location_id, amount, sales_channel, category, tactics, employee_number FROM sales_report;")
-            sales_report = cursor.fetchall()
+            conn = get_db_connection()
+            ensure_sales_report_table_exists_and_seed(conn)
 
-        conn.close()
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT id, sales_date, location_id, amount, sales_channel, category, tactics, employee_number FROM sales_report WHERE sales_date = %s;",(date,))
+                sales_report = cursor.fetchall()
 
-        return func.HttpResponse(
-            json.dumps(sales_report, ensure_ascii=False, cls=DateEncoder),
-            status_code=200,
-            mimetype="application/json",
-        )
+            conn.close()
+
+            return func.HttpResponse(
+                json.dumps(sales_report, ensure_ascii=False, cls=DateEncoder),
+                status_code=200,
+                mimetype="application/json",
+            )
 
     except pymysql.err.OperationalError as e:
         logging.error(f"Operational error: {e}")
@@ -131,3 +134,5 @@ def send_sales(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(
             status_code=200
         )
+    
+
