@@ -1,133 +1,131 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+  } from "@/components/ui/table"
+import { useState, useEffect } from "react";
 
-export default function AdminPage() {
-  const [reports, setReports] = useState<any[]>([]);
+// fetchするデータの型を定義
+type SalesReport = {
+  id: number;
+  employee_name: string;
+  sales_date: string;
+  amount: number;
+  sales_channel: string;
+  category: string;
+  tactics: string;
+  memo: string|null;
+}
+
+export default function SalesReportPage() {
+  const [reports, setReports] = useState<SalesReport[]>([]);
   const [error, setError] = useState("");
-
-  const myEmployeeNumber = 12345; // 報告者別フィルター用変数
-  const LocationId = 2; // 拠点別フィルター用変数
-
+  // 現在の日付を取得
+  const now = new Date();
+  const today_year = now.getFullYear();
+  const today_month = now.getMonth() + 1;
+  const today_day = now.getDate();
+  // useEffectを使ってページ読み込み時にデータを取得
+  // TODO: ユーザーのデータを取得し、ユーザーの所属する拠点に一致するデータを取得
   useEffect(() => {
     async function fetchSales() {
       try {
-        const res = await fetch('/api/get-sales?sales_date=2025-03-03&location_id=2');
+        const res = await fetch(`https://team6-sales-function.azurewebsites.net/api/get_sales?sales_date=${today_year}-${today_month}-${today_day}&location_id=1`);
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
+        // レスポンスのデータをjsonに変換
         const json = await res.json();
         setReports(json);
       } catch (err) {
-        console.error(err);
         setError('データ取得に失敗しました');
       }
     }
-
     fetchSales();
   }, []);
 
-  const today = new Date().toISOString().slice(0, 10);
-
-  // 今日かつ大阪のデータに限定
-  const todayOsakaReports = reports.filter(
-    (r) => r.sales_date === today && r.location_id === LocationId
-  );
-
-  const yourReports = todayOsakaReports.filter(
-    (r) => r.employee_number === myEmployeeNumber
-  );
-
   return (
-    <main className="p-6 flex flex-col gap-6">
-      <h2 className="text-2xl font-bold">今日の売上報告（大阪拠点）</h2>
+    <main className="flex-1 p-6 space-y-8">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-muted-foreground">今日の売上報告</h2>
+        <div className="flex items-center gap-4">
+          <span>田中さん</span>
+          <Button variant="outline">ログアウト</Button>
+        </div>
+      </div>
 
-      {/* 大阪拠点 */}
+      {/* Osaka Sales Table */}
+      <Card>
+  <CardHeader>
+    <CardTitle>今日の関東拠点の報告状況</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>報告者</TableHead>
+          <TableHead>売り上げ</TableHead>
+          <TableHead>チャネル</TableHead>
+          <TableHead>商品カテゴリ</TableHead>
+          <TableHead>種別</TableHead>
+          <TableHead>メモ</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        { reports.length > 0 ? (
+          reports.sort((a, b) => a.id - b.id).map((row, i) => (
+            <TableRow key={i}>
+              <TableCell>{row.employee_name}</TableCell>
+              <TableCell>{row.amount}円</TableCell>
+              <TableCell>{row.sales_channel}</TableCell>
+              <TableCell>{row.category}</TableCell>
+              <TableCell>{row.tactics}</TableCell>
+              <TableCell>{row.memo}</TableCell>
+            </TableRow>
+          ))
+        ) : (
+          <TableRow>
+            <TableCell colSpan={7} className="text-center">
+              {error ? error : "データがありません"}
+            </TableCell>
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
+  </CardContent>
+</Card>
+
+      {/* User Sales History */}
+      {/* TODO: ユーザーのデータを取得し、ユーザーの所属する拠点とemployee_idに一致するデータを取得 */}
       <Card>
         <CardHeader>
-          <CardTitle>今日の大阪拠点の報告状況</CardTitle>
+          <CardTitle>今日のあなたの報告履歴</CardTitle>
         </CardHeader>
         <CardContent>
-          {error ? (
-            <p className="text-red-500">{error}</p>
-          ) : todayOsakaReports.length === 0 ? (
-            <p>今日の大阪拠点のデータはありません。</p>
-          ) : (
             <Table>
-              <TableHeader>
+            <TableHeader>
                 <TableRow>
-                  <TableHead>報告ID</TableHead>
-                  <TableHead>日付</TableHead>
-                  <TableHead>売り上げ</TableHead>
-                  <TableHead>チャネル</TableHead>
-                  <TableHead>商品カテゴリ</TableHead>
-                  <TableHead>種別</TableHead>
-                  <TableHead>従業員番号</TableHead>
+                <TableHead>報告者</TableHead>
+                <TableHead>時間</TableHead>
+                <TableHead>売り上げ</TableHead>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {todayOsakaReports.map((r) => (
-                  <TableRow key={r.id}>
-                    <TableCell>{r.id}</TableCell>
-                    <TableCell>{r.sales_date}</TableCell>
-                    <TableCell>{r.amount}円</TableCell>
-                    <TableCell>{r.sales_channel}</TableCell>
-                    <TableCell>{r.category}</TableCell>
-                    <TableCell>{r.tactics}</TableCell>
-                    <TableCell>{r.employee_number}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* あなたの履歴 */}
-      <Card>
-        <CardHeader>
-          <CardTitle>今日のあなたの報告履歴（大阪拠点）</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {error ? (
-            <p className="text-red-500">{error}</p>
-          ) : yourReports.length === 0 ? (
-            <p>今日のあなたの履歴はありません。</p>
-          ) : (
-            <Table>
-              <TableHeader>
+            </TableHeader>
+            <TableBody>
                 <TableRow>
-                  <TableHead>報告ID</TableHead>
-                  <TableHead>日付</TableHead>
-                  <TableHead>売り上げ</TableHead>
-                  <TableHead>チャネル</TableHead>
-                  <TableHead>商品カテゴリ</TableHead>
-                  <TableHead>種別</TableHead>
+                <TableCell>佐藤</TableCell>
+                <TableCell>12:35</TableCell>
+                <TableCell>50000円</TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {yourReports.map((r) => (
-                  <TableRow key={r.id}>
-                    <TableCell>{r.id}</TableCell>
-                    <TableCell>{r.sales_date}</TableCell>
-                    <TableCell>{r.amount}円</TableCell>
-                    <TableCell>{r.sales_channel}</TableCell>
-                    <TableCell>{r.category}</TableCell>
-                    <TableCell>{r.tactics}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
+            </TableBody>
             </Table>
-          )}
         </CardContent>
       </Card>
     </main>
