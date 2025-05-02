@@ -10,7 +10,7 @@ import {
   SidebarMenuButton,
   SidebarHeader,
 } from "@/components/ui/sidebar";
-import { Home, Search, ChevronDown, ChevronUp } from "lucide-react";
+import { Home, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -19,12 +19,7 @@ const menuItems = [
     title: "ダッシュボード",
     icon: Home,
     href: "/admin/dashboard",
-  },
-  {
-    title: "user管理",
-    icon: Search,
-    href: "/admin/users",
-  },
+  }
 ];
 
 const stores = ["大阪", "東京"];
