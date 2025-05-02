@@ -10,38 +10,50 @@ import { BranchTabs } from "@/components/dashboard/BranchTabs"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { PieChartComponent } from "@/components/dashboard/PieChartComponent"
+import { useEffect } from "react"
 
 export default function SalesDashboard() {
     const [analysisType, setAnalysisType] = useState<"category" | "channel" | "strategy">("category")
 
     const [selectedBranch, setSelectedBranch] = useState("all")
-    const salesData = [
-        {
-            task: "FIG-001",
-            name: "田中一郎",
-            category: "SNS広告",
-            amount: 150000,
-            date: "2025-05-01",
-            branch: "東京支店",
-        },
-        {
-            task: "FIG-002",
-            name: "鈴木花子",
-            category: "メール",
-            amount: 80000,
-            date: "2025-05-01",
-            branch: "名古屋支店",
-        },
-        {
-            task: "FIG-003",
-            name: "山田太郎",
-            category: "キャンペーン",
-            amount: 120000,
-            date: "2025-05-02",
-            branch: "大阪支店",
-        },
-    ]
-
+    const [startDate, setStartDate] = useState(new Date().toISOString().split("T")[0])
+    const [endDate, setEndDate] = useState(new Date().toISOString().split("T")[0])
+    const [salesData, setSalesData] = useState<any[]>([])
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState("")
+    
+    useEffect(() => {
+        const fetchSales = async () => {
+          setIsLoading(true)
+          setError("")
+    
+          const params = new URLSearchParams({
+            sales_date_from: startDate,
+            sales_date_until: endDate,
+          })
+    
+          const url = `/api/get-sales?${params.toString()}`
+          console.log("🔍 Fetching sales data from:", url)
+    
+          try {
+            const res = await fetch(url)
+            if (!res.ok) throw new Error(`HTTP error: ${res.status}`)
+    
+            const data = await res.json()
+            console.log("✅ Fetched sales data:", data)
+            setSalesData(data)
+          } catch (err) {
+            console.error("❌ Error:", err)
+            setError("売上データの取得に失敗しました")
+          } finally {
+            setIsLoading(false)
+          }
+        }
+    
+        fetchSales()
+      }, [startDate, endDate])
+    
+    
     return (
         <main className="flex flex-col gap-6 p-6 md:ml">
             <BranchTabs value={selectedBranch} onValueChange={setSelectedBranch} />
