@@ -15,6 +15,8 @@ DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_NAME = os.getenv("DB_NAME")
 
+
+
 # DB設定（ここではAzure MySQLフレキシブルサーバーを使用）
 def get_db_connection():
     try:
@@ -195,4 +197,25 @@ def send_sales(req: func.HttpRequest) -> func.HttpResponse:
         if conn:
             conn.close()
     
+@app.route(route="get_employee")
+def get_employee(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info("Processing get_employee HTTP request.")
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT employee_number, employee_name, location_id, employee_role FROM users;")
+            employee = cursor.fetchall()
+        return func.HttpResponse(
+            json.dumps(employee, ensure_ascii=False),
+            status_code=200,
+            mimetype="application/json",
+        )
+    except pymysql.err.OperationalError as e:
+        logging.error(f"Operational error: {e}")
+        return func.HttpResponse(
+            f"Database operational error: {str(e)}", status_code=500
+        )
+    finally:
+        conn.close()
 
+    
