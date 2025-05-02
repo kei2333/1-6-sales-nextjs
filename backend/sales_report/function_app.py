@@ -78,13 +78,14 @@ def get_sales(req: func.HttpRequest) -> func.HttpResponse:
 
     try:
         date=req.params.get('sales_date')
-        if date:
+        location=req.params.get('location_id')
+        if date and location:
 
             conn = get_db_connection()
             ensure_sales_report_table_exists_and_seed(conn)
 
             with conn.cursor() as cursor:
-                cursor.execute("SELECT id, sales_date, location_id, amount, sales_channel, category, tactics, employee_number FROM sales_report WHERE sales_date = %s;",(date,))
+                cursor.execute("SELECT id, sales_date, location_id, amount, sales_channel, category, tactics, employee_number FROM sales_report WHERE sales_date = %s AND location_id=%s; ",(date,location,))
                 sales_report = cursor.fetchall()
 
             conn.close()
