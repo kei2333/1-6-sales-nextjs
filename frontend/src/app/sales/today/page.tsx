@@ -14,6 +14,7 @@ import { useState, useEffect } from "react";
 
 // fetchするデータの型を定義
 type SalesReport = {
+  id: number;
   employee_name: string;
   sales_date: string;
   amount: number;
@@ -80,7 +81,7 @@ export default function SalesReportPage() {
       </TableHeader>
       <TableBody>
         { reports.length > 0 ? (
-          reports.map((row, i) => (
+          reports.sort((a, b) => a.id - b.id).map((row, i) => (
             <TableRow key={i}>
               <TableCell>{row.employee_name}</TableCell>
               <TableCell>{row.amount}円</TableCell>
