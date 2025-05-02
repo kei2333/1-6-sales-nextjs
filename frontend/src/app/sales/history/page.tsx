@@ -1,68 +1,118 @@
-import { Card, CardContent } from "@/components/ui/card";
+"use client";
+
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronLeft, ChevronRight} from "lucide-react";
 
+export default function AdminPage() {
+  const [reports, setReports] = useState<any[]>([]);
+  const [error, setError] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState<number>(
+    new Date().getMonth() + 1
+  );
+  const [selectedYear, setSelectedYear] = useState<number>(
+    new Date().getFullYear()
+  );
+  const LocationID = 2; // 拠点別フィルター用変数
 
-export default function OsakaMarchReport() {
-  const data = [
-    { date: "2025年3月2日", time: "12:35", reporter: "田中健太郎", sales: "50000円", channel: "EC", category: "飲料", type: "エンド", memo: "メモ" },
-    { date: "2025年3月2日", time: "12:35", reporter: "田中健太郎", sales: "50000円", channel: "EC", category: "飲料", type: "エンド", memo: "メモ" },
-    { date: "2025年3月2日", time: "12:35", reporter: "田中健太郎", sales: "50000円", channel: "EC", category: "飲料", type: "チラシ", memo: "メモ" },
-    { date: "2025年3月2日", time: "12:35", reporter: "田中健太郎", sales: "50000円", channel: "EC", category: "飲料", type: "チラシ", memo: "メモ" },
-    { date: "2025年3月2日", time: "12:35", reporter: "田中健太郎", sales: "50000円", channel: "EC", category: "飲料", type: "企画", memo: "メモ" },
-  ];
+  useEffect(() => {
+    async function fetchSales() {
+      try {
+        const res = await fetch(
+          "/api/get-sales?sales_date=2025-03-03&location_id=2"
+        );
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const json = await res.json();
+        setReports(json);
+      } catch (err) {
+        console.error(err);
+        setError("データ取得に失敗しました");
+      }
+    }
+
+    fetchSales();
+  }, []);
+
+  const filteredReports = reports.filter((r) => {
+    const date = new Date(r.sales_date);
+    return (
+      date.getFullYear() === selectedYear &&
+      date.getMonth() + 1 === selectedMonth
+    );
+  });
 
   return (
-    <div className="p-6">
+    <main className="p-6 flex flex-col gap-6">
+      <h2 className="text-2xl font-bold">
+        {selectedYear}年{selectedMonth}月の大阪拠点の報告状況
+      </h2>
 
-      <div className="text-xl font-semibold mb-4">2025年3月の大阪拠点の報告状況</div>
-
-      <div className="flex items-center mb-4 gap-2">
-        <Button variant="outline" size="sm"><ChevronLeft className="w-4 h-4 mr-1" />前年</Button>
-        <Tabs defaultValue="3">
-          <TabsList className="grid grid-cols-12 w-full max-w-xl">
-            {[...Array(12)].map((_, i) => (
-              <TabsTrigger key={i} value={(i + 1).toString()}>{i + 1}月</TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-        <Button variant="outline" size="sm">翌年<ChevronRight className="w-4 h-4 ml-1" /></Button>
+      <div className="flex items-center gap-2 mb-4">
+        <Button onClick={() => setSelectedYear(selectedYear - 1)}>
+          ＜ 前年
+        </Button>
+        {[...Array(12)].map((_, i) => (
+          <Button
+            key={i + 1}
+            variant={selectedMonth === i + 1 ? "default" : "outline"}
+            onClick={() => setSelectedMonth(i + 1)}
+          >
+            {i + 1}月
+          </Button>
+        ))}
+        <Button onClick={() => setSelectedYear(selectedYear + 1)}>
+          翌年 ＞
+        </Button>
       </div>
 
       <Card>
-        <CardContent className="overflow-auto p-4">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>日付</TableHead>
-                <TableHead>時間</TableHead>
-                <TableHead>報告者</TableHead>
-                <TableHead>売り上げ</TableHead>
-                <TableHead>チャネル</TableHead>
-                <TableHead>商品カテゴリ</TableHead>
-                <TableHead>種別</TableHead>
-                <TableHead>メモ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.map((item, index) => (
-                <TableRow key={index}>
-                  <TableCell>{item.date}</TableCell>
-                  <TableCell>{item.time}</TableCell>
-                  <TableCell>{item.reporter}</TableCell>
-                  <TableCell>{item.sales}</TableCell>
-                  <TableCell>{item.channel}</TableCell>
-                  <TableCell>{item.category}</TableCell>
-                  <TableCell>{item.type}</TableCell>
-                  <TableCell>{item.memo}</TableCell>
+        <CardContent>
+          {error ? (
+            <p className="text-red-500">{error}</p>
+          ) : filteredReports.length === 0 ? (
+            <p>データがありません。</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>日付</TableHead>
+                  <TableHead>時間</TableHead>
+                  <TableHead>報告者</TableHead>
+                  <TableHead>売り上げ</TableHead>
+                  <TableHead>チャネル</TableHead>
+                  <TableHead>商品カテゴリ</TableHead>
+                  <TableHead>種別</TableHead>
+                  <TableHead>メモ</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredReports.map((r) => (
+                  <TableRow key={r.id}>
+                    <TableCell>{r.sales_date}</TableCell>
+                    <TableCell>{r.time || "12:35"}</TableCell>
+                    <TableCell>{r.reporter_name || "田中健太郎"}</TableCell>
+                    <TableCell>{r.amount}円</TableCell>
+                    <TableCell>{r.sales_channel}</TableCell>
+                    <TableCell>{r.category}</TableCell>
+                    <TableCell>{r.tactics}</TableCell>
+                    <TableCell>メモ</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }
