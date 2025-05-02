@@ -97,6 +97,21 @@ def get_sales(req: func.HttpRequest) -> func.HttpResponse:
                 status_code=200,
                 mimetype="application/json",
             )
+        elif sales_date_from and sales_date_until and location:
+            #日付の区間を設定して全拠点のデータを見るよう
+            conn = get_db_connection()
+
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT id, sales_date, location_id, amount, sales_channel, category, tactics, employee_number FROM sales_report WHERE sales_date BETWEEN %s AND %s AND location_id=%s; ",(sales_date_from, sales_date_until, location,))
+                sales_report = cursor.fetchall()
+
+            conn.close()
+
+            return func.HttpResponse(
+                json.dumps(sales_report, ensure_ascii=False, cls=DateEncoder),
+                status_code=200,
+                mimetype="application/json",
+            )
         elif sales_date_from and sales_date_until:
             #日付の区間を設定して全拠点のデータを見るよう
             conn = get_db_connection()
