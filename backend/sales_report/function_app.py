@@ -122,7 +122,7 @@ def send_sales(req: func.HttpRequest) -> func.HttpResponse:
         send_sql = """
             INSERT INTO sales_report (sales_date, location_id, amount, 
             sales_channel, category, tactics, employee_number, memo) VALUES
-            ('2025-03-02', 1, 40000, 'SM', '飲料', 'チラシ', 0, '');  
+            ('2025-03-03', 2, 40000, 'SM', '飲料', 'チラシ', 0, '');  
             """
         cursor.execute(send_sql)
         conn.commit()
