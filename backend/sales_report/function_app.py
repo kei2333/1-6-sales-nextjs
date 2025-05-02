@@ -89,7 +89,7 @@ def get_sales(req: func.HttpRequest) -> func.HttpResponse:
             ensure_sales_report_table_exists_and_seed(conn)
 
             with conn.cursor() as cursor:
-                cursor.execute("SELECT id, sales_date, location_id, amount, sales_channel, category, tactics, employee_number FROM sales_report WHERE sales_date = %s AND location_id=%s; ",(date,location,))
+                cursor.execute("SELECT s.id, s.sales_date, s.location_id, s.amount, s.sales_channel, s.category, s.tactics, s.employee_number, s.memo, u.employee_name FROM sales_report s LEFT JOIN users u ON s.employee_number = u.employee_number WHERE s.sales_date = %s AND s.location_id=%s; ",(date,location,))
                 sales_report = cursor.fetchall()
 
             conn.close()
