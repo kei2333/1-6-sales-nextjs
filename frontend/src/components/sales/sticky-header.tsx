@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 
 const pathTitleMap: { [key: string]: string } = {
-  "/test/sales/today": "今日の売上報告",
-  "/test/sales/history": "過去の売上報告",
-  "/test/sales/entry": "売上報告をする",
+  "/sales/today": "今日の売上報告",
+  "/sales/history": "過去の売上報告",
+  "/sales/entry": "売上報告をする",
 };
 
 export default function StickyHeader() {

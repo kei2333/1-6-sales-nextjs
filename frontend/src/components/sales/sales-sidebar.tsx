@@ -16,17 +16,17 @@ import {
     {
       title: "今日の売上報告",
       icon: Home,
-      href: "/test/sales/today",
+      href: "/sales/today",
     },
     {
       title: "過去の売上報告",
       icon: Search,
-      href: "/test/sales/history",
+      href: "/sales/history",
     },
     {
       title: "売上報告をする",
       icon: Upload,
-      href: "/test/sales/entry",
+      href: "/sales/entry",
     },
   ];
   

@@ -10,18 +10,18 @@ import {
     SidebarMenuButton,
     SidebarHeader,
   } from "@/components/ui/sidebar";
-  import { Home, Search, Upload } from "lucide-react";
+  import { Home, Search} from "lucide-react";
   
   const menuItems = [
     {
       title: "ダッシュボード",
       icon: Home,
-      href: "/test/admin/analysis",
+      href: "/admin/dashboard",
     },
     {
       title: "user管理",
       icon: Search,
-      href: "/test/admin/users",
+      href: "/admin/users",
     },
 
   ];
