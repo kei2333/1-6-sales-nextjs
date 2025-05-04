@@ -5,6 +5,7 @@ import NextAuth from "next-auth"
 // Fetch userdata database via API (https) -> EntraID login -> fetch email from EntraID ->
 //  define email as profile.preferred_username -> pull userdata database & search email ->
 //  return false if no match, return true and change callback using '"ifs"
+// Httpslink "https://team6-sales-function.azurewebsites.net/api/get_employee_callback"
 
 export const authOptions = {
     proveders: [
