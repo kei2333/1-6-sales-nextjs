@@ -10,25 +10,21 @@ import {
   CartesianGrid,
 } from 'recharts'
 
-const data = [
-  { date: '23 Nov', value: 22000 },
-  { date: '24', value: 24000 },
-  { date: '25', value: 29000 },
-  { date: '26', value: 31000 },
-  { date: '27', value: 35000 },
-  { date: '28', value: 42000 },
-  { date: '29', value: 46000 },
-  { date: '30', value: 49000 },
-]
+type Props = {
+  data: { date: string; value: number }[]
+}
 
-export function SalesChart() {
+export function SalesChart({ data }: Props) {
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={data}>
+      <LineChart 
+      data={data}
+      margin={{ top: 10, right: 20, bottom: 20, left: 30 }}
+      >
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="date" />
-        <YAxis tickFormatter={(value) => `¥${value.toLocaleString()}`} />
-        <Tooltip formatter={(value) => `¥${value.toLocaleString()}`} />
+        <YAxis tickFormatter={(v) => `¥${v.toLocaleString()}`} />
+        <Tooltip formatter={(v) => `¥${v.toLocaleString()}`} />
         <Line
           type="monotone"
           dataKey="value"
