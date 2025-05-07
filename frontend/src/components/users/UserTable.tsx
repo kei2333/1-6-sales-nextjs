@@ -99,7 +99,6 @@ export default function UserTable() {
       alert("保存に失敗しました。");
     }
   };
-  
 
   const deleteUser = (userId: number) => {
     setUsers((prev) => prev.filter((user) => user.id !== userId));
