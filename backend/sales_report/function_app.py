@@ -353,4 +353,3 @@ def get_employee_callback(req: func.HttpRequest) -> func.HttpResponse:
         )
     finally:
         conn.close()
-
