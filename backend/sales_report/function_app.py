@@ -261,9 +261,9 @@ def edit_employee_role(req: func.HttpRequest) -> func.HttpResponse:
     conn = get_db_connection()
     try:
         employee_number = req.params.get('employee_number')
-        employee_role = req.params.get('employee_role')
+        new_employee_role = req.params.get('new_employee_role')
 
-        if not employee_number or not employee_role:
+        if not employee_number or not new_employee_role:
             return func.HttpResponse(
                 "Missing required parameters.",
                 status_code=400
@@ -273,7 +273,7 @@ def edit_employee_role(req: func.HttpRequest) -> func.HttpResponse:
             update_sql = """
                 UPDATE users SET employee_role = %s WHERE employee_number = %s;
             """
-            cursor.execute(update_sql,(employee_role, employee_number,))
+            cursor.execute(update_sql,(new_employee_role, employee_number,))
             conn.commit()
         return func.HttpResponse(
             "Employee role updated successfully.",
@@ -316,6 +316,52 @@ def delete_employee(req: func.HttpRequest) -> func.HttpResponse:
         logging.error(f"Error deleting employee data: {str(e)}")
         return func.HttpResponse(
             f"Failed to delete employee data. Error: {str(e)}",
+            status_code=500
+        )
+    finally:
+        conn.close()
+
+@app.route(route="update_employee_name")
+def update_employee_name(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info("Processing update_employee_name HTTP request.")
+    conn = get_db_connection()
+    try:
+        # リクエストボディから employee_number と new_employee_name を取得
+        employee_number = req.params.get('employee_number')
+        new_employee_name = req.params.get('new_employee_name')
+
+        # 必要なパラメータが欠けている場合、エラーレスポンスを返す
+        if not employee_number or not new_employee_name:
+            return func.HttpResponse(
+                "Missing required parameters: employee_number or employee_name.",
+                status_code=400
+            )
+
+        with conn.cursor() as cursor:
+            # 名前を更新するSQL文
+            update_sql = """
+                UPDATE users
+                SET employee_name = %s
+                WHERE employee_number = %s;
+            """
+            cursor.execute(update_sql, (new_employee_name, employee_number))
+            conn.commit()
+
+            # 更新された行数をチェック
+            if cursor.rowcount == 0:
+                return func.HttpResponse(
+                    "Employee not found.",
+                    status_code=404
+                )
+
+        return func.HttpResponse(
+            "Employee name updated successfully.",
+            status_code=200
+        )
+    except Exception as e:
+        logging.error(f"Error updating employee name: {str(e)}")
+        return func.HttpResponse(
+            f"Failed to update employee name. Error: {str(e)}",
             status_code=500
         )
     finally:
