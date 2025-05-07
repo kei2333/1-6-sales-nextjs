@@ -6,7 +6,8 @@ import { TargetForm } from "@/components/target_setting/TargetForm"
 import { SortableTable } from "@/components/general/SortableTable"
 
 export default function TargetSettingPage() {
-  const [branch, setBranch] = useState("all")
+  const [branch, setBranch] = useState<string | undefined>(undefined);
+
   const [targetData, setTargetData] = useState<any[]>([])
   const isMockMode = process.env.NEXT_PUBLIC_USE_MOCK === "true"
 
