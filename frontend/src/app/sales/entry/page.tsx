@@ -1,6 +1,6 @@
 "use client";
 
-
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,7 +10,19 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import { useState } from "react";
 import { Filter } from "lucide-react";
 
+// fetchするデータの型を定義
+type SalesReport = {
+  employee_name: string;
+  sales_date: string;
+  amount: number;
+  sales_channel: string;
+  category: string;
+  tactics: string;
+  memo: string|null;
+}
+
 export default function ReportEntryDashboard() {
+  const [todayReports, setTodayReports] = useState<SalesReport[]>([]);
   const [date, setDate] = useState(new Date());
 
   const taskData = [
@@ -21,7 +33,26 @@ export default function ReportEntryDashboard() {
     { task: "FIG-119", title: "Add gradients to design system", project: "Design backlog", priority: "Medium", date: "Dec 5", owner: "🧑" },
     { task: "FIG-118", title: "Responsive behavior doesn’t work on Android", project: "Bug fixes", priority: "Medium", date: "Dec 5", owner: "🧑" },
   ];
+  const location_id=2 //TODO:ユーザーのlocation_id参照
 
+  useEffect(() => {
+    async function fetchSales() {
+      try {
+        const res = await fetch(
+          `https://team6-sales-function.azurewebsites.net/api/get_sales?sales_date_from=${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}&sales_date_until=${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}&location_id=${location_id}`
+        );
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const json = await res.json();
+        console.log(json)
+        setTodayReports(json);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    fetchSales();
+  }, [date]);
   return (
     <div className="p-6 space-y-6">
 
