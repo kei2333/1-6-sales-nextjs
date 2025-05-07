@@ -1,5 +1,4 @@
 "use client";
-
 import {
   Table,
   TableHeader,
@@ -8,75 +7,42 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useEffect } from "react";
 
-// バッジのロールマップ
-const roleMap: { [key: string]: string } = {
-  employee: "従業員",
-  admin: "管理者",
-  executive: "経営部門",
-  sales: "営業",
-  support: "サポート",
-};
 
-// 後端からのデータ型定義
-interface Employee {
-  employee_number: string;
-  employee_name: string;
-  location_id: number;
-  employee_role: string;
-}
 
-// フロントエンド用のユーザー型定義
-interface User {
-  id: string;
-  name: string;
-  department: string;
-  role: string;
-  email: string;
-  updatedAt: string;
-}
+const roleOptions = ["Sales", "IT", "Manager","権限なし"];
 
 export default function UserTable() {
   const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [editedName, setEditedName] = useState("");
+  const [editedRole, setEditedRole] = useState("");
 
   useEffect(() => {
-    // APIからデータを取得する
     async function fetchUsers() {
       try {
         setLoading(true);
-        const response = await fetch('https://team6-sales-function.azurewebsites.net/api/get_employee');
-        
+        const response = await fetch("https://team6-sales-function.azurewebsites.net/api/get_employee");
         if (!response.ok) {
           throw new Error(`APIエラー: ${response.status}`);
         }
-        
         const employees: Employee[] = await response.json();
-        
-        // APIからのデータをフロントエンド用に変換
-        const formattedUsers: User[] = employees.map(emp => ({
+
+        const formattedUsers: User[] = employees.map((emp) => ({
           id: emp.employee_number,
           name: emp.employee_name,
-          department: getDepartmentByRole(emp.employee_role),
           role: emp.employee_role,
-          email: `${emp.employee_name.replace(/\s+/g, '').toLowerCase()}@example.com`,
-          updatedAt: new Date().toISOString().split('T')[0],
+          email: `${emp.employee_name.replace(/\s+/g, "").toLowerCase()}@example.com`,
+          updatedAt: new Date().toISOString().split("T")[0],
         }));
-        
+
         setUsers(formattedUsers);
       } catch (err) {
         console.error("データ取得エラー:", err);
@@ -89,50 +55,55 @@ export default function UserTable() {
     fetchUsers();
   }, []);
 
-  // 役職から部署を取得する関数
-  function getDepartmentByRole(role: string): string {
-    const departmentMap: Record<string, string> = {
-      'admin': '管理',
-      'sales': '営業',
-      'support': 'サポート',
-      'executive': '経営部門',
-      'employee': '一般'
-    };
-    return departmentMap[role] || '一般';
-  }
-
-  const startEdit = (userId: string, currentName: string) => {
+  const startEdit = (userId: number, currentName: string, currentRole: string) => {
     setEditingId(userId);
     setEditedName(currentName);
+    setEditedRole(currentRole);
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setEditedName("");
+    setEditedRole("");
   };
 
-  const saveEdit = (userId: string) => {
-    setUsers((prev) =>
-      prev.map((user) =>
-        user.id === userId
-          ? { ...user, name: editedName, updatedAt: new Date().toISOString().split("T")[0] }
-          : user
-      )
-    );
-    cancelEdit();
+  const saveEdit = async (userId: number) => {
+    try {
+      // 名前の更新（GETやPOSTどちらでも可。API仕様に合わせる）
+      const nameUrl = `https://team6-sales-function.azurewebsites.net/api/update_employee_name?employee_number=${userId}&new_employee_name=${encodeURIComponent(editedName)}`;
+      const nameResponse = await fetch(nameUrl, { method: "POST" });
+  
+      if (!nameResponse.ok) {
+        throw new Error("名前の更新に失敗しました");
+      }
+  
+      // 役職の更新
+      const roleUrl = `https://team6-sales-function.azurewebsites.net/api/edit_employee_role?employee_number=${userId}&new_employee_role=${encodeURIComponent(editedRole)}`;
+      const roleResponse = await fetch(roleUrl, { method: "POST" });
+  
+      if (!roleResponse.ok) {
+        throw new Error("役職の更新に失敗しました");
+      }
+  
+      // フロントエンド状態更新
+      setUsers((prev) =>
+        prev.map((user) =>
+          user.id === userId
+            ? { ...user, name: editedName, role: editedRole }
+            : user
+        )
+      );
+      cancelEdit();
+    } catch (error) {
+      console.error("保存エラー:", error);
+      alert("保存に失敗しました。");
+    }
   };
+  
 
-  const deleteUser = (userId: string) => {
+  const deleteUser = (userId: number) => {
     setUsers((prev) => prev.filter((user) => user.id !== userId));
   };
-
-  if (loading) {
-    return <div className="p-4 text-center">データを読み込み中...</div>;
-  }
-
-  if (error) {
-    return <div className="p-4 text-center text-red-500">{error}</div>;
-  }
 
   return (
     <div className="rounded-md border">
@@ -140,10 +111,7 @@ export default function UserTable() {
         <TableHeader>
           <TableRow>
             <TableHead>名前</TableHead>
-            <TableHead>部署</TableHead>
             <TableHead>役職</TableHead>
-            <TableHead>メールアドレス</TableHead>
-            <TableHead>最終更新</TableHead>
             <TableHead className="text-right">操作</TableHead>
           </TableRow>
         </TableHeader>
@@ -161,14 +129,23 @@ export default function UserTable() {
                   user.name
                 )}
               </TableCell>
-              <TableCell>{user.department}</TableCell>
               <TableCell>
-                <span className="inline-block px-3 py-1 border rounded-full text-sm">
-                  {roleMap[user.role] || user.role}
-                </span>
+                {editingId === user.id ? (
+                  <select
+                    value={editedRole}
+                    onChange={(e) => setEditedRole(e.target.value)}
+                    className="border rounded px-2 py-1"
+                  >
+                    {roleOptions.map((role) => (
+                      <option key={role} value={role}>
+                        {role}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  user.role
+                )}
               </TableCell>
-              <TableCell>{user.email}</TableCell>
-              <TableCell>{user.updatedAt}</TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -186,7 +163,9 @@ export default function UserTable() {
                       </>
                     ) : (
                       <>
-                        <DropdownMenuItem onClick={() => startEdit(user.id, user.name)}>
+                        <DropdownMenuItem
+                          onClick={() => startEdit(user.id, user.name, user.role)}
+                        >
                           編集
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => deleteUser(user.id)}>
