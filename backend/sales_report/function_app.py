@@ -323,7 +323,7 @@ def delete_employee(req: func.HttpRequest) -> func.HttpResponse:
 
 # get_employee for callback after logging in
 @app.route(route="get_employee_callback")
-def get_employee(req: func.HttpRequest) -> func.HttpResponse:
+def get_employee_callback(req: func.HttpRequest) -> func.HttpResponse:
     email = req.params.get('email')
     if not email:
         return func.HttpResponse("Email parameter missing", status_code=400)
