@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { SortableTable } from "@/components/general/SortableTable";
 import {
   Table,
   TableBody,
@@ -65,13 +66,13 @@ export default function AdminPage() {
     fetchSales();
   }, [selectedMonth, selectedYear]);
 
-  const filteredReports = reports.filter((r) => {
-    const date = new Date(r.sales_date);
-    return (
-      date.getFullYear() === selectedYear &&
-      date.getMonth() + 1 === selectedMonth
-    );
-  });
+  // const filteredReports = reports.filter((r) => {
+  //   const date = new Date(r.sales_date);
+  //   return (
+  //     date.getFullYear() === selectedYear &&
+  //     date.getMonth() + 1 === selectedMonth
+  //   );
+  // });
 
   return (
     <main className="p-6 flex flex-col gap-6">
@@ -101,35 +102,23 @@ export default function AdminPage() {
         <CardContent>
           {error ? (
             <p className="text-red-500">{error}</p>
-          ) : filteredReports.length === 0 ? (
+          ) : reports.length === 0 ? (
             <p>データがありません。</p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>日付</TableHead>
-                  <TableHead>報告者</TableHead>
-                  <TableHead>売り上げ</TableHead>
-                  <TableHead>チャネル</TableHead>
-                  <TableHead>商品カテゴリ</TableHead>
-                  <TableHead>種別</TableHead>
-                  <TableHead>メモ</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredReports.sort((a, b) => a.sales_date.localeCompare(b.sales_date)).map((r, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{r.sales_date}</TableCell>
-                    <TableCell>{r.employee_name || ""}</TableCell>
-                    <TableCell>{r.amount}円</TableCell>
-                    <TableCell>{r.sales_channel}</TableCell>
-                    <TableCell>{r.category}</TableCell>
-                    <TableCell>{r.tactics}</TableCell>
-                    <TableCell>{r.memo}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <>
+              <SortableTable
+                data={reports}
+                columns={[
+                  { key: "sales_date", label: "日付" },
+                  { key: "employee_name", label: "報告者" },
+                  { key: "amount", label: "売り上げ", format: (v) => `¥${v.toLocaleString()}` },
+                  { key: "sales_channel", label: "チャネル"},
+                  { key: "category", label: "商品カテゴリ" },
+                  { key: "tactics", label: "種別" },
+                  { key: "memo1", label: "メモ" },
+                ]}
+              />
+            </>
           )}
         </CardContent>
       </Card>
