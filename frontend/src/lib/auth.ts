@@ -19,7 +19,7 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user }) {
       try {
         const res = await fetch(// Azure AD (Entra ID) からのメールアドレスを保存
-          `${process.env.PYTHON_API_BASE_URL}/get_employee_callback?email=${encodeURIComponent(user.email!)}`,
+          '${process.env.PYTHON_API_BASE_URL}/get_employee_callback?email=${encodeURIComponent(user.email!)}',
           {
             method: "GET",
             headers: {
@@ -29,14 +29,14 @@ export const authOptions: NextAuthOptions = {
         )
 
         if (!res.ok) {
-          console.error(`Failed to fetch employee data: ${res.status}`)
+          console.error('Failed to fetch employee data: ${res.status}')
           return false
         }
 
         const employee = await res.json()
 
         if (!employee || employee.employee_role === "NOT_EMPLOYED") {//データベースにアドレスはあるがログインさせない処理
-          console.warn(`Access denied for ${user.email} with role ${employee?.employee_role}`)
+          console.warn('Access denied for ${user.email} with role ${employee?.employee_role}')
           return false
         }
 
@@ -45,7 +45,7 @@ export const authOptions: NextAuthOptions = {
 
         return true
       } catch (error) {
-        console.error(`Error checking employee role: ${error}`)
+        console.error('Error checking employee role: ${error}')
         return false
       }
     },
@@ -70,11 +70,11 @@ export const authOptions: NextAuthOptions = {
       const role = parsedUrl.searchParams.get("role")
 
       if (role === "EMP") {
-        return `${baseUrl}/emp-page`
+        return '${baseUrl}/emp-page'
       } else if (role === "MANAGER") {
-        return `${baseUrl}/manager-page`
+        return '${baseUrl}/manager-page'
       } else if (role === "IT") {
-        return `${baseUrl}/it-page`
+        return '${baseUrl}/it-page'
       }
       return baseUrl
     },
