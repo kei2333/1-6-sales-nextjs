@@ -120,7 +120,7 @@ export default function AdminPage() {
                 {filteredReports.sort((a, b) => a.sales_date.localeCompare(b.sales_date)).map((r, index) => (
                   <TableRow key={index}>
                     <TableCell>{r.sales_date}</TableCell>
-                    <TableCell>{r.employee_name || "田中健太郎"}</TableCell>
+                    <TableCell>{r.employee_name || ""}</TableCell>
                     <TableCell>{r.amount}円</TableCell>
                     <TableCell>{r.sales_channel}</TableCell>
                     <TableCell>{r.category}</TableCell>
