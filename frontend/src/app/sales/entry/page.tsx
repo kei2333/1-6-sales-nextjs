@@ -8,10 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Filter } from "lucide-react";
 
 // fetchするデータの型を定義
 type SalesReport = {
+  employee_number: number|string;
   employee_name: string;
   sales_date: string;
   amount: number;
@@ -25,23 +25,72 @@ type SalesReport = {
 export default function ReportEntryDashboard() {
   const [todayReports, setTodayReports] = useState<SalesReport[]>([]);
   const [date, setDate] = useState(new Date());
-  const [currentEmployeeLocation, setCurrentEmployeeLocation] = useState<number>(1);
   const [newReport, setNewReport] = useState<SalesReport>({
+    employee_number: 0,
     employee_name: "",
-    sales_date: "",
+    sales_date: date.toDateString(),
     amount: 0,
-    sales_channel: "",
-    category: "",
-    tactics: "",
-    memo: null,
+    sales_channel: "SM",
+    category: "飲料",
+    tactics: "チラシ",
+    memo: "",
     location_id: 1,
   });
-  const location_id=2 //TODO:ユーザーのlocation_id参照
-  const handleSetCurrentEmployeeLocation = (location: number) => {
-    setNewReport({
-      ...newReport,
-      location_id: location,
-    });
+  const location_id=1 //TODO:ユーザーのlocation_id参照
+  const handleSubmitReport = async() => {
+    try {
+      console.log("newReport:", newReport)
+      if(!date) {
+        alert("日付を選択してください。")
+        return
+      }
+      if(!newReport.employee_number) {
+        alert("社員番号を入力してください。")
+        return
+      }
+      if(!newReport.amount) {
+        alert("売上を入力してください。")
+        return
+      }
+      if(!newReport.sales_channel) {
+        alert("チャネルを選択してください。")
+        return
+      }
+      if(!newReport.category) {
+        alert("商品カテゴリを選択してください。")
+        return
+      }
+      if(!newReport.tactics) {
+        alert("種別を選択してください。")
+        return
+      }
+      if(!newReport.location_id) {
+        alert("拠点を選択してください。")
+        return
+      }
+      if(date && newReport.employee_number && newReport.amount && newReport.sales_channel && newReport.category && newReport.tactics && newReport.location_id) {
+        alert("報告が完了しました。");
+      }
+      const res = await fetch(
+        `https://team6-sales-function.azurewebsites.net/api/send_sales?sales_date=${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}&location_id=${newReport.location_id}&employee_number=${newReport.employee_number}&amount=${newReport.amount}&sales_channel=${newReport.sales_channel}&category=${newReport.category}&tactics=${newReport.tactics}&memo=${newReport.memo}`      
+      );
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      setNewReport({
+        employee_number: 0,
+        employee_name: "",
+        sales_date: date.toDateString(),
+        amount: 0,
+        sales_channel: "SM",
+        category: "飲料",
+        tactics: "チラシ",
+        memo: "",
+        location_id: 1,
+      });
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   useEffect(() => {
@@ -77,8 +126,8 @@ export default function ReportEntryDashboard() {
           </CardContent>
         </Card>
         <Card className="md:col-span-2 bg-white rounded-3xl border">
-
           <CardContent className="space-y-4 p-4">
+            <form>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1">日付</label>
@@ -103,12 +152,12 @@ export default function ReportEntryDashboard() {
                 
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">担当者</label>
+                <label className="block text-sm font-medium mb-1">担当者の社員番号</label>
                 <Input 
                   type="text"
-                  placeholder="担当者 名前"
-                  value={newReport.employee_name}
-                  onChange={(e) => setNewReport({ ...newReport, employee_name: e.target.value })}
+                  placeholder="社員番号"
+                  value={newReport.employee_number || ""}
+                  onChange={(e) => setNewReport({ ...newReport, employee_number: Number(e.target.value) })}
                   required
                 />
               </div>
@@ -145,7 +194,7 @@ export default function ReportEntryDashboard() {
               <Input
                 type="number"
                 min={0}
-                placeholder="0円"
+                placeholder="0"
                 value={newReport.amount || ""}
                 onChange={(e) => setNewReport({ ...newReport, amount: parseInt(e.target.value) })}
                 required
@@ -154,19 +203,16 @@ export default function ReportEntryDashboard() {
             <div>
               <label className="block text-sm font-medium mb-1">メモ</label>
               <Textarea
+                name="memo"
                 placeholder="メモ"
                 value={newReport.memo || ""}
                 onChange={(e) => setNewReport({ ...newReport, memo: e.target.value })}
               />
             </div>
-            <Button className="w-full bg-black text-white hover:bg-gray-800">Submit</Button>
+            <Button className="w-full bg-black text-white hover:bg-gray-800" onClick={handleSubmitReport}>Submit</Button>
+            </form>
           </CardContent>
         </Card>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <Input placeholder="Search tickets..." className="max-w-xs" />
-        <Button variant="outline"><Filter className="w-4 h-4 mr-1" />Filter</Button>
       </div>
 
       <Card>
