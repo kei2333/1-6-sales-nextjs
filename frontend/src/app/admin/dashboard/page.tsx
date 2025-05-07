@@ -13,16 +13,17 @@ import { PieChartComponent } from "@/components/dashboard/PieChartComponent"
 import { DateRange } from "react-day-picker"
 import { mockSalesData } from "./mockSalesData"
 import { SortableTable } from "@/components/general/SortableTable" // ← 追加
+import { ExportCsvButton } from "@/components/general/ExportCsvButton" // ← 追加
 
 export default function SalesDashboard() {
   const [analysisType, setAnalysisType] = useState<"category" | "sales_channel" | "tactics">("category")
-  const [selectedBranch, setSelectedBranch] = useState("all")
+  const [selectedBranch, setSelectedBranch] = useState<string | undefined>(undefined);
   const [salesData, setSalesData] = useState<any[]>([])
   const [error, setError] = useState("")
   const [chartData, setChartData] = useState<{ date: string; value: number }[]>([])
   const [pieData, setPieData] = useState<{ label: string; value: number }[]>([])
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: new Date(),
+    from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
     to: new Date(),
   })
 
@@ -35,7 +36,7 @@ export default function SalesDashboard() {
         const params = new URLSearchParams()
         if (dateRange?.from) params.set("sales_date_from", dateRange.from.toISOString().split("T")[0])
         if (dateRange?.to) params.set("sales_date_until", dateRange.to.toISOString().split("T")[0])
-        params.set("location_id", selectedBranch)
+          if (selectedBranch !== undefined) params.set("location_id", selectedBranch)
 
         const url = `/api/get-sales?${params.toString()}`
         console.log("🔍 Fetching sales data:", url)
@@ -124,6 +125,9 @@ export default function SalesDashboard() {
               <Button variant={analysisType === "tactics" ? "default" : "outline"} onClick={() => setAnalysisType("tactics")}>
                 戦略
               </Button>
+            </div>
+            <div className="flex justify-end mt-4">
+              <ExportCsvButton data={salesData} filename={`sales_${selectedBranch}_${dateRange?.from?.toLocaleDateString()}_${dateRange?.to?.toLocaleDateString()}.csv`} />
             </div>
           </CardContent>
         </Card>
