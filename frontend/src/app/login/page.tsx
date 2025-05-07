@@ -13,7 +13,6 @@ export default function Home() {
           <Button
             className="w-full bg-green-700 hover:bg-green-800 text-white"
             onClick={() => signIn('azure-ad')}
-            // signIn('azure-ad', { callbackUrl: '/src/app/sales.tsx' })
           >
             Sign in with Microsoft
           </Button>
