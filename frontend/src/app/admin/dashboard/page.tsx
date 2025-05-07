@@ -7,153 +7,141 @@ import { Card, CardContent } from "@/components/ui/card"
 import { SalesChart } from "@/components/dashboard/SalesChart"
 import { DateRangePicker } from "@/components/dashboard/DateRangePicker"
 import { BranchTabs } from "@/components/dashboard/BranchTabs"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { PieChartComponent } from "@/components/dashboard/PieChartComponent"
-import { useEffect } from "react"
+import { DateRange } from "react-day-picker"
+import { mockSalesData } from "./mockSalesData"
+import { SortableTable } from "@/components/general/SortableTable" // ← 追加
 
 export default function SalesDashboard() {
-    const [analysisType, setAnalysisType] = useState<"category" | "channel" | "strategy">("category")
+  const [analysisType, setAnalysisType] = useState<"category" | "sales_channel" | "tactics">("category")
+  const [selectedBranch, setSelectedBranch] = useState("all")
+  const [salesData, setSalesData] = useState<any[]>([])
+  const [error, setError] = useState("")
+  const [chartData, setChartData] = useState<{ date: string; value: number }[]>([])
+  const [pieData, setPieData] = useState<{ label: string; value: number }[]>([])
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: new Date(),
+    to: new Date(),
+  })
 
-    const [selectedBranch, setSelectedBranch] = useState("all")
-    const [startDate, setStartDate] = useState(new Date().toISOString().split("T")[0])
-    const [endDate, setEndDate] = useState(new Date().toISOString().split("T")[0])
-    const [salesData, setSalesData] = useState<any[]>([])
-    const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState("")
-    
-    useEffect(() => {
-        const fetchSales = async () => {
-          setIsLoading(true)
-          setError("")
-    
-          const params = new URLSearchParams({
-            sales_date_from: startDate,
-            sales_date_until: endDate,
-          })
-    
-          const url = `/api/get-sales?${params.toString()}`
-          console.log("🔍 Fetching sales data from:", url)
-    
-          try {
-            const res = await fetch(url)
-            if (!res.ok) throw new Error(`HTTP error: ${res.status}`)
-    
-            const data = await res.json()
-            console.log("✅ Fetched sales data:", data)
-            setSalesData(data)
-          } catch (err) {
-            console.error("❌ Error:", err)
-            setError("売上データの取得に失敗しました")
-          } finally {
-            setIsLoading(false)
-          }
-        }
-    
-        fetchSales()
-      }, [startDate, endDate])
-    
-    
-    return (
-        <main className="flex flex-col gap-6 p-6 md:ml">
-            <BranchTabs value={selectedBranch} onValueChange={setSelectedBranch} />
-            {/* 売上カード 3つ */}
-            <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <RevenueCard />
-                <WeeklyRevenueCard />
-                <AchievementCard />
+  const isMockMode = process.env.NEXT_PUBLIC_USE_MOCK === "true"
 
-            </section>
+  useEffect(() => {
+    const fetchSales = async () => {
+      try {
+        setError("")
+        const params = new URLSearchParams()
+        if (dateRange?.from) params.set("sales_date_from", dateRange.from.toISOString().split("T")[0])
+        if (dateRange?.to) params.set("sales_date_until", dateRange.to.toISOString().split("T")[0])
+        params.set("location_id", selectedBranch)
 
-            {/* 折れ線グラフ */}
-            <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <Card>
-                    <CardContent className="p-4">
-                        <SalesChart />
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardContent className="p-4">
-                        <PieChartComponent data={salesData} analysisType={analysisType} />
-                    </CardContent>
-                </Card>
+        const url = `/api/get-sales?${params.toString()}`
+        console.log("🔍 Fetching sales data:", url)
+        console.log("Mock mode is", isMockMode ? "enabled" : "disabled")
 
-                <Card className="h-fit">
-                    <CardContent className="p-4">
-                        <DateRangePicker />
-                        <div className="flex gap-2 mt-4">
-                            <Button
-                                variant={analysisType === "category" ? "default" : "outline"}
-                                onClick={() => setAnalysisType("category")}
-                            >
-                                商品カテゴリ
-                            </Button>
-                            <Button
-                                variant={analysisType === "channel" ? "default" : "outline"}
-                                onClick={() => setAnalysisType("channel")}
-                            >
-                                チャネル
-                            </Button>
-                            <Button
-                                variant={analysisType === "strategy" ? "default" : "outline"}
-                                onClick={() => setAnalysisType("strategy")}
-                            >
-                                戦略
-                            </Button>
-                        </div>
+        const responseData = isMockMode
+          ? mockSalesData
+          : await fetch(url).then(res => res.json())
 
-                    </CardContent>
-                </Card>
-            </section>
+        setSalesData(responseData)
+      } catch {
+        setError("データの取得に失敗しました")
+      }
+    }
 
-            {/* テーブル + フィルター */}
-            <section className="space-y-4">
-                <div className="flex justify-between items-center">
-                    <h2 className="text-lg font-semibold">売上一覧</h2>
-                    {/* ここに日付ピッカーや検索バーを追加予定 */}
-                </div>
-                <Card>
-                    <CardContent>
-                        <div className="overflow-auto">
-                            <table className="w-full text-sm text-left">
-                                <thead>
-                                    <tr className="border-b">
-                                        <th className="p-2">Task</th>
-                                        <th className="p-2">従業員名</th>
-                                        <th className="p-2">カテゴリ</th>
-                                        <th className="p-2">売上</th>
-                                        <th className="p-2">Date</th>
-                                        <th className="p-2">支店名</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {/* 仮の空行 */}
-                                    <tr>
-                                        <td className="p-2 text-muted">...</td>
-                                        <td className="p-2 text-muted">...</td>
-                                        <td className="p-2 text-muted">...</td>
-                                        <td className="p-2 text-muted">...</td>
-                                        <td className="p-2 text-muted">...</td>
-                                        <td className="p-2 text-muted">...</td>
-                                    </tr>
-                                </tbody>
-                                <tbody>
-                                    {salesData.map((sale, idx) => (
-                                        <tr key={idx} className="border-b">
-                                            <td className="p-2">{sale.task}</td>
-                                            <td className="p-2">{sale.name}</td>
-                                            <td className="p-2">{sale.category}</td>
-                                            <td className="p-2">¥{sale.amount.toLocaleString()}</td>
-                                            <td className="p-2">{sale.date}</td>
-                                            <td className="p-2">{sale.branch}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </CardContent>
-                </Card>
-            </section>
-        </main>
-    )
+    fetchSales()
+  }, [dateRange, selectedBranch, isMockMode])
+
+  useEffect(() => {
+    const aggregated = salesData.reduce((acc: Record<string, number>, cur) => {
+      const date = cur.sales_date
+      acc[date] = (acc[date] || 0) + cur.amount
+      return acc
+    }, {})
+
+    const chart = Object.entries(aggregated).map(([date, value]) => ({ date, value }))
+    chart.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    setChartData(chart)
+  }, [salesData])
+
+  useEffect(() => {
+    const grouped = salesData.reduce((acc: Record<string, number>, cur) => {
+      const key = cur[analysisType]
+      acc[key] = (acc[key] || 0) + cur.amount
+      return acc
+    }, {})
+
+    const pie = Object.entries(grouped).map(([label, value]) => ({ label, value }))
+    setPieData(pie)
+  }, [salesData, analysisType])
+
+  // 🔽 テーブルのカラム定義
+  const columns = [
+    { key: "employee_name", label: "従業員名" },
+    { key: "category", label: "カテゴリ" },
+    { key: "sales_channel", label: "チャネル" },
+    { key: "tactics", label: "戦略" },
+    { key: "amount", label: "売上", format: (v: number) => `¥${v.toLocaleString()}` },
+    { key: "sales_date", label: "日付" },
+    { key: "location_id", label: "支店ID" },
+  ]
+
+  return (
+    <main className="flex flex-col gap-6 p-6 md:ml">
+      <BranchTabs value={selectedBranch} onValueChange={setSelectedBranch} />
+
+      {/* 売上カード */}
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <RevenueCard />
+        <WeeklyRevenueCard />
+        <AchievementCard />
+      </section>
+
+      {/* グラフ */}
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <SalesChart data={chartData} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6 pb-4 px-4 flex justify-center">
+            <PieChartComponent data={pieData} analysisType={analysisType} />
+          </CardContent>
+        </Card>
+        <Card className="h-fit">
+          <CardContent className="p-4">
+            <DateRangePicker date={dateRange} setDate={setDateRange} />
+            <div className="flex gap-2 mt-4">
+              <Button variant={analysisType === "category" ? "default" : "outline"} onClick={() => setAnalysisType("category")}>
+                商品カテゴリ
+              </Button>
+              <Button variant={analysisType === "sales_channel" ? "default" : "outline"} onClick={() => setAnalysisType("sales_channel")}>
+                チャネル
+              </Button>
+              <Button variant={analysisType === "tactics" ? "default" : "outline"} onClick={() => setAnalysisType("tactics")}>
+                戦略
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* テーブル */}
+      <section className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-lg font-semibold">売上一覧</h2>
+        </div>
+        <Card>
+          <CardContent>
+            <div className="overflow-auto">
+              <SortableTable data={salesData} columns={columns} />
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+    </main>
+  )
 }
