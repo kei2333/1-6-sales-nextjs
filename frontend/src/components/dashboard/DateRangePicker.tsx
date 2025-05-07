@@ -9,27 +9,31 @@ import { CalendarIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { DateRange } from "react-day-picker"
 
-export function DateRangePicker({
-  className,
-}: React.HTMLAttributes<HTMLDivElement>) {
-  const [date, setDate] = React.useState<DateRange | undefined>({
-    from: new Date(),
-    to: new Date(),
-  })
+type Props = {
+  date: DateRange | undefined
+  setDate: React.Dispatch<React.SetStateAction<DateRange | undefined>>
+  className?: string
+}
 
+export function DateRangePicker({ date, setDate, className }: Props) {
   return (
     <div className={cn("grid gap-2", className)}>
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">日付範囲を選択</h2>
-            <Button variant="outline" className="text-sm" onClick={() => setDate(undefined)}>
-                リセット
-            </Button>
-        </div>
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">日付範囲を選択</h2>
+        <Button
+          variant="outline"
+          className="text-sm"
+          onClick={() => setDate(undefined)}
+        >
+          リセット
+        </Button>
+      </div>
+
       <Popover>
         <PopoverTrigger asChild>
           <Button
             id="date"
-            variant={"outline"}
+            variant="outline"
             className={cn(
               "w-[300px] justify-start text-left font-normal",
               !date && "text-muted-foreground"
@@ -39,7 +43,7 @@ export function DateRangePicker({
             {date?.from ? (
               date.to ? (
                 <>
-                  {format(date.from, "MMM d, yyyy")} -{" "}
+                  {format(date.from, "MMM d, yyyy")} –{" "}
                   {format(date.to, "MMM d, yyyy")}
                 </>
               ) : (
