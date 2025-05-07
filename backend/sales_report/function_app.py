@@ -261,9 +261,9 @@ def edit_employee_role(req: func.HttpRequest) -> func.HttpResponse:
     conn = get_db_connection()
     try:
         employee_number = req.params.get('employee_number')
-        employee_role = req.params.get('employee_role')
+        new_employee_role = req.params.get('new_employee_role')
 
-        if not employee_number or not employee_role:
+        if not employee_number or not new_employee_role:
             return func.HttpResponse(
                 "Missing required parameters.",
                 status_code=400
@@ -273,7 +273,7 @@ def edit_employee_role(req: func.HttpRequest) -> func.HttpResponse:
             update_sql = """
                 UPDATE users SET employee_role = %s WHERE employee_number = %s;
             """
-            cursor.execute(update_sql,(employee_role, employee_number,))
+            cursor.execute(update_sql,(new_employee_role, employee_number,))
             conn.commit()
         return func.HttpResponse(
             "Employee role updated successfully.",
