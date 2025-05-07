@@ -100,7 +100,7 @@ def get_sales(req: func.HttpRequest) -> func.HttpResponse:
                 mimetype="application/json",
             )
         elif sales_date_from and sales_date_until and location:
-            #日付の区間を設定して全拠点のデータを見るよう
+            #日付の区間と拠点を設定して一拠点のデータを見る
             conn = get_db_connection()
 
             with conn.cursor() as cursor:
