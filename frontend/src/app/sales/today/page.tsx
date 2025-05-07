@@ -11,6 +11,7 @@ import {
     TableRow,
   } from "@/components/ui/table"
 import { useState, useEffect } from "react";
+import { SortableTable } from "@/components/general/SortableTable";
 
 // fetchするデータの型を定義
 type SalesReport = {
@@ -22,6 +23,7 @@ type SalesReport = {
   category: string;
   tactics: string;
   memo: string|null;
+  employee_number: number;
 }
 
 export default function SalesReportPage() {
@@ -62,46 +64,28 @@ export default function SalesReportPage() {
         </div>
       </div>
 
-      {/* Osaka Sales Table */}
       <Card>
-  <CardHeader>
-    <CardTitle>今日の関東拠点の報告状況</CardTitle>
-  </CardHeader>
-  <CardContent>
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>報告者</TableHead>
-          <TableHead>売り上げ</TableHead>
-          <TableHead>チャネル</TableHead>
-          <TableHead>商品カテゴリ</TableHead>
-          <TableHead>種別</TableHead>
-          <TableHead>メモ</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        { reports.length > 0 ? (
-          reports.sort((a, b) => a.id - b.id).map((row, i) => (
-            <TableRow key={i}>
-              <TableCell>{row.employee_name}</TableCell>
-              <TableCell>{row.amount}円</TableCell>
-              <TableCell>{row.sales_channel}</TableCell>
-              <TableCell>{row.category}</TableCell>
-              <TableCell>{row.tactics}</TableCell>
-              <TableCell>{row.memo}</TableCell>
-            </TableRow>
-          ))
-        ) : (
-          <TableRow>
-            <TableCell colSpan={7} className="text-center">
-              {error ? error : "データがありません"}
-            </TableCell>
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
-  </CardContent>
-</Card>
+        <CardHeader>
+          <CardTitle>今日の関東拠点の報告状況</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {reports.length === 0 ? (
+            <p>データがありません。</p>
+          ) : (
+            <SortableTable
+              data={reports}
+              columns={[
+                { key: "employee_name", label: "報告者" },
+                { key: "amount", label: "売り上げ", format: (v) => `¥${v.toLocaleString()}` },
+                { key: "sales_channel", label: "チャネル"},
+                { key: "category", label: "商品カテゴリ" },
+                { key: "tactics", label: "種別" },
+                { key: "memo1", label: "メモ" },
+              ]}
+            />
+          )}
+        </CardContent>
+      </Card>
 
       {/* User Sales History */}
       {/* TODO: ユーザーのデータを取得し、ユーザーの所属する拠点とemployee_idに一致するデータを取得 */}
@@ -110,22 +94,22 @@ export default function SalesReportPage() {
           <CardTitle>今日のあなたの報告履歴</CardTitle>
         </CardHeader>
         <CardContent>
-            <Table>
-            <TableHeader>
-                <TableRow>
-                <TableHead>報告者</TableHead>
-                <TableHead>時間</TableHead>
-                <TableHead>売り上げ</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                <TableRow>
-                <TableCell>佐藤</TableCell>
-                <TableCell>12:35</TableCell>
-                <TableCell>50000円</TableCell>
-                </TableRow>
-            </TableBody>
-            </Table>
+          {/*filterするemployee_numberを現在のユーザーのものに一致させる*/}
+          {reports.filter((r) => r.employee_number ===1).length === 0 ? (
+            <p>データがありません。</p>
+          ) : (
+            <SortableTable
+              data={reports.filter((r) => r.employee_number ===1)}
+              columns={[
+                { key: "employee_name", label: "報告者" },
+                { key: "amount", label: "売り上げ", format: (v) => `¥${v.toLocaleString()}` },
+                { key: "sales_channel", label: "チャネル"},
+                { key: "category", label: "商品カテゴリ" },
+                { key: "tactics", label: "種別" },
+                { key: "memo1", label: "メモ" },
+              ]}
+            />
+          )}
         </CardContent>
       </Card>
     </main>
