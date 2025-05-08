@@ -2,39 +2,33 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-// セッションの確認とリダイレクト処理
 export async function middleware(req: NextRequest) {
-  // セッション情報の取得
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-
-  // ログインしていない、または権限なしの場合、ログインページにリダイレクト
-  if (!token || !token.role || token.role === "権限なし") {
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
-
-  // ページアクセス制限
   const pathname = req.nextUrl.pathname;
 
-  // 管理者ページ(/admin)にアクセスする際のチェック
-  if (pathname.startsWith("/admin") && token.role !== "Manager" ) {
+  // ログインしていない、または role がない／権限なしの場合、ログインページへリダイレクト
+  if (!token || typeof token.role !== "string" || token.role === "権限なし") {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // セールスページ(/sales)にアクセスする際のチェック
+  // 管理者ページ (/admin) → Managerのみ許可
+  if (pathname.startsWith("/admin") && token.role !== "Manager") {
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
+
+  // セールスページ (/sales) → Salesのみ許可
   if (pathname.startsWith("/sales") && token.role !== "Sales") {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // セールスページ(/users)にアクセスする際のチェック
+  // ユーザーページ (/users) → ITのみ許可
   if (pathname.startsWith("/users") && token.role !== "IT") {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // 他のページアクセスの場合、問題なければそのまま進む
   return NextResponse.next();
 }
 
-// 適用するパスを指定
 export const config = {
-  matcher: ["/admin/:path*", "/sales/:path*", "/users/:path*"], 
+  matcher: ["/admin/:path*", "/sales/:path*", "/users/:path*"],
 };
