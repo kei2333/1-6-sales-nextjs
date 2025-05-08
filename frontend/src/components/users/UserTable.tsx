@@ -13,14 +13,29 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useEffect } from "react";
 
+type Employee = {
+  employee_number: number;
+  employee_name: string;
+  employee_role: string;
+  location_id: number;
+};
+type User = {
+  id: number;
+  name: string;
+  role: string;
+  email: string;
+  updatedAt: string;
+};
+
+
 
 
 const roleOptions = ["Sales", "IT", "Manager","権限なし"];
 
 export default function UserTable() {
   const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [, setLoading] = useState(false);
+  const [, setError] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editedName, setEditedName] = useState("");
   const [editedRole, setEditedRole] = useState("");
