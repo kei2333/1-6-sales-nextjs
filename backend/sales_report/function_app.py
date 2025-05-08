@@ -370,29 +370,40 @@ def update_employee_name(req: func.HttpRequest) -> func.HttpResponse:
 # get_employee for callback after logging in
 @app.route(route="get_employee_callback")
 def get_employee_callback(req: func.HttpRequest) -> func.HttpResponse:
-    email = req.params.get('email')
-    if not email:
-        return func.HttpResponse("Email parameter missing", status_code=400)
+    employee_address = req.params.get('employee_address')
+    if not employee_address:
+        return func.HttpResponse("employee_address parameter missing", status_code=400)
 
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
             cursor.execute(
                 "SELECT employee_role, location_id FROM users WHERE employee_address = %s;",
-                (email,)
+                (employee_address,)
             )
             row = cursor.fetchone()
 
         if not row:
-            return func.HttpResponse(json.dumps({}), status_code=200, mimetype="application/json")
+            return func.HttpResponse(
+                json.dumps({}),
+                status_code=200,
+                mimetype="application/json"
+            )
 
         return func.HttpResponse(
-            json.dumps({"employee_role": row[0], "region": row[1]}),
+            json.dumps({
+                "employee_role": row["employee_role"],
+                "location_id": row["location_id"]
+            }),
             status_code=200,
             mimetype="application/json"
         )
-    except pymysql.err.OperationalError as e:
-        logging.error(f"DB error: {e}")
-        return func.HttpResponse(f"DB error: {e}", status_code=500)
+    except Exception as e:
+        logging.error(f"get_employee_callback error: {e}")
+        return func.HttpResponse(
+            "Internal server error",
+            status_code=500
+        )
     finally:
         conn.close()
+
