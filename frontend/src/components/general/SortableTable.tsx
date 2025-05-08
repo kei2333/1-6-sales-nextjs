@@ -96,8 +96,6 @@ export function SortableTable({ data, columns }: Props) {
                       <SelectItem value="すべて">すべて</SelectItem>
                       <SelectItem value="飲料">飲料</SelectItem>
                       <SelectItem value="酒類">酒類</SelectItem>
-                      <SelectItem value="食品">食品</SelectItem>
-                      <SelectItem value="その他">その他</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
