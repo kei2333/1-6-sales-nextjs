@@ -24,7 +24,9 @@ export function SortableTable({ data, columns }: Props) {
   const [selectedCategory, setSelectedCategory] = useState<string>('すべて')
   const [selectedTactics, setSelectedTactics] = useState<string>('すべて')
 
-  const sortedData = [...data].sort((a, b) => {
+  const safeData = Array.isArray(data) ? data : []
+
+  const sortedData = [...safeData].sort((a, b) => {
     if (!sortConfig) return 0
     const { key, direction } = sortConfig
     const aVal = a[key]
@@ -35,7 +37,7 @@ export function SortableTable({ data, columns }: Props) {
     return 0
   })
 
-  const startIndex = (currentPage - 1) * itemsPerPage  
+  const startIndex = (currentPage - 1) * itemsPerPage
   const filteredData = sortedData.filter((row) => {
     const matchSales = selectedSalesChannel === "すべて" || row.sales_channel === selectedSalesChannel
     const matchCategory = selectedCategory === "すべて" || row.category === selectedCategory
@@ -112,7 +114,7 @@ export function SortableTable({ data, columns }: Props) {
                     </SelectContent>
                   </Select>
                 )}
-                
+
               </th>
             ))}
           </tr>
