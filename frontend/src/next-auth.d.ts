@@ -1,11 +1,6 @@
-import NextAuth from 'next-auth';
+import { DefaultUser } from 'next-auth';
 
 declare module 'next-auth' {
-  interface User {
-    role?: string;
-    region?: number;
-  }
-
   interface Session {
     user: {
       id: string;
@@ -13,12 +8,26 @@ declare module 'next-auth' {
       email: string;
       emailVerified: boolean | null;
       role: string;
-      region: number;
+      location_id: number;
     };
+    error?: string | null;
+  }
+
+  interface User extends DefaultUser {
+    role?: string;
+    location_id?: number;
   }
 
   interface JWT {
+    sub?: string;
+    name?: string;
+    email?: string;
+    emailVerified?: boolean | null;
     role?: string;
-    region?: number;
+    location_id?: number;
+    accessToken?: string;
+    refreshToken?: string;
+    expiresAt?: number;
+    error?: string;
   }
 }

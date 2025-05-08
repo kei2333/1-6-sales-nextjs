@@ -53,7 +53,7 @@ export const authConfig: NextAuthConfig = {
         if (!data.employee_role || data.employee_role === "not_employed") return false;
 
         user.role = data.employee_role;
-        user.region = data.region;
+        user.location_id = data.location_id;
 
         return true;
       } catch (e) {
@@ -77,7 +77,7 @@ export const authConfig: NextAuthConfig = {
 
       if (user) {
         token.role = user.role;
-        token.region = user.region;
+        token.location_id = user.location_id;
       }
 
       const isExpiredToken = token.expiresAt && Date.now() >= token.expiresAt;
@@ -103,7 +103,7 @@ export const authConfig: NextAuthConfig = {
         email: token.email!,
         emailVerified: token.emailVerified ?? null,
         role: token.role,
-        region: token.region,
+        location_id: token.location_id,
       };
       session.error = token.error ?? null;
       return session;
