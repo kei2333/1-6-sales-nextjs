@@ -80,8 +80,10 @@ export const authConfig: NextAuthConfig = {
         token.location_id = user.location_id;
       }
 
-      const isExpiredToken = token.expiresAt && Date.now() >= token.expiresAt;
-      if (isExpiredToken && token.refreshToken) {
+      const isExpiredToken =
+        typeof token.expiresAt === "number" && Date.now() >= token.expiresAt;
+
+      if (isExpiredToken && typeof token.refreshToken === "string") {
         const refreshedTokens = await refreshAccessToken(token.refreshToken);
         if (refreshedTokens && refreshedTokens.accessToken) {
           token.idToken = refreshedTokens.idToken;
