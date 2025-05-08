@@ -50,7 +50,7 @@ export const authConfig: NextAuthConfig = {
         if (!res.ok) return false;
 
         const data = await res.json();
-        if (!data.employee_role || data.employee_role === "not_employed") return false;
+        if (!data.employee_role || data.employee_role === "権限なし") return false;
 
         user.role = data.employee_role;
         user.location_id = data.location_id;
