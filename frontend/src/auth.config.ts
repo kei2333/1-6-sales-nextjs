@@ -43,6 +43,9 @@ export const authConfig: NextAuthConfig = {
       authorization: { params: { scope: "openid profile email offline_access" } },
     }),
   ],
+  pages: {
+    error: '/login', // ここでエラー時のリダイレクト先を指定
+  },
   callbacks: {
     async signIn({ user }) {
       try {
