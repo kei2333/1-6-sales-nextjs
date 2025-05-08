@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-
+import { SortableTable } from "@/components/general/SortableTable";
 // fetchするデータの型を定義
 type SalesReport = {
   employee_number: number|string;
@@ -217,32 +217,18 @@ export default function ReportEntryDashboard() {
 
       <Card>
         <CardContent className="overflow-auto p-4">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>日付</TableHead>
-                <TableHead>報告者</TableHead>
-                <TableHead>売り上げ</TableHead>
-                <TableHead>チャネル</TableHead>
-                <TableHead>商品カテゴリ</TableHead>
-                <TableHead>種別</TableHead>
-                <TableHead>メモ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {todayReports.map((report, index) => (
-                <TableRow key={index}>
-                  <TableCell>{report.sales_date}</TableCell>
-                  <TableCell>{report.employee_name}</TableCell>
-                  <TableCell>{report.amount}円</TableCell>
-                  <TableCell>{report.sales_channel}</TableCell>
-                  <TableCell>{report.category}</TableCell>
-                  <TableCell>{report.tactics}</TableCell>
-                  <TableCell>{report.memo}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <SortableTable
+            data={todayReports}
+            columns={[
+              { key: "sales_date", label: "日付" },
+              { key: "employee_name", label: "報告者" },
+              { key: "amount", label: "売り上げ", format: (v) => `¥${v.toLocaleString()}` },
+              { key: "sales_channel", label: "チャネル"},
+              { key: "category", label: "商品カテゴリ" },
+              { key: "tactics", label: "種別" },
+              { key: "memo1", label: "メモ" },
+            ]}
+          />
         </CardContent>
       </Card>
     </div>
