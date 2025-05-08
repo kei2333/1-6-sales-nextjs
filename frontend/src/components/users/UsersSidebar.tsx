@@ -16,7 +16,7 @@ export function AppSidebar() {
         {locations.map((loc) => (
           <Link
             key={loc.value}
-            href={`/admin/users/${loc.value}`}
+            href={`/users/${loc.value}`}
             className="block px-3 py-2 rounded hover:bg-accent transition"
           >
             {loc.label}

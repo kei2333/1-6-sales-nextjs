@@ -12,6 +12,7 @@ const pathTitleMap: { [key: string]: string } = {
   "/sales/today": "今日の売上報告",
   "/sales/history": "過去の売上報告",
   "/sales/entry": "売上報告をする",
+  "/admin/target_setting": "目標設定",
 };
 
 export default function StickyHeader() {

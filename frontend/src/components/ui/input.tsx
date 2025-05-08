@@ -5,6 +5,12 @@ import { cn } from "@/lib/utils"
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
     <input
+      onChange={(e) => {
+        if (type === "number") {
+          const value = e.target.value.replace(/[^0-9]/g, "")
+          e.target.value = value
+        }
+      }}
       type={type}
       data-slot="input"
       className={cn(

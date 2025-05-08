@@ -10,7 +10,7 @@ import {
   SidebarMenuButton,
   SidebarHeader,
 } from "@/components/ui/sidebar";
-import { Home, ChevronDown, ChevronUp } from "lucide-react";
+import { Home, Goal, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -19,6 +19,11 @@ const menuItems = [
     title: "ダッシュボード",
     icon: Home,
     href: "/admin/dashboard",
+  },
+  {
+    title: "目標設定",
+    icon: Goal,
+    href: "/admin/target_setting",
   }
 ];
 

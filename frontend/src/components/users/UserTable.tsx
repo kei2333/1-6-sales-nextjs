@@ -1,5 +1,4 @@
 "use client";
-
 import {
   Table,
   TableHeader,
@@ -8,77 +7,130 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { useEffect } from "react";
 
-// バッジのロールマップ
-const roleMap: { [key: string]: string } = {
-  employee: "従業員",
-  admin: "管理者",
-  executive: "経営部門",
+type Employee = {
+  employee_number: number;
+  employee_name: string;
+  employee_role: string;
+  location_id: number;
+};
+type User = {
+  id: number;
+  name: string;
+  role: string;
+  email: string;
+  updatedAt: string;
 };
 
-// モックデータ
-const initialUsers = [
-  {
-    id: 1,
-    name: "佐藤 太郎",
-    department: "営業",
-    role: "employee",
-    email: "sato@example.com",
-    updatedAt: "2024-05-01",
-  },
-  {
-    id: 2,
-    name: "田中 花子",
-    department: "管理",
-    role: "executive",
-    email: "tanaka@example.com",
-    updatedAt: "2024-04-30",
-  },
-  {
-    id: 3,
-    name: "高橋 次郎",
-    department: "サポート",
-    role: "admin",
-    email: "takahashi@example.com",
-    updatedAt: "2024-04-28",
-  },
-];
+
+
+
+const roleOptions = ["Sales", "IT", "Manager","権限なし"];
 
 export default function UserTable() {
-  const [users, setUsers] = useState(initialUsers);
+  const [users, setUsers] = useState<User[]>([]);
+  const [, setLoading] = useState(false);
+  // Removed unused error state
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editedName, setEditedName] = useState("");
+  const [editedRole, setEditedRole] = useState("");
 
-  const startEdit = (userId: number, currentName: string) => {
+  useEffect(() => {
+    async function fetchUsers() {
+      try {
+        setLoading(true);
+        const response = await fetch("https://team6-sales-function.azurewebsites.net/api/get_employee");
+        if (!response.ok) {
+          throw new Error(`APIエラー: ${response.status}`);
+        }
+        const employees: Employee[] = await response.json();
+
+        const formattedUsers: User[] = employees.map((emp) => ({
+          id: emp.employee_number,
+          name: emp.employee_name,
+          role: emp.employee_role,
+          email: `${emp.employee_name.replace(/\s+/g, "").toLowerCase()}@example.com`,
+          updatedAt: new Date().toISOString().split("T")[0],
+        }));
+
+        setUsers(formattedUsers);
+      } catch (err) {
+        console.error("データ取得エラー:", err);
+        console.error("ユーザーデータの読み込みに失敗しました。");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchUsers();
+  }, []);
+
+  
+
+  const startEdit = (userId: number, currentName: string, currentRole: string) => {
     setEditingId(userId);
     setEditedName(currentName);
+    setEditedRole(currentRole);
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setEditedName("");
+    setEditedRole("");
   };
 
-  const saveEdit = (userId: number) => {
-    setUsers((prev) =>
-      prev.map((user) =>
-        user.id === userId
-          ? { ...user, name: editedName, updatedAt: new Date().toISOString().split("T")[0] }
-          : user
-      )
-    );
-    cancelEdit();
+  const saveEdit = async (userId: number) => {
+    try {
+      console.log("=== 保存処理開始 ===");
+      console.log("User ID:", userId);
+      console.log("Edited Name:", editedName);
+      console.log("Edited Role:", editedRole);
+  
+      // 빈 값 확인
+      if (!editedName.trim() || !editedRole.trim()) {
+        alert("名前と役職を入力してください。");
+        return;
+      }
+  
+      // 이름 변경 API
+      const nameUrl = `https://team6-sales-function.azurewebsites.net/api/update_employee_name?employee_number=${userId}&new_employee_name=${encodeURIComponent(editedName)}`;
+      console.log("名前API URL:", nameUrl);
+  
+      const nameResponse = await fetch(nameUrl, { method: "POST" });
+      if (!nameResponse.ok) {
+        throw new Error("名前の更新に失敗しました");
+      }
+  
+      // 권한 변경 API
+      const roleUrl = `https://team6-sales-function.azurewebsites.net/api/edit_employee_role?employee_number=${userId}&employee_role=${encodeURIComponent(editedRole)}`;
+      console.log("役職API URL:", roleUrl);
+  
+      const roleResponse = await fetch(roleUrl, { method: "POST" });
+      if (!roleResponse.ok) {
+        throw new Error("役職の更新に失敗しました");
+      }
+  
+      // 상태 업데이트
+      setUsers((prev) =>
+        prev.map((user) =>
+          user.id === userId
+            ? { ...user, name: editedName, role: editedRole }
+            : user
+        )
+      );
+      cancelEdit();
+      console.log("=== 保存完了 ===");
+    } catch (error) {
+      console.error("保存エラー:", error);
+      alert("保存に失敗しました。");
+    }
   };
+  
 
   const deleteUser = (userId: number) => {
     setUsers((prev) => prev.filter((user) => user.id !== userId));
@@ -90,10 +142,7 @@ export default function UserTable() {
         <TableHeader>
           <TableRow>
             <TableHead>名前</TableHead>
-            <TableHead>部署</TableHead>
             <TableHead>役職</TableHead>
-            <TableHead>メールアドレス</TableHead>
-            <TableHead>最終更新</TableHead>
             <TableHead className="text-right">操作</TableHead>
           </TableRow>
         </TableHeader>
@@ -111,14 +160,23 @@ export default function UserTable() {
                   user.name
                 )}
               </TableCell>
-              <TableCell>{user.department}</TableCell>
               <TableCell>
-                <span className="inline-block px-3 py-1 border rounded-full text-sm">
-                  {roleMap[user.role]}
-                </span>
+                {editingId === user.id ? (
+                  <select
+                    value={editedRole}
+                    onChange={(e) => setEditedRole(e.target.value)}
+                    className="border rounded px-2 py-1"
+                  >
+                    {roleOptions.map((role) => (
+                      <option key={role} value={role}>
+                        {role}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  user.role
+                )}
               </TableCell>
-              <TableCell>{user.email}</TableCell>
-              <TableCell>{user.updatedAt}</TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -136,7 +194,9 @@ export default function UserTable() {
                       </>
                     ) : (
                       <>
-                        <DropdownMenuItem onClick={() => startEdit(user.id, user.name)}>
+                        <DropdownMenuItem
+                          onClick={() => startEdit(user.id, user.name, user.role)}
+                        >
                           編集
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => deleteUser(user.id)}>
