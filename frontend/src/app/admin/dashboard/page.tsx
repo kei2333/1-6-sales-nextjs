@@ -33,10 +33,45 @@ export default function SalesDashboard() {
       to: lastDayOfLastMonth,
     }
   })
-
-
-
+  const [currentAmount, setCurrentAmount] = useState(0)
   const isMockMode = process.env.NEXT_PUBLIC_USE_MOCK === "true"
+
+  useEffect(() => {
+    if (!dateRange?.from || !dateRange?.to || dateRange.from === dateRange.to) return
+
+    const fetchCurrentBranchSales = async () => {
+      try {
+        setError("")
+        const today = new Date()
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+
+        const params = new URLSearchParams()
+        params.set("sales_date_from", startOfMonth.toISOString().split("T")[0])
+        params.set("sales_date_until", today.toISOString().split("T")[0])
+
+        if (selectedBranch !== undefined) {
+          params.set("location_id", selectedBranch)
+        } // selectedBranch が undefined でない場合のみ追加
+
+        const url = `/api/get-sales?${params.toString()}`
+        console.log("📊 Fetching currentAmount for branch:", url)
+
+        const responseData = isMockMode
+          ? mockSalesData
+          : await fetch(url).then(res => res.json())
+
+        const total = responseData.reduce((sum: number, cur: any) => sum + (cur.amount || 0), 0)
+        setCurrentAmount(total)
+      } catch {
+        setError("拠点の今月売上取得に失敗しました")
+      }
+    }
+
+    fetchCurrentBranchSales()
+  }, [selectedBranch, dateRange, isMockMode])
+
+
+
   const [branchPieData, setBranchPieData] = useState<{ label: string; value: number }[]>([])
   useEffect(() => {
     if (!dateRange?.from || !dateRange?.to || dateRange.from === dateRange.to) return;
@@ -245,9 +280,9 @@ export default function SalesDashboard() {
         <RevenueCard value={monthlyRevenue} />
         <WeeklyRevenueCard value={weeklyRevenue} />
         <AchievementCard
-          currentAmount={9469000}
+          currentAmount={currentAmount}
           percentage={achievementRate}
-          target={1500000}
+          target={15000000}
         />
       </section>
       {/* グラフ */}
