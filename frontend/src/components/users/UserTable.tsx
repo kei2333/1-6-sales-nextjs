@@ -13,14 +13,29 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useEffect } from "react";
 
+interface User {
+  id: number;
+  name: string;
+  role: string;
+  email: string;
+  updatedAt: string;
+}
+import { useEffect } from "react";
+
+interface Employee {
+  employee_number: number;
+  employee_name: string;
+  employee_role: string;
+}
+
 
 
 const roleOptions = ["Sales", "IT", "Manager","権限なし"];
 
 export default function UserTable() {
   const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [, setLoading] = useState(false);
+  // Removed unused error state
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editedName, setEditedName] = useState("");
   const [editedRole, setEditedRole] = useState("");
@@ -46,7 +61,7 @@ export default function UserTable() {
         setUsers(formattedUsers);
       } catch (err) {
         console.error("データ取得エラー:", err);
-        setError("ユーザーデータの読み込みに失敗しました。");
+        console.error("ユーザーデータの読み込みに失敗しました。");
       } finally {
         setLoading(false);
       }
@@ -69,23 +84,36 @@ export default function UserTable() {
 
   const saveEdit = async (userId: number) => {
     try {
-      // 名前の更新（GETやPOSTどちらでも可。API仕様に合わせる）
-      const nameUrl = `https://team6-sales-function.azurewebsites.net/api/update_employee_name?employee_number=${userId}&new_employee_name=${encodeURIComponent(editedName)}`;
-      const nameResponse = await fetch(nameUrl, { method: "POST" });
+      console.log("=== 保存処理開始 ===");
+      console.log("User ID:", userId);
+      console.log("Edited Name:", editedName);
+      console.log("Edited Role:", editedRole);
   
+      // 빈 값 확인
+      if (!editedName.trim() || !editedRole.trim()) {
+        alert("名前と役職を入力してください。");
+        return;
+      }
+  
+      // 이름 변경 API
+      const nameUrl = `https://team6-sales-function.azurewebsites.net/api/update_employee_name?employee_number=${userId}&new_employee_name=${encodeURIComponent(editedName)}`;
+      console.log("名前API URL:", nameUrl);
+  
+      const nameResponse = await fetch(nameUrl, { method: "POST" });
       if (!nameResponse.ok) {
         throw new Error("名前の更新に失敗しました");
       }
   
-      // 役職の更新
-      const roleUrl = `https://team6-sales-function.azurewebsites.net/api/edit_employee_role?employee_number=${userId}&new_employee_role=${encodeURIComponent(editedRole)}`;
-      const roleResponse = await fetch(roleUrl, { method: "POST" });
+      // 권한 변경 API
+      const roleUrl = `https://team6-sales-function.azurewebsites.net/api/edit_employee_role?employee_number=${userId}&employee_role=${encodeURIComponent(editedRole)}`;
+      console.log("役職API URL:", roleUrl);
   
+      const roleResponse = await fetch(roleUrl, { method: "POST" });
       if (!roleResponse.ok) {
         throw new Error("役職の更新に失敗しました");
       }
   
-      // フロントエンド状態更新
+      // 상태 업데이트
       setUsers((prev) =>
         prev.map((user) =>
           user.id === userId
@@ -94,11 +122,13 @@ export default function UserTable() {
         )
       );
       cancelEdit();
+      console.log("=== 保存完了 ===");
     } catch (error) {
       console.error("保存エラー:", error);
       alert("保存に失敗しました。");
     }
   };
+  
 
   const deleteUser = (userId: number) => {
     setUsers((prev) => prev.filter((user) => user.id !== userId));
