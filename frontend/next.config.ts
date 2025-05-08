@@ -1,10 +1,12 @@
-
-
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
-    ignoreDuringBuilds: true, // ✅ Vercelビルド時にESLintエラーを無視
+    ignoreDuringBuilds: true, // ✅ Vercel/Azure ビルド時に ESLint エラー無視
   },
-  // 他の設定があればここに追加
-};
+  experimental: {
+    optimizeCss: false, // ✅ LightningCSS を無効化 → next/fontのビルドエラー回避
+  },
+  // 他に設定があればここに追加
+}
 
-export default nextConfig;
+export default nextConfig
