@@ -261,7 +261,7 @@ def edit_employee_role(req: func.HttpRequest) -> func.HttpResponse:
     conn = get_db_connection()
     try:
         employee_number = req.params.get('employee_number')
-        new_employee_role = req.params.get('new_employee_role')
+        new_employee_role = req.params.get('employee_role')
 
         if not employee_number or not new_employee_role:
             return func.HttpResponse(
