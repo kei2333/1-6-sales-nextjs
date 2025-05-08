@@ -23,7 +23,7 @@ const msalInstance = new ConfidentialClientApplication({
   auth: {
     clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_ID!,
     authority: `https://login.microsoftonline.com/${process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID}/v2.0`,
-    clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET,
+    clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_SECRET!,
   },
 });
 
@@ -65,8 +65,8 @@ export const authConfig: NextAuthConfig = {
   trustHost: true,
   providers: [
     MicrosoftEntraID({
-      clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_ID,
-      clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET,
+      clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_ID!,
+      clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_SECRET!,
       issuer: `https://login.microsoftonline.com/${process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID}/v2.0`,
       authorization: {
         params: {
