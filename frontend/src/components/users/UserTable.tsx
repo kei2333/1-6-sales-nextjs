@@ -13,19 +13,20 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useEffect } from "react";
 
-interface User {
+type Employee = {
+  employee_number: number;
+  employee_name: string;
+  employee_role: string;
+  location_id: number;
+};
+type User = {
   id: number;
   name: string;
   role: string;
   email: string;
   updatedAt: string;
-}
+};
 
-interface Employee {
-  employee_number: number;
-  employee_name: string;
-  employee_role: string;
-}
 
 
 

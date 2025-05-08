@@ -2,14 +2,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-  } from "@/components/ui/table"
 import { useState, useEffect } from "react";
 import { SortableTable } from "@/components/general/SortableTable";
 
@@ -28,7 +20,7 @@ type SalesReport = {
 
 export default function SalesReportPage() {
   const [reports, setReports] = useState<SalesReport[]>([]);
-  const [error, setError] = useState("");
+  const [, setError] = useState("");
   // 現在の日付を取得
   const now = new Date();
   const today_year = now.getFullYear();
@@ -48,6 +40,7 @@ export default function SalesReportPage() {
         setReports(json);
       } catch (err) {
         setError('データ取得に失敗しました');
+        console.error("データ取得エラー:", err);
       }
     }
     fetchSales();
