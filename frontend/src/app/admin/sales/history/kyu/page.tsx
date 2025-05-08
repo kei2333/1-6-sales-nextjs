@@ -61,7 +61,7 @@ export default function OsakaMarchReport() {
 
   return (
     <div className="p-6">
-      <div className="text-xl font-semibold mb-4">{selectedYear}年{selectedMonth}月の{location_id == 1 ? '関東': location_id == 2 ? '北陸' : location_id == 3 ? '東海' : location_id == 4 ? '近畿' : location_id == 5 ? '中四国' : location_id == 6 ? '九州' : ''}拠点の報告状況</div>
+      <div className="text-xl font-semibold mb-4">{selectedYear}年{selectedMonth}月の九州拠点の報告状況</div>
       <div className="flex items-center gap-2 mb-4">
         <Button onClick={() => setSelectedYear(selectedYear - 1)}>
           ＜ 前年

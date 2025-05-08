@@ -50,7 +50,7 @@ export default function AdminPage() {
       {/* 大阪拠点 */}
       <Card>
         <CardHeader>
-          <CardTitle>本日の{location_id == 1 ? '関東': location_id == 2 ? '北陸' : location_id == 3 ? '東海' : location_id == 4 ? '近畿' : location_id == 5 ? '中四国' : location_id == 6 ? '九州' : ''}拠点の報告状況</CardTitle>
+          <CardTitle>本日の東海拠点の報告状況</CardTitle>
         </CardHeader>
         <CardContent>
           {reports.length === 0 ? (
