@@ -331,25 +331,22 @@ def get_employee_callback(req: func.HttpRequest) -> func.HttpResponse:
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
-            cursor.execute("SELECT employee_role, employee_address FROM users WHERE employee_address = %s;", (email,))
-            employees = cursor.fetchone()
-
-        if not employees:
-            return func.HttpResponse(
-                json.dumps({}),
-                status_code=200,
-                mimetype="application/json"
+            cursor.execute(
+                "SELECT employee_role, location_id FROM users WHERE employee_address = %s;",
+                (email,)
             )
+            row = cursor.fetchone()
+
+        if not row:
+            return func.HttpResponse(json.dumps({}), status_code=200, mimetype="application/json")
 
         return func.HttpResponse(
-            json.dumps(employees, ensure_ascii=False),
+            json.dumps({"employee_role": row[0], "region": row[1]}),
             status_code=200,
             mimetype="application/json"
         )
     except pymysql.err.OperationalError as e:
-        logging.error(f"Operational error: {e}")
-        return func.HttpResponse(
-            f"Database operational error: {str(e)}", status_code=500
-        )
+        logging.error(f"DB error: {e}")
+        return func.HttpResponse(f"DB error: {e}", status_code=500)
     finally:
         conn.close()

@@ -1,5 +1,4 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
-
 import type { NextAuthConfig } from "next-auth";
 import { ConfidentialClientApplication } from "@azure/msal-node";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
@@ -23,7 +22,7 @@ const msalInstance = new ConfidentialClientApplication({
   auth: {
     clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_ID!,
     authority: `https://login.microsoftonline.com/${process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID}/v2.0`,
-    clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_SECRET!,  // ← 修正済み
+    clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_SECRET!,  
   },
 });
 
