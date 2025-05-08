@@ -1,25 +1,31 @@
 'use client';
 
+import { signIn } from 'next-auth/react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#BAC43E]/40 space-y-4">
-      {/* タイトルを白いボックスの上に配置 */}
       <h1 className="text-2xl font-bold text-gray-800">売上管理おまかせくん</h1>
 
       <div className="w-full max-w-sm bg-white p-8 rounded shadow-md space-y-6">
-        <div className="text-center space-y-2">
-          <h2 className="text-xl font-bold">ログイン</h2>
-          <p className="text-sm text-gray-500">
-            ログインできない方は管理者にお問い合わせください。
+        <div>
+          <Button
+            className="w-full bg-green-700 hover:bg-green-800 text-white"
+            onClick={() => signIn('microsoft-entra-id')}
+          >
+            Sign in with Microsoft
+          </Button>
+
+          <p className="mt-4 text-xs text-gray-600 text-center">
+            ログインできない方は{" "}
+            <a
+              href="mailto:kohkishibata@aaa.com"
+              className="text-blue-600 underline hover:text-blue-800"
+            >
+              管理者にお問い合わせください。
+            </a>
           </p>
-        </div>
-        <div className="space-y-4">
-          <Input placeholder="社員番号" />
-          <Input type="password" placeholder="パスワード" />
-          <Button className="w-full">ログイン</Button>
         </div>
       </div>
     </div>
