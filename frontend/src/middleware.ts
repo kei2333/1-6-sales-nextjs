@@ -7,8 +7,8 @@ export async function middleware(req: NextRequest) {
   // セッション情報の取得
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
-  // ログインしていない場合、ログインページにリダイレクト
-  if (!token) {
+  // ログインしていない、または権限なしの場合、ログインページにリダイレクト
+  if (!token || !token.role || token.role === "権限なし") {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
@@ -16,7 +16,7 @@ export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
   // 管理者ページ(/admin)にアクセスする際のチェック
-  if (pathname.startsWith("/admin") && token.role !== "Manager" && token.role !== "IT") {
+  if (pathname.startsWith("/admin") && token.role !== "Manager" ) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
@@ -36,5 +36,5 @@ export async function middleware(req: NextRequest) {
 
 // 適用するパスを指定
 export const config = {
-  matcher: ["/admin", "/sales", "/users"], // /dashboard は削除しました
+  matcher: ["/admin/:path*", "/sales/:path*", "/users/:path*"], 
 };
