@@ -20,8 +20,8 @@ export function SortableTable({ data, columns }: Props) {
   const [sortConfig, setSortConfig] = useState<SortConfig>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
-
-  const sortedData = [...data].sort((a, b) => {
+  const safeData = Array.isArray(data) ? data : []
+  const sortedData = [...safeData].sort((a, b) => {
     if (!sortConfig) return 0
     const { key, direction } = sortConfig
     const aVal = a[key]
@@ -31,6 +31,7 @@ export function SortableTable({ data, columns }: Props) {
     if (aVal > bVal) return direction === "asc" ? 1 : -1
     return 0
   })
+
 
   const startIndex = (currentPage - 1) * itemsPerPage
   const currentPageData = sortedData.slice(startIndex, startIndex + itemsPerPage)

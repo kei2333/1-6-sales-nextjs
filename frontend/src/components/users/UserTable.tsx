@@ -13,6 +13,9 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useEffect } from "react";
 
+type Employee = {  employee_number: number;  employee_name: string;  employee_role: string;  location_id: number;};
+type User = {  id: number;  name: string;  role: string;  email: string;  updatedAt: string;};
+
 
 
 const roleOptions = ["Sales", "IT", "Manager","権限なし"];
@@ -54,6 +57,8 @@ export default function UserTable() {
 
     fetchUsers();
   }, []);
+
+  
 
   const startEdit = (userId: number, currentName: string, currentRole: string) => {
     setEditingId(userId);
