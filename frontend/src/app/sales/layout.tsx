@@ -3,7 +3,7 @@
 
 import "@/app/globals.css";
 import StickyHeader from "@/components/sales/sticky-header";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sales/sales-sidebar";
 import type { ReactNode } from "react";
 
