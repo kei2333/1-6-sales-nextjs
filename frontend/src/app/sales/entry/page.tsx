@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { SortableTable } from "@/components/general/SortableTable";
+
 // fetchするデータの型を定義
 type SalesReport = {
   employee_number: number|string;

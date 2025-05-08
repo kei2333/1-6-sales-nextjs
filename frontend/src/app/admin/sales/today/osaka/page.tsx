@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+
 const reports = [
   { name: "佐藤", time: "12:35", amount: "500000円", channel: "ECサイト", category: "飲料", type: "エンド", note: "×メモ" },
   { name: "吉田", time: "14:35", amount: "500000円", channel: "スーパーマーケット", category: "飲料", type: "チラシ", note: "メモ" },
