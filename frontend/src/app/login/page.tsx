@@ -20,7 +20,7 @@ export default function Home() {
           <p className="mt-4 text-xs text-gray-600 text-center">
             ログインできない方は{" "}
             <a
-              href="mailto:kohkishibata@aaa.com"
+              href="mailto:kohkishibata@aaa.com?subject=売上管理おまかせくんのログインについて"
               className="text-blue-600 underline hover:text-blue-800"
             >
               管理者にお問い合わせください。
