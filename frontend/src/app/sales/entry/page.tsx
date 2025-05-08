@@ -7,7 +7,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { SortableTable } from "@/components/general/SortableTable";
 // fetchするデータの型を定義
 type SalesReport = {
@@ -113,28 +112,18 @@ export default function ReportEntryDashboard() {
   }, [date]);
   return (
     <div className="p-6 space-y-6">
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="rounded-3xl bg-purple-100 flex items-center justify-center min-h-[300px]">
-          <CardContent className="p-4">
-            <Calendar
-              selected={date}
-              onSelect={(selected) => selected && setDate(selected)}
-              mode="single"
-              className="rounded-md border"
-            />
-          </CardContent>
-        </Card>
-        <Card className="md:col-span-2 bg-white rounded-3xl border">
+        <Card className="md:col-span-3 bg-white rounded-3xl border">
           <CardContent className="space-y-4 p-4">
             <form>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1">日付</label>
                 <Input
-                  type="text"
+                  type="date"
                   placeholder="年月日"
-                  value={format(date, 'yyyy年M月d日')}
+                  onChange={(e) => setDate(new Date(e.target.value))}
+                  value={date.toISOString().split("T")[0]}
                   required
                 />
               </div>
