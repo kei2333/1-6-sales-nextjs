@@ -55,14 +55,17 @@ export function DateRangePicker({ date, setDate, className }: Props) {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0">
-          <Calendar
-            initialFocus
-            mode="range"
-            defaultMonth={date?.from}
+        <Calendar
             selected={date}
-            onSelect={setDate}
+            onSelect={(val) => {
+              if (!val || typeof val === 'object' && 'from' in val) {
+                setDate(val as DateRange)
+              }
+            }}
+            defaultMonth={date?.from}
             numberOfMonths={2}
           />
+
         </PopoverContent>
       </Popover>
     </div>
