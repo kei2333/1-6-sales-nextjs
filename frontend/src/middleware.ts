@@ -1,18 +1,20 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 export function middleware(req: NextRequest) {
-  const isLoggedIn = req.cookies.get('auth-token') // 例：ログイン後にセットした cookie
+  const token = req.cookies.get('__Secure-next-auth.session-token') || req.cookies.get('next-auth.session-token');
 
-  const protectedPaths = ['/admin', '/dashboard', '/users']
-  const pathname = req.nextUrl.pathname
+  const protectedPaths = ['/admin', '/sales', '/users'];
+  const pathname = req.nextUrl.pathname;
 
-  const isProtected = protectedPaths.some((path) => pathname.startsWith(path))
-
-  if (isProtected && !isLoggedIn) {
-    return NextResponse.redirect(new URL('/login', req.url))
+  const isProtected = protectedPaths.some(path => pathname.startsWith(path));
+  if (isProtected && !token) {
+    return NextResponse.redirect(new URL('/login', req.url));
   }
 
-  return NextResponse.next()
+  return NextResponse.next();
 }
 
+export const config = {
+  matcher: ['/admin/:path*', '/sales/:path*', '/users/:path*'],
+};

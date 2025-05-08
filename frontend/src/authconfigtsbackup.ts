@@ -3,22 +3,41 @@ import type { NextAuthConfig } from "next-auth";
 import { ConfidentialClientApplication } from "@azure/msal-node";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
 
+const LoggerMessages = {
+  emptyAccessToken: "アクセストークンが取得できませんでした",
+  emptySub: "ユーザー識別子 (sub) が取得できませんでした",
+  expiredAccessToken: "アクセストークンの有効期限が切れています",
+  startedToRefreshAccessToken: "アクセストークンの更新を開始します",
+  failedToRefreshAccessToken: "アクセストークンの更新に失敗しました",
+  successToRefreshAccessToken: "アクセストークンの更新に成功しました",
+} as const;
+
+export const ErrorCodes = {
+  emptyAccessToken: "EMPTY_ACCESS_TOKEN",
+  emptySub: "EMPTY_SUB",
+  failedToRefreshAccessToken: "FAILED_TO_REFRESH_ACCESS_TOKEN",
+} as const;
+
 const msalInstance = new ConfidentialClientApplication({
   auth: {
     clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_ID!,
     authority: `https://login.microsoftonline.com/${process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID}/v2.0`,
-    clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_SECRET!,
+    clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_SECRET!,  
   },
 });
 
 async function refreshAccessToken(refreshToken: string) {
+  console.log("refreshAccessToken", LoggerMessages.startedToRefreshAccessToken);
   try {
     const response = await msalInstance.acquireTokenByRefreshToken({
       refreshToken,
       scopes: ["openid", "profile", "email"],
     });
 
-    if (!response?.accessToken) throw new Error("Failed to refresh access token");
+    if (!response?.accessToken) {
+      throw new Error(LoggerMessages.failedToRefreshAccessToken);
+    }
+    console.log("refreshAccessToken", LoggerMessages.successToRefreshAccessToken);
 
     return {
       idToken: response.idToken,
@@ -26,43 +45,28 @@ async function refreshAccessToken(refreshToken: string) {
       expiresAt: response.expiresOn?.getTime() ?? Date.now() + 3600 * 1000,
     };
   } catch (error) {
-    console.error("refreshAccessToken error:", error);
+    console.error("refreshAccessToken", LoggerMessages.failedToRefreshAccessToken, error);
     return null;
   }
 }
 
 export const authConfig: NextAuthConfig = {
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.AUTH_SECRET,
   trustHost: true,
-  session: { strategy: "jwt" },
   providers: [
     MicrosoftEntraID({
       clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_ID,
-      clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_SECRET,
+      clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_SECRET,  // ← 修正済み
       issuer: `https://login.microsoftonline.com/${process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID}/v2.0`,
-      authorization: { params: { scope: "openid profile email offline_access" } },
+      authorization: {
+        params: {
+          scope: "openid profile email offline_access",
+        },
+      },
     }),
   ],
   callbacks: {
-    async signIn({ user }) {
-      try {
-        const res = await fetch(`${process.env.BASE_API_URL_PYTHON}/get_employee_callback?email=${user.email}`);
-        if (!res.ok) return false;
-
-        const data = await res.json();
-        if (!data.employee_role || data.employee_role === "not_employed") return false;
-
-        user.role = data.employee_role;
-        user.region = data.region;
-
-        return true;
-      } catch (e) {
-        console.error("signIn error:", e);
-        return false;
-      }
-    },
-
-    async jwt({ token, user, account }) {
+    async jwt({ token, account, profile }) {
       if (account) {
         const { id_token, access_token, refresh_token, expires_in } = account;
         if (id_token) {
@@ -75,9 +79,20 @@ export const authConfig: NextAuthConfig = {
         token.error = undefined;
       }
 
-      if (user) {
-        token.role = user.role;
-        token.region = user.region;
+      if (profile) {
+        token.sub = profile.sub ?? token.sub;
+        token.email = profile.email ?? token.email;
+        token.name = profile.name ?? token.name;
+      }
+
+      if (!token.accessToken) {
+        console.error("authConfig.callback.jwt", LoggerMessages.emptyAccessToken);
+        token.error = ErrorCodes.emptyAccessToken;
+      }
+
+      if (!token.sub) {
+        console.error("authConfig.callback.jwt", LoggerMessages.emptySub);
+        token.error = ErrorCodes.emptySub;
       }
 
       const isExpiredToken = token.expiresAt && Date.now() >= token.expiresAt;
@@ -89,21 +104,18 @@ export const authConfig: NextAuthConfig = {
           token.expiresAt = refreshedTokens.expiresAt;
           token.error = undefined;
         } else {
-          token.error = "FAILED_TO_REFRESH_ACCESS_TOKEN";
+          token.error = ErrorCodes.failedToRefreshAccessToken;
         }
       }
 
       return token;
     },
-
     async session({ session, token }) {
       session.user = {
         id: token.sub!,
         name: token.name!,
         email: token.email!,
         emailVerified: token.emailVerified ?? null,
-        role: token.role,
-        region: token.region,
       };
       session.error = token.error ?? null;
       return session;
