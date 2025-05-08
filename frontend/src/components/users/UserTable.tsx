@@ -20,7 +20,6 @@ interface User {
   email: string;
   updatedAt: string;
 }
-import { useEffect } from "react";
 
 interface Employee {
   employee_number: number;
