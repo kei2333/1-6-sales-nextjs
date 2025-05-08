@@ -1,5 +1,5 @@
 import { useState } from "react"
-
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "../ui/select"
 type Column = {
   key: string
   label: string
@@ -20,6 +20,9 @@ export function SortableTable({ data, columns }: Props) {
   const [sortConfig, setSortConfig] = useState<SortConfig>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
+  const [selectedSalesChannel, setSelectedSalesChannel] = useState<string>('すべて')
+  const [selectedCategory, setSelectedCategory] = useState<string>('すべて')
+  const [selectedTactics, setSelectedTactics] = useState<string>('すべて')
 
   const sortedData = [...data].sort((a, b) => {
     if (!sortConfig) return 0
@@ -32,9 +35,15 @@ export function SortableTable({ data, columns }: Props) {
     return 0
   })
 
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const currentPageData = sortedData.slice(startIndex, startIndex + itemsPerPage)
-  const totalPages = Math.ceil(sortedData.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage  
+  const filteredData = sortedData.filter((row) => {
+    const matchSales = selectedSalesChannel === "すべて" || row.sales_channel === selectedSalesChannel
+    const matchCategory = selectedCategory === "すべて" || row.category === selectedCategory
+    const matchTactics = selectedTactics === "すべて" || row.tactics === selectedTactics
+    return matchSales && matchCategory && matchTactics
+  })
+  const currentPageData = filteredData.slice(startIndex, startIndex + itemsPerPage)
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage)
 
   const handleSort = (key: string) => {
     setSortConfig((prev) =>
@@ -62,6 +71,50 @@ export function SortableTable({ data, columns }: Props) {
                 onClick={() => handleSort(col.key)}
               >
                 {col.label} {renderArrow(col.key)}
+                {/* ソート機能 */}
+                {col.key === "sales_channel" && (
+                  <Select value={selectedSalesChannel} onValueChange={setSelectedSalesChannel}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="選択してください" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="すべて">すべて</SelectItem>
+                      <SelectItem value="SM">スーパーマーケット</SelectItem>
+                      <SelectItem value="HC">ホームセンター</SelectItem>
+                      <SelectItem value="CVS">コンビニ</SelectItem>
+                      <SelectItem value="DRUG">ドラッグストア</SelectItem>
+                      <SelectItem value="EC">ECサイト</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+                {col.key === "category" && (
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="選択してください" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="すべて">すべて</SelectItem>
+                      <SelectItem value="飲料">飲料</SelectItem>
+                      <SelectItem value="酒類">酒類</SelectItem>
+                      <SelectItem value="食品">食品</SelectItem>
+                      <SelectItem value="その他">その他</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+                {col.key === "tactics" && (
+                  <Select value={selectedTactics} onValueChange={setSelectedTactics}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="選択してください" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="すべて">すべて</SelectItem>
+                      <SelectItem value="チラシ">チラシ</SelectItem>
+                      <SelectItem value="エンド">エンド</SelectItem>
+                      <SelectItem value="企画">企画</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+                
               </th>
             ))}
           </tr>
@@ -70,9 +123,9 @@ export function SortableTable({ data, columns }: Props) {
           {currentPageData.map((row, idx) => (
             <tr key={idx} className="border-b even:bg-lime-50">
               {columns.map((col) => (
-                  <td key={col.key} className="p-2">
-                    {col.format ? col.format(row[col.key]) : row[col.key] ?? "-"}
-                  </td>
+                <td key={col.key} className="p-2">
+                  {col.format ? col.format(row[col.key]) : row[col.key] ?? "-"}
+                </td>
               ))}
             </tr>
           ))}
