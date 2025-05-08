@@ -1,10 +1,17 @@
+import { NextConfig } from 'next';
 
-
-const nextConfig = {
+const nextConfig: NextConfig = {
   eslint: {
-    ignoreDuringBuilds: true, // ✅ Vercelビルド時にESLintエラーを無視
+    ignoreDuringBuilds: true, // Vercelビルド時にESLintエラーを無視
   },
-  // 他の設定があればここに追加
+  // App Router を有効化
+  experimental: {
+    appDir: true, // Appディレクトリを有効にする設定
+  },
+  // middlewareの設定
+  middleware: {
+    matcher: ["/admin", "/sales", "/users"], // このパスに対して適用
+  },
 };
 
 export default nextConfig;
