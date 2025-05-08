@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { SortableTable } from "@/components/general/SortableTable";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select";
 // fetchするデータの型を定義
 type SalesReport = {
   employee_number: number|string;
@@ -130,15 +131,19 @@ export default function ReportEntryDashboard() {
               <div>
                 {/*TODO: スタイルを周りのインプットに合わせる。枠など。*/}
                 <label className="block text-sm font-medium mb-1">拠点</label>
-                  <select value={newReport.location_id} onChange={(e)=>setNewReport({...newReport, location_id:Number(e.target.value)})} required>
-                    <option value={1}>関東広域</option>
-                    <option value={2}>北陸</option>
-                    <option value={3}>東海</option>
-                    <option value={4}>近畿</option>
-                    <option value={5}>中四国</option>
-                    <option value={6}>九州</option>
-                  </select>
-                
+                <Select value={newReport.location_id.toString()} onValueChange={(value) => setNewReport({ ...newReport, location_id:Number(value) })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="選択してください" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={'1'}>関東広域</SelectItem>
+                    <SelectItem value={'2'}>北陸</SelectItem>
+                    <SelectItem value={'3'}>東海</SelectItem>
+                    <SelectItem value={'4'}>近畿</SelectItem>
+                    <SelectItem value={'5'}>中四国</SelectItem>
+                    <SelectItem value={'6'}>九州</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">担当者の社員番号</label>
@@ -152,30 +157,44 @@ export default function ReportEntryDashboard() {
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">商品カテゴリ</label>
-                <select value={newReport.category} onChange={(e)=>setNewReport({...newReport, category:e.target.value})} required>
-                    <option value={'飲料'}>飲料</option>
-                    <option value={'酒類'}>酒類</option>
-                    <option value={'食品'}>食品</option>
-                    <option value={'その他'}>その他</option>
-                </select>
+                <Select value={newReport.category} onValueChange={(value) => setNewReport({ ...newReport, category: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="選択してください" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="飲料">飲料</SelectItem>
+                    <SelectItem value="酒類">酒類</SelectItem>
+                    <SelectItem value="企画">コンビニ</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">種別</label>
-                <select value={newReport.tactics} onChange={(e)=>setNewReport({...newReport, tactics:e.target.value})} required>
-                    <option value={'チラシ'}>チラシ</option>
-                    <option value={'エンド'}>エンド</option>
-                    <option value={'企画'}>企画</option>
-                </select>
+                <Select value={newReport.tactics} onValueChange={(value) => setNewReport({ ...newReport, tactics: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="選択してください" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="チラシ">チラシ</SelectItem>
+                    <SelectItem value="エンド">ホームセンター</SelectItem>
+                    <SelectItem value="企画">コンビニ</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">チャネル</label>
-                <select value={newReport.sales_channel} onChange={(e)=>setNewReport({...newReport, sales_channel:e.target.value})} required>
-                    <option value={'SM'}>スーパーマーケット</option>
-                    <option value={'HC'}>ホームセンター</option>
-                    <option value={'CVS'}>コンビニ</option>
-                    <option value={'DRUG'}>ドラッグストア</option>
-                    <option value={'EC'}>ECサイト</option>
-                </select>
+                <Select value={newReport.sales_channel} onValueChange={(value) => setNewReport({ ...newReport, sales_channel: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="選択してください" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="SM">スーパーマーケット</SelectItem>
+                    <SelectItem value="HC">ホームセンター</SelectItem>
+                    <SelectItem value="CVS">コンビニ</SelectItem>
+                    <SelectItem value="DRUG">ドラッグストア</SelectItem>
+                    <SelectItem value="EC">ECサイト</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div>
