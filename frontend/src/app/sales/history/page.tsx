@@ -3,14 +3,6 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { SortableTable } from "@/components/general/SortableTable";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 
 // fetchするデータの型を定義
@@ -33,7 +25,7 @@ export default function AdminPage() {
   const [selectedYear, setSelectedYear] = useState<number>(
     new Date().getFullYear()
   );
-  const LocationID = 2; // 拠点別フィルター用変数
+  const location_id = 1; // TODO: 現在のユーザーのlocation_idから拠点取得
 
   useEffect(() => {
     async function fetchSales() {
@@ -50,7 +42,7 @@ export default function AdminPage() {
           var lastDayOfMonth = 30;
         }
         const res = await fetch(
-          `https://team6-sales-function.azurewebsites.net/api/get_sales?sales_date_from=${selectedYear}-${selectedMonth}-1&sales_date_until=${selectedYear}-${selectedMonth}-${lastDayOfMonth}&location_id=${LocationID}`
+          `https://team6-sales-function.azurewebsites.net/api/get_sales?sales_date_from=${selectedYear}-${selectedMonth}-1&sales_date_until=${selectedYear}-${selectedMonth}-${lastDayOfMonth}&location_id=${location_id}`
         );
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
@@ -66,18 +58,10 @@ export default function AdminPage() {
     fetchSales();
   }, [selectedMonth, selectedYear]);
 
-  // const filteredReports = reports.filter((r) => {
-  //   const date = new Date(r.sales_date);
-  //   return (
-  //     date.getFullYear() === selectedYear &&
-  //     date.getMonth() + 1 === selectedMonth
-  //   );
-  // });
-
   return (
     <main className="p-6 flex flex-col gap-6">
       <h2 className="text-2xl font-bold">
-        {selectedYear}年{selectedMonth}月の大阪拠点の報告状況
+        {selectedYear}年{selectedMonth}月の{location_id == 1 ? '関東': location_id == 2 ? '北陸' : location_id == 3 ? '東海' : location_id == 4 ? '近畿' : location_id == 5 ? '中四国' : location_id == 6 ? '九州' : ''}拠点の報告状況
       </h2>
 
       <div className="flex items-center gap-2 mb-4">
@@ -115,7 +99,7 @@ export default function AdminPage() {
                   { key: "sales_channel", label: "チャネル"},
                   { key: "category", label: "商品カテゴリ" },
                   { key: "tactics", label: "種別" },
-                  { key: "memo1", label: "メモ" },
+                  { key: "memo", label: "メモ" },
                 ]}
               />
             </>

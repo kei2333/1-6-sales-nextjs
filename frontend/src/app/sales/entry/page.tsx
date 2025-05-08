@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
 import { SortableTable } from "@/components/general/SortableTable";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select";
 // fetchするデータの型を定義
@@ -25,6 +23,7 @@ type SalesReport = {
 export default function ReportEntryDashboard() {
   const [todayReports, setTodayReports] = useState<SalesReport[]>([]);
   const [date, setDate] = useState(new Date());
+  const location_id=1 //TODO:ユーザーのlocation_id参照
   const [newReport, setNewReport] = useState<SalesReport>({
     employee_number: 0,
     employee_name: "",
@@ -34,9 +33,8 @@ export default function ReportEntryDashboard() {
     category: "飲料",
     tactics: "チラシ",
     memo: "",
-    location_id: 1,
+    location_id: location_id
   });
-  const location_id=1 //TODO:ユーザーのlocation_id参照
   const handleSubmitReport = async() => {
     try {
       console.log("newReport:", newReport)
@@ -86,7 +84,7 @@ export default function ReportEntryDashboard() {
         category: "飲料",
         tactics: "チラシ",
         memo: "",
-        location_id: 1,
+        location_id: location_id,
       });
     } catch (err) {
       console.error(err);
@@ -164,7 +162,6 @@ export default function ReportEntryDashboard() {
                   <SelectContent>
                     <SelectItem value="飲料">飲料</SelectItem>
                     <SelectItem value="酒類">酒類</SelectItem>
-                    <SelectItem value="企画">コンビニ</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -176,8 +173,8 @@ export default function ReportEntryDashboard() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="チラシ">チラシ</SelectItem>
-                    <SelectItem value="エンド">ホームセンター</SelectItem>
-                    <SelectItem value="企画">コンビニ</SelectItem>
+                    <SelectItem value="エンド">エンド</SelectItem>
+                    <SelectItem value="企画">企画</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -224,19 +221,27 @@ export default function ReportEntryDashboard() {
       </div>
 
       <Card>
+        {/* TODO: 入力者の拠点のデータのみ表示 */}
+        <CardHeader>
+          <CardTitle>本日{date.getFullYear()}年{date.getMonth()+1}月{date.getDate()}日の{location_id == 1 ? '関東': location_id == 2 ? '北陸' : location_id == 3 ? '東海' : location_id == 4 ? '近畿' : location_id == 5 ? '中四国' : location_id == 6 ? '九州' : ''}拠点の報告状況</CardTitle>
+        </CardHeader>
         <CardContent className="overflow-auto p-4">
-          <SortableTable
-            data={todayReports}
-            columns={[
-              { key: "sales_date", label: "日付" },
-              { key: "employee_name", label: "報告者" },
-              { key: "amount", label: "売り上げ", format: (v) => `¥${v.toLocaleString()}` },
-              { key: "sales_channel", label: "チャネル"},
-              { key: "category", label: "商品カテゴリ" },
-              { key: "tactics", label: "種別" },
-              { key: "memo1", label: "メモ" },
-            ]}
-          />
+          {todayReports.length === 0 ? (
+            <p>データがありません。</p>
+          ) : (
+            <SortableTable
+              data={todayReports}
+              columns={[
+                { key: "sales_date", label: "日付" },
+                { key: "employee_name", label: "報告者" },
+                { key: "amount", label: "売り上げ", format: (v) => `¥${v.toLocaleString()}` },
+                { key: "sales_channel", label: "チャネル"},
+                { key: "category", label: "商品カテゴリ" },
+                { key: "tactics", label: "種別" },
+                { key: "memo", label: "メモ" },
+              ]}
+            />
+          )}
         </CardContent>
       </Card>
     </div>
