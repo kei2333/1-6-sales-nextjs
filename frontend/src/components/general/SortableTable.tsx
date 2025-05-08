@@ -53,7 +53,7 @@ export function SortableTable({ data, columns }: Props) {
   return (
     <div>
       <table className="w-full text-sm text-left border">
-        <thead>
+        <thead className="bg-lime-200">
           <tr className="border-b">
             {columns.map((col) => (
               <th
@@ -68,11 +68,11 @@ export function SortableTable({ data, columns }: Props) {
         </thead>
         <tbody>
           {currentPageData.map((row, idx) => (
-            <tr key={idx} className="border-b">
+            <tr key={idx} className="border-b even:bg-lime-50">
               {columns.map((col) => (
-                <td key={col.key} className="p-2">
-                  {col.format ? col.format(row[col.key]) : row[col.key] ?? "-"}
-                </td>
+                  <td key={col.key} className="p-2">
+                    {col.format ? col.format(row[col.key]) : row[col.key] ?? "-"}
+                  </td>
               ))}
             </tr>
           ))}
