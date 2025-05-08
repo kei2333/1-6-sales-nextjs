@@ -15,9 +15,19 @@ export async function middleware(req: NextRequest) {
   // ページアクセス制限
   const pathname = req.nextUrl.pathname;
 
-  const isProtected = protectedPaths.some(path => pathname.startsWith(path));
-  if (isProtected && !token) {
-    return NextResponse.redirect(new URL('/login', req.url));
+  // 管理者ページ(/admin)にアクセスする際のチェック
+  if (pathname.startsWith("/admin") && token.role !== "Manager" ) {
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
+
+  // セールスページ(/sales)にアクセスする際のチェック
+  if (pathname.startsWith("/sales") && token.role !== "Sales") {
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
+
+  // セールスページ(/users)にアクセスする際のチェック
+  if (pathname.startsWith("/users") && token.role !== "IT") {
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 
   // 他のページアクセスの場合、問題なければそのまま進む
