@@ -23,16 +23,10 @@ const msalInstance = new ConfidentialClientApplication({
   auth: {
     clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_ID!,
     authority: `https://login.microsoftonline.com/${process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID}/v2.0`,
-    clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET,
+    clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_SECRET!,  // ← 修正済み
   },
 });
 
-/**
- * refreshAccessToken
- * リフレッシュトークンを使用してアクセストークンを更新
- *
- * @param refreshToken - リフレッシュトークン
- */
 async function refreshAccessToken(refreshToken: string) {
   console.log("refreshAccessToken", LoggerMessages.startedToRefreshAccessToken);
   try {
@@ -57,16 +51,13 @@ async function refreshAccessToken(refreshToken: string) {
   }
 }
 
-/**
- * NextAuth（Auth.js）の設定
- */
 export const authConfig: NextAuthConfig = {
   secret: process.env.AUTH_SECRET,
   trustHost: true,
   providers: [
     MicrosoftEntraID({
       clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_ID,
-      clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET,
+      clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_SECRET,  // ← 修正済み
       issuer: `https://login.microsoftonline.com/${process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID}/v2.0`,
       authorization: {
         params: {
@@ -105,8 +96,6 @@ export const authConfig: NextAuthConfig = {
         token.error = ErrorCodes.emptySub;
       }
 
-      // アクセストークンの有効期限が切れている場合
-      // リフレッシュトークンを使用してトークンを更新
       const isExpiredToken = token.expiresAt && Date.now() >= token.expiresAt;
       if (isExpiredToken && token.refreshToken) {
         const refreshedTokens = await refreshAccessToken(token.refreshToken);
