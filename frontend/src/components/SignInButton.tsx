@@ -17,7 +17,7 @@ export default function SignInButton() {
   return (
     <>
       <p>Not signed in</p>
-      <button onClick={() => signIn('azure-ad')}>Sign in with Microsoft</button>
+      <button onClick={() => signIn('microsoft-entra-id')}>Sign in with Microsoft</button>
     </>
   )
 }
