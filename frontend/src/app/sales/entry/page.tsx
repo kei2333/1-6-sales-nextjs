@@ -7,8 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-
+import { SortableTable } from "@/components/general/SortableTable";
 // fetchするデータの型を定義
 type SalesReport = {
   employee_number: number|string;
@@ -113,28 +112,18 @@ export default function ReportEntryDashboard() {
   }, [date]);
   return (
     <div className="p-6 space-y-6">
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="rounded-3xl bg-purple-100 flex items-center justify-center min-h-[300px]">
-          <CardContent className="p-4">
-            <Calendar
-              selected={date}
-              onSelect={(selected) => selected && setDate(selected)}
-              mode="single"
-              className="rounded-md border"
-            />
-          </CardContent>
-        </Card>
-        <Card className="md:col-span-2 bg-white rounded-3xl border">
+        <Card className="md:col-span-3 bg-white rounded-3xl border">
           <CardContent className="space-y-4 p-4">
             <form>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1">日付</label>
                 <Input
-                  type="text"
+                  type="date"
                   placeholder="年月日"
-                  value={format(date, 'yyyy年M月d日')}
+                  onChange={(e) => setDate(new Date(e.target.value))}
+                  value={date.toISOString().split("T")[0]}
                   required
                 />
               </div>
@@ -217,32 +206,18 @@ export default function ReportEntryDashboard() {
 
       <Card>
         <CardContent className="overflow-auto p-4">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>日付</TableHead>
-                <TableHead>報告者</TableHead>
-                <TableHead>売り上げ</TableHead>
-                <TableHead>チャネル</TableHead>
-                <TableHead>商品カテゴリ</TableHead>
-                <TableHead>種別</TableHead>
-                <TableHead>メモ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {todayReports.map((report, index) => (
-                <TableRow key={index}>
-                  <TableCell>{report.sales_date}</TableCell>
-                  <TableCell>{report.employee_name}</TableCell>
-                  <TableCell>{report.amount}円</TableCell>
-                  <TableCell>{report.sales_channel}</TableCell>
-                  <TableCell>{report.category}</TableCell>
-                  <TableCell>{report.tactics}</TableCell>
-                  <TableCell>{report.memo}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <SortableTable
+            data={todayReports}
+            columns={[
+              { key: "sales_date", label: "日付" },
+              { key: "employee_name", label: "報告者" },
+              { key: "amount", label: "売り上げ", format: (v) => `¥${v.toLocaleString()}` },
+              { key: "sales_channel", label: "チャネル"},
+              { key: "category", label: "商品カテゴリ" },
+              { key: "tactics", label: "種別" },
+              { key: "memo1", label: "メモ" },
+            ]}
+          />
         </CardContent>
       </Card>
     </div>

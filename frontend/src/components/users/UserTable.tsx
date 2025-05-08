@@ -11,21 +11,22 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { MoreHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { useEffect } from "react";
 
-interface User {
+type Employee = {
+  employee_number: number;
+  employee_name: string;
+  employee_role: string;
+  location_id: number;
+};
+type User = {
   id: number;
   name: string;
   role: string;
   email: string;
   updatedAt: string;
-}
-import { useEffect } from "react";
+};
 
-interface Employee {
-  employee_number: number;
-  employee_name: string;
-  employee_role: string;
-}
 
 
 
