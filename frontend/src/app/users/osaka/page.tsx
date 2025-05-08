@@ -1,16 +1,12 @@
 // app/admin/users/page.tsx
 "use client";
 
-import UserSearchBar from "@/components/users/UserSearchBar";
-import UserTable from "@/components/users/UserTable";
+import { CsvUserTable } from "@/components/users/CsvUserTable"; // ★ ここが正しいパスか確認！
 
 export default function UserManagementPage() {
   return (
-    <>
-      <div className="flex items-center justify-between mb-4">
-        <UserSearchBar />
-      </div>
-      <UserTable />
-    </>
+    <div className="p-6">
+      <CsvUserTable />
+    </div>
   );
 }
