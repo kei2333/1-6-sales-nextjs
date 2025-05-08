@@ -15,6 +15,7 @@ import { mockSalesData } from "./mockSalesData"
 import { SortableTable } from "@/components/general/SortableTable" // ← 追加
 import { ExportCsvButton } from "@/components/general/ExportCsvButton" // ← 追加
 import { BranchSalesPieChart } from "@/components/dashboard/BranchSalesPieChart"
+import {CurrentSalesCard} from "@/components/dashboard/CurrentSalesCard"
 
 export default function SalesDashboard() {
   const [analysisType, setAnalysisType] = useState<"category" | "sales_channel" | "tactics">("category")
@@ -115,7 +116,7 @@ export default function SalesDashboard() {
 
 
 
-  const targetAmount = 1500000
+  const targetAmount = 15000000
 
   const useFixedRevenueData = (selectedBranch?: string, isMockMode = false, mockSalesData?: any[]) => {
     const [monthlyRevenue, setMonthlyRevenue] = useState(0)
@@ -267,29 +268,29 @@ export default function SalesDashboard() {
   ]
 
   return (
-    <main className="flex flex-col gap-6 p-6 md:ml">
+    <main className="flex flex-col gap-4 p-6 md:ml">
       <BranchTabs value={selectedBranch} onValueChange={setSelectedBranch} />
       <div className="mt-4 max-w-md">
         <Card>
-          <CardContent className="p-4">
+          <CardContent>
             <DateRangePicker date={dateRange} setDate={setDateRange} />
           </CardContent>
         </Card>
       </div>
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <RevenueCard value={monthlyRevenue} />
         <WeeklyRevenueCard value={weeklyRevenue} />
+        <CurrentSalesCard amount={currentAmount} />
         <AchievementCard
-          currentAmount={currentAmount}
           percentage={achievementRate}
-          target={15000000}
+          target= {targetAmount}
         />
       </section>
       {/* グラフ */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <BranchSalesPieChart data={branchPieData} highlightLabel={selectedBranch} />
         <Card>
-          <CardContent className="pt-6 pb-4 px-4 flex justify-center">
+          <CardContent className="p-3 flex justify-center">
             <PieChartComponent
               data={pieData}
               analysisType={analysisType}
@@ -298,7 +299,7 @@ export default function SalesDashboard() {
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3">
             <SalesChart data={chartData} />
           </CardContent>
         </Card>
