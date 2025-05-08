@@ -6,7 +6,7 @@ declare module 'next-auth' {
       id: string;
       name: string;
       email: string;
-      emailVerified: boolean | null;
+      emailVerified: Date | null;  // ← 修正: Date 型に統一
       role: string;
       location_id: number;
     };
@@ -22,7 +22,7 @@ declare module 'next-auth' {
     sub?: string;
     name?: string;
     email?: string;
-    emailVerified?: boolean | null;
+    emailVerified?: boolean | null;  // JWT 側は boolean | null で OK
     role?: string;
     location_id?: number;
     accessToken?: string;

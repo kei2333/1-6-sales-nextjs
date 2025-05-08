@@ -67,7 +67,7 @@ export const authConfig: NextAuthConfig = {
         const { id_token, access_token, refresh_token, expires_in } = account;
         if (id_token) {
           const decoded = jwt.decode(id_token) as JwtPayload;
-          token.emailVerified = decoded?.email_verified ?? null;
+          token.emailVerified = typeof decoded?.email_verified === "boolean" ? decoded.email_verified : null;
         }
         token.accessToken = access_token ?? token.accessToken;
         token.refreshToken = refresh_token ?? token.refreshToken;
@@ -81,6 +81,7 @@ export const authConfig: NextAuthConfig = {
       }
 
       let isExpiredToken = false;
+
       if (typeof token.expiresAt === "number") {
         isExpiredToken = Date.now() >= token.expiresAt;
       }
@@ -105,11 +106,12 @@ export const authConfig: NextAuthConfig = {
         id: token.sub!,
         name: token.name!,
         email: token.email!,
-        emailVerified: token.emailVerified ?? null,
-        role: token.role,
-        location_id: token.location_id,
+        emailVerified: null,
+        role: typeof token.role === "string" ? token.role : "",
+        location_id: typeof token.location_id === "number" ? token.location_id : 0,
       };
-      session.error = token.error ?? null;
+      session.error =
+        typeof token.error === "string" ? token.error : null;
       return session;
     },
   },
