@@ -11,24 +11,49 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { MoreHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { useEffect } from "react";
 
-// モックAPIデータに対応
-const initialUsers = [
-  { id: 0, name: "木村健太郎", location_id: 1, role: "IT" },
-  { id: 1, name: "田中健太郎", location_id: 2, role: "Sales" },
-  { id: 2, name: "清水翔太", location_id: 3, role: "Sales" },
-  { id: 3, name: "佐倉健太郎", location_id: 2, role: "IT" },
-  { id: 4, name: "吉田誠", location_id: 2, role: "IT" },
-  { id: 5, name: "木村健太郎", location_id: 4, role: "Manager" },
-];
 
-const roleOptions = ["Sales", "IT", "Manager"];
+
+const roleOptions = ["Sales", "IT", "Manager","権限なし"];
 
 export default function UserTable() {
-  const [users, setUsers] = useState(initialUsers);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editedName, setEditedName] = useState("");
   const [editedRole, setEditedRole] = useState("");
+
+  useEffect(() => {
+    async function fetchUsers() {
+      try {
+        setLoading(true);
+        const response = await fetch("https://team6-sales-function.azurewebsites.net/api/get_employee");
+        if (!response.ok) {
+          throw new Error(`APIエラー: ${response.status}`);
+        }
+        const employees: Employee[] = await response.json();
+
+        const formattedUsers: User[] = employees.map((emp) => ({
+          id: emp.employee_number,
+          name: emp.employee_name,
+          role: emp.employee_role,
+          email: `${emp.employee_name.replace(/\s+/g, "").toLowerCase()}@example.com`,
+          updatedAt: new Date().toISOString().split("T")[0],
+        }));
+
+        setUsers(formattedUsers);
+      } catch (err) {
+        console.error("データ取得エラー:", err);
+        setError("ユーザーデータの読み込みに失敗しました。");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchUsers();
+  }, []);
 
   const startEdit = (userId: number, currentName: string, currentRole: string) => {
     setEditingId(userId);
@@ -42,15 +67,37 @@ export default function UserTable() {
     setEditedRole("");
   };
 
-  const saveEdit = (userId: number) => {
-    setUsers((prev) =>
-      prev.map((user) =>
-        user.id === userId
-          ? { ...user, name: editedName, role: editedRole }
-          : user
-      )
-    );
-    cancelEdit();
+  const saveEdit = async (userId: number) => {
+    try {
+      // 名前の更新（GETやPOSTどちらでも可。API仕様に合わせる）
+      const nameUrl = `https://team6-sales-function.azurewebsites.net/api/update_employee_name?employee_number=${userId}&new_employee_name=${encodeURIComponent(editedName)}`;
+      const nameResponse = await fetch(nameUrl, { method: "POST" });
+  
+      if (!nameResponse.ok) {
+        throw new Error("名前の更新に失敗しました");
+      }
+  
+      // 役職の更新
+      const roleUrl = `https://team6-sales-function.azurewebsites.net/api/edit_employee_role?employee_number=${userId}&new_employee_role=${encodeURIComponent(editedRole)}`;
+      const roleResponse = await fetch(roleUrl, { method: "POST" });
+  
+      if (!roleResponse.ok) {
+        throw new Error("役職の更新に失敗しました");
+      }
+  
+      // フロントエンド状態更新
+      setUsers((prev) =>
+        prev.map((user) =>
+          user.id === userId
+            ? { ...user, name: editedName, role: editedRole }
+            : user
+        )
+      );
+      cancelEdit();
+    } catch (error) {
+      console.error("保存エラー:", error);
+      alert("保存に失敗しました。");
+    }
   };
 
   const deleteUser = (userId: number) => {
