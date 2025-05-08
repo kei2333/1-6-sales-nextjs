@@ -350,3 +350,4 @@ def get_employee_callback(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(f"DB error: {e}", status_code=500)
     finally:
         conn.close()
+    
