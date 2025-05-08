@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
 import { SortableTable } from "@/components/general/SortableTable";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select";
 // fetchするデータの型を定義
 type SalesReport = {
   employee_number: number|string;
@@ -24,6 +23,7 @@ type SalesReport = {
 export default function ReportEntryDashboard() {
   const [todayReports, setTodayReports] = useState<SalesReport[]>([]);
   const [date, setDate] = useState(new Date());
+  const location_id=1 //TODO:ユーザーのlocation_id参照
   const [newReport, setNewReport] = useState<SalesReport>({
     employee_number: 0,
     employee_name: "",
@@ -33,9 +33,8 @@ export default function ReportEntryDashboard() {
     category: "飲料",
     tactics: "チラシ",
     memo: "",
-    location_id: 1,
+    location_id: location_id
   });
-  const location_id=1 //TODO:ユーザーのlocation_id参照
   const handleSubmitReport = async() => {
     try {
       console.log("newReport:", newReport)
@@ -85,7 +84,7 @@ export default function ReportEntryDashboard() {
         category: "飲料",
         tactics: "チラシ",
         memo: "",
-        location_id: 1,
+        location_id: location_id,
       });
     } catch (err) {
       console.error(err);
@@ -130,15 +129,19 @@ export default function ReportEntryDashboard() {
               <div>
                 {/*TODO: スタイルを周りのインプットに合わせる。枠など。*/}
                 <label className="block text-sm font-medium mb-1">拠点</label>
-                  <select value={newReport.location_id} onChange={(e)=>setNewReport({...newReport, location_id:Number(e.target.value)})} required>
-                    <option value={1}>関東広域</option>
-                    <option value={2}>北陸</option>
-                    <option value={3}>東海</option>
-                    <option value={4}>近畿</option>
-                    <option value={5}>中四国</option>
-                    <option value={6}>九州</option>
-                  </select>
-                
+                <Select value={newReport.location_id.toString()} onValueChange={(value) => setNewReport({ ...newReport, location_id:Number(value) })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="選択してください" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={'1'}>関東広域</SelectItem>
+                    <SelectItem value={'2'}>北陸</SelectItem>
+                    <SelectItem value={'3'}>東海</SelectItem>
+                    <SelectItem value={'4'}>近畿</SelectItem>
+                    <SelectItem value={'5'}>中四国</SelectItem>
+                    <SelectItem value={'6'}>九州</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">担当者の社員番号</label>
@@ -152,30 +155,43 @@ export default function ReportEntryDashboard() {
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">商品カテゴリ</label>
-                <select value={newReport.category} onChange={(e)=>setNewReport({...newReport, category:e.target.value})} required>
-                    <option value={'飲料'}>飲料</option>
-                    <option value={'酒類'}>酒類</option>
-                    <option value={'食品'}>食品</option>
-                    <option value={'その他'}>その他</option>
-                </select>
+                <Select value={newReport.category} onValueChange={(value) => setNewReport({ ...newReport, category: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="選択してください" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="飲料">飲料</SelectItem>
+                    <SelectItem value="酒類">酒類</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">種別</label>
-                <select value={newReport.tactics} onChange={(e)=>setNewReport({...newReport, tactics:e.target.value})} required>
-                    <option value={'チラシ'}>チラシ</option>
-                    <option value={'エンド'}>エンド</option>
-                    <option value={'企画'}>企画</option>
-                </select>
+                <Select value={newReport.tactics} onValueChange={(value) => setNewReport({ ...newReport, tactics: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="選択してください" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="チラシ">チラシ</SelectItem>
+                    <SelectItem value="エンド">エンド</SelectItem>
+                    <SelectItem value="企画">企画</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">チャネル</label>
-                <select value={newReport.sales_channel} onChange={(e)=>setNewReport({...newReport, sales_channel:e.target.value})} required>
-                    <option value={'SM'}>スーパーマーケット</option>
-                    <option value={'HC'}>ホームセンター</option>
-                    <option value={'CVS'}>コンビニ</option>
-                    <option value={'DRUG'}>ドラッグストア</option>
-                    <option value={'EC'}>ECサイト</option>
-                </select>
+                <Select value={newReport.sales_channel} onValueChange={(value) => setNewReport({ ...newReport, sales_channel: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="選択してください" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="SM">スーパーマーケット</SelectItem>
+                    <SelectItem value="HC">ホームセンター</SelectItem>
+                    <SelectItem value="CVS">コンビニ</SelectItem>
+                    <SelectItem value="DRUG">ドラッグストア</SelectItem>
+                    <SelectItem value="EC">ECサイト</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div>
@@ -205,19 +221,27 @@ export default function ReportEntryDashboard() {
       </div>
 
       <Card>
+        {/* TODO: 入力者の拠点のデータのみ表示 */}
+        <CardHeader>
+          <CardTitle>本日{date.getFullYear()}年{date.getMonth()+1}月{date.getDate()}日の{location_id == 1 ? '関東': location_id == 2 ? '北陸' : location_id == 3 ? '東海' : location_id == 4 ? '近畿' : location_id == 5 ? '中四国' : location_id == 6 ? '九州' : ''}拠点の報告状況</CardTitle>
+        </CardHeader>
         <CardContent className="overflow-auto p-4">
-          <SortableTable
-            data={todayReports}
-            columns={[
-              { key: "sales_date", label: "日付" },
-              { key: "employee_name", label: "報告者" },
-              { key: "amount", label: "売り上げ", format: (v) => `¥${v.toLocaleString()}` },
-              { key: "sales_channel", label: "チャネル"},
-              { key: "category", label: "商品カテゴリ" },
-              { key: "tactics", label: "種別" },
-              { key: "memo1", label: "メモ" },
-            ]}
-          />
+          {todayReports.length === 0 ? (
+            <p>データがありません。</p>
+          ) : (
+            <SortableTable
+              data={todayReports}
+              columns={[
+                { key: "sales_date", label: "日付" },
+                { key: "employee_name", label: "報告者" },
+                { key: "amount", label: "売り上げ", format: (v) => `¥${v.toLocaleString()}` },
+                { key: "sales_channel", label: "チャネル"},
+                { key: "category", label: "商品カテゴリ" },
+                { key: "tactics", label: "種別" },
+                { key: "memo", label: "メモ" },
+              ]}
+            />
+          )}
         </CardContent>
       </Card>
     </div>

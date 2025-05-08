@@ -1,9 +1,10 @@
-"use client";
-
+'use client'
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { SortableTable } from "@/components/general/SortableTable";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ChevronLeft, ChevronRight} from "lucide-react";
+import { SortableTable } from "@/components/general/SortableTable";
 
 // fetchするデータの型を定義
 type SalesReport = {
@@ -16,7 +17,7 @@ type SalesReport = {
   memo: string|null;
 }
 
-export default function AdminPage() {
+export default function OsakaMarchReport() {
   const [reports, setReports] = useState<SalesReport[]>([]);
   const [error, setError] = useState("");
   const [selectedMonth, setSelectedMonth] = useState<number>(
@@ -25,7 +26,7 @@ export default function AdminPage() {
   const [selectedYear, setSelectedYear] = useState<number>(
     new Date().getFullYear()
   );
-  const location_id = 1; // TODO: 現在のユーザーのlocation_idから拠点取得
+  const location_id = 6;
 
   useEffect(() => {
     async function fetchSales() {
@@ -59,11 +60,8 @@ export default function AdminPage() {
   }, [selectedMonth, selectedYear]);
 
   return (
-    <main className="p-6 flex flex-col gap-6">
-      <h2 className="text-2xl font-bold">
-        {selectedYear}年{selectedMonth}月の{location_id == 1 ? '関東': location_id == 2 ? '北陸' : location_id == 3 ? '東海' : location_id == 4 ? '近畿' : location_id == 5 ? '中四国' : location_id == 6 ? '九州' : ''}拠点の報告状況
-      </h2>
-
+    <div className="p-6">
+      <div className="text-xl font-semibold mb-4">{selectedYear}年{selectedMonth}月の九州拠点の報告状況</div>
       <div className="flex items-center gap-2 mb-4">
         <Button onClick={() => setSelectedYear(selectedYear - 1)}>
           ＜ 前年
@@ -106,6 +104,6 @@ export default function AdminPage() {
           )}
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

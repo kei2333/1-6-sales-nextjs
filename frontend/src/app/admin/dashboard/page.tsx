@@ -16,6 +16,8 @@ import { SortableTable } from "@/components/general/SortableTable" // ← 追加
 import { ExportCsvButton } from "@/components/general/ExportCsvButton" // ← 追加
 import { BranchSalesPieChart } from "@/components/dashboard/BranchSalesPieChart"
 import {CurrentSalesCard} from "@/components/dashboard/CurrentSalesCard"
+import LogoutButton from '@/components/dashboard/sticky-header';
+
 
 export default function SalesDashboard() {
   const [analysisType, setAnalysisType] = useState<"category" | "sales_channel" | "tactics">("category")

@@ -1,7 +1,6 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { SortableTable } from "@/components/general/SortableTable";
 
@@ -28,10 +27,11 @@ export default function SalesReportPage() {
   const today_day = now.getDate();
   // useEffectを使ってページ読み込み時にデータを取得
   // TODO: ユーザーのデータを取得し、ユーザーの所属する拠点に一致するデータを取得
+  const location_id = 1;
   useEffect(() => {
     async function fetchSales() {
       try {
-        const res = await fetch(`https://team6-sales-function.azurewebsites.net/api/get_sales?sales_date=${today_year}-${today_month}-${today_day}&location_id=1`);
+        const res = await fetch(`https://team6-sales-function.azurewebsites.net/api/get_sales?sales_date=${today_year}-${today_month}-${today_day}&location_id=${location_id}`);
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
@@ -50,16 +50,12 @@ export default function SalesReportPage() {
     <main className="flex-1 p-6 space-y-8">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-muted-foreground">今日の売上報告</h2>
-        <div className="flex items-center gap-4">
-          <span>田中さん</span>
-          <Button variant="outline">ログアウト</Button>
-        </div>
+        <h2 className="text-2xl font-bold text-muted-foreground">本日{today_year}年{today_month}月{today_day}日の売上報告</h2>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>今日の関東拠点の報告状況</CardTitle>
+          <CardTitle>本日の{location_id == 1 ? '関東': location_id == 2 ? '北陸' : location_id == 3 ? '東海' : location_id == 4 ? '近畿' : location_id == 5 ? '中四国' : location_id == 6 ? '九州' : ''}拠点の報告状況</CardTitle>
         </CardHeader>
         <CardContent>
           {reports.length === 0 ? (
@@ -73,7 +69,7 @@ export default function SalesReportPage() {
                 { key: "sales_channel", label: "チャネル"},
                 { key: "category", label: "商品カテゴリ" },
                 { key: "tactics", label: "種別" },
-                { key: "memo1", label: "メモ" },
+                { key: "memo", label: "メモ" },
               ]}
             />
           )}
@@ -84,7 +80,7 @@ export default function SalesReportPage() {
       {/* TODO: ユーザーのデータを取得し、ユーザーの所属する拠点とemployee_idに一致するデータを取得 */}
       <Card>
         <CardHeader>
-          <CardTitle>今日のあなたの報告履歴</CardTitle>
+          <CardTitle>本日のあなたの報告履歴</CardTitle>
         </CardHeader>
         <CardContent>
           {/*filterするemployee_numberを現在のユーザーのものに一致させる*/}
@@ -99,7 +95,7 @@ export default function SalesReportPage() {
                 { key: "sales_channel", label: "チャネル"},
                 { key: "category", label: "商品カテゴリ" },
                 { key: "tactics", label: "種別" },
-                { key: "memo1", label: "メモ" },
+                { key: "memo", label: "メモ" },
               ]}
             />
           )}
