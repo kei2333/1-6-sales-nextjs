@@ -261,9 +261,9 @@ def edit_employee_role(req: func.HttpRequest) -> func.HttpResponse:
     conn = get_db_connection()
     try:
         employee_number = req.params.get('employee_number')
-        employee_role = req.params.get('employee_role')
+        new_employee_role = req.params.get('new_employee_role')
 
-        if not employee_number or not employee_role:
+        if not employee_number or not new_employee_role:
             return func.HttpResponse(
                 "Missing required parameters.",
                 status_code=400
@@ -273,7 +273,7 @@ def edit_employee_role(req: func.HttpRequest) -> func.HttpResponse:
             update_sql = """
                 UPDATE users SET employee_role = %s WHERE employee_number = %s;
             """
-            cursor.execute(update_sql,(employee_role, employee_number,))
+            cursor.execute(update_sql,(new_employee_role, employee_number,))
             conn.commit()
         return func.HttpResponse(
             "Employee role updated successfully.",
@@ -321,39 +321,6 @@ def delete_employee(req: func.HttpRequest) -> func.HttpResponse:
     finally:
         conn.close()
 
-# get_employee for callback after logging in
-@app.route(route="get_employee_callback")
-def get_employee_callback(req: func.HttpRequest) -> func.HttpResponse:
-    email = req.params.get('email')
-    if not email:
-        return func.HttpResponse("Email parameter missing", status_code=400)
-
-    conn = get_db_connection()
-    try:
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT employee_role, location_id, employee_address FROM users WHERE employee_address = %s;", (email,))
-            employees = cursor.fetchone()
-
-        if not employees:
-            return func.HttpResponse(
-                json.dumps({}),
-                status_code=200,
-                mimetype="application/json"
-            )
-
-        return func.HttpResponse(
-            json.dumps(employees, ensure_ascii=False),
-            status_code=200,
-            mimetype="application/json"
-        )
-    except pymysql.err.OperationalError as e:
-        logging.error(f"Operational error: {e}")
-        return func.HttpResponse(
-            f"Database operational error: {str(e)}", status_code=500
-        )
-    finally:
-        conn.close()
-
 @app.route(route="update_employee_name")
 def update_employee_name(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("Processing update_employee_name HTTP request.")
@@ -396,6 +363,39 @@ def update_employee_name(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(
             f"Failed to update employee name. Error: {str(e)}",
             status_code=500
+        )
+    finally:
+        conn.close()
+
+# get_employee for callback after logging in
+@app.route(route="get_employee_callback")
+def get_employee_callback(req: func.HttpRequest) -> func.HttpResponse:
+    email = req.params.get('email')
+    if not email:
+        return func.HttpResponse("Email parameter missing", status_code=400)
+
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT employee_role, location_id, employee_address FROM users WHERE employee_address = %s;", (email,))
+            employees = cursor.fetchone()
+
+        if not employees:
+            return func.HttpResponse(
+                json.dumps({}),
+                status_code=200,
+                mimetype="application/json"
+            )
+
+        return func.HttpResponse(
+            json.dumps(employees, ensure_ascii=False),
+            status_code=200,
+            mimetype="application/json"
+        )
+    except pymysql.err.OperationalError as e:
+        logging.error(f"Operational error: {e}")
+        return func.HttpResponse(
+            f"Database operational error: {str(e)}", status_code=500
         )
     finally:
         conn.close()
