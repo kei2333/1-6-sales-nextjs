@@ -27,15 +27,15 @@ const menuItems = [
   }
 ];
 
-const stores = ["大阪", "東京"];
-
-//辞書で大阪をosaka、東京をtokyoにする
+const stores = ["関東広域", "北陸", "東海", "近畿", "中四国", "九州"];
 const storeDict: { [key: string]: string } = {
-  大阪: "osaka",
-  東京: "tokyo",
+  関東広域: "kat",
+  北陸: "hok",
+  東海: "tok",
+  近畿: "kin",
+  中四国: "chu",
+  九州: "kyu",
 };
-
-
 
 export function AppSidebar() {
   const [openToday, setOpenToday] = useState(false);
