@@ -5,11 +5,7 @@ import { getToken } from "next-auth/jwt";
 export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
-  console.log("middleware token:", token);
-  console.log("middleware token.role:", token?.role);
-
   const pathname = req.nextUrl.pathname;
-  console.log("middleware path check:", pathname);
 
   // ログインしていない、または role がない／権限なしの場合、ログインページへリダイレクト
   if (!token || typeof token.role !== "string" || token.role === "権限なし") {

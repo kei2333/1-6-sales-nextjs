@@ -53,11 +53,7 @@ export const authConfig: NextAuthConfig = {
     async signIn({ user, profile }) {
       try {
         const resolvedEmail =
-          user.email ||
-          profile.email ||
-          profile.preferred_username;
-
-        console.log("signIn: resolved email ->", resolvedEmail);
+          user.email || profile?.email || profile?.preferred_username;
 
         if (!resolvedEmail) {
           console.error("signIn error: email not found");
@@ -67,7 +63,6 @@ export const authConfig: NextAuthConfig = {
         const res = await fetch(
           `${process.env.BASE_API_URL_PYTHON}/get_employee_callback?employee_address=${resolvedEmail}`
         );
-        console.log("signIn: fetch status ->", res.status);
 
         if (!res.ok) {
           console.error(`Backend API error: ${res.status}`);
@@ -75,7 +70,6 @@ export const authConfig: NextAuthConfig = {
         }
 
         const data = await res.json();
-        console.log("signIn: fetched data ->", data);
 
         if (!data.employee_role || data.employee_role === "権限なし") {
           console.warn(`User ${resolvedEmail} has no valid role`);
@@ -84,11 +78,9 @@ export const authConfig: NextAuthConfig = {
 
         user.role = data.employee_role;
         user.location_id = data.location_id;
-        user.employee_number = data.employee_number; // ✅ 追加
+        user.employee_number = data.employee_number;
+        user.employee_name = data.employee_name; 
 
-        console.log("signIn: assigned user.role ->", user.role);
-        console.log("signIn: assigned user.location_id ->", user.location_id);
-        console.log("signIn: assigned user.employee_number ->", user.employee_number);
         return true;
       } catch (error) {
         console.error("signIn callback error:", error);
@@ -112,7 +104,8 @@ export const authConfig: NextAuthConfig = {
       if (user) {
         token.role = user.role;
         token.location_id = user.location_id;
-        token.employee_number = user.employee_number; // ✅ 追加
+        token.employee_number = user.employee_number;
+        token.employee_name = user.employee_name; 
       }
 
       if (token.expiresAt && Date.now() >= token.expiresAt && token.refreshToken) {
@@ -132,12 +125,13 @@ export const authConfig: NextAuthConfig = {
     async session({ session, token }) {
       session.user = {
         id: token.sub!,
-        name: token.name!,
+        name: token.employee_name || token.name || "不明なユーザー",
         email: token.email!,
         emailVerified: token.emailVerified === true ? new Date() : null,
         role: token.role ?? "",
         location_id: token.location_id ?? 0,
-        employee_number: token.employee_number ?? 0, // ✅ 追加
+        employee_number: token.employee_number ?? 0,
+        employee_name: token.employee_name ?? "", 
       };
       session.error = token.error ?? null;
       return session;

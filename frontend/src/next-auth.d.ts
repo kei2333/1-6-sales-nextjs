@@ -10,18 +10,16 @@ declare module "next-auth" {
       role: string;
       location_id: number;
       employee_number: number;
+      employee_name: string; // ✅ 追加
     };
     error?: string | null;
   }
 
   interface User extends DefaultUser {
-    id?: string;
-    name?: string;
-    email?: string;
-    emailVerified?: Date | null;
     role?: string;
     location_id?: number;
     employee_number?: number;
+    employee_name?: string; // ✅ 追加
   }
 }
 
@@ -34,6 +32,7 @@ declare module "next-auth/jwt" {
     role?: string;
     location_id?: number;
     employee_number?: number;
+    employee_name?: string; // ✅ 追加
     accessToken?: string;
     refreshToken?: string;
     expiresAt?: number;
