@@ -5,8 +5,6 @@ import StickyHeader from "@/components/users/sticky-header";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/users/UsersSidebar";
 import type { ReactNode } from "react";
-import LogoutButton from '@/components/users/sticky-header';
-
 
 export default function SalesLayout({ children }: { children: ReactNode }) {
   return (

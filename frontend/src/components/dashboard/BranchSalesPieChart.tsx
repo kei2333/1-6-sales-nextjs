@@ -24,7 +24,7 @@ const COLORS = [
 export const BranchSalesPieChart = ({ data, highlightLabel }: Props) => {
   return (
     <Card>
-      <CardContent className="p-3 flex flex-col items-center">
+      <CardContent className="pt-6 pb-4 px-4 flex flex-col items-center">
         <h3 className="text-lg font-semibold mb-2">拠点別売上分布</h3>
         <div className="w-full h-[250px]">
           <ResponsiveContainer width="100%" height="100%">

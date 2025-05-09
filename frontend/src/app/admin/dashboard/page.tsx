@@ -15,10 +15,6 @@ import { mockSalesData } from "./mockSalesData"
 import { SortableTable } from "@/components/general/SortableTable" // ← 追加
 import { ExportCsvButton } from "@/components/general/ExportCsvButton" // ← 追加
 import { BranchSalesPieChart } from "@/components/dashboard/BranchSalesPieChart"
-import { CurrentSalesCard } from "@/components/dashboard/CurrentSalesCard"
-import LogoutButton from '@/components/dashboard/sticky-header';
-import { CsvSortableTableCard } from "@/components/general/CsvSortableTableCard"
-
 
 export default function SalesDashboard() {
   const [analysisType, setAnalysisType] = useState<"category" | "sales_channel" | "tactics">("category")
@@ -50,8 +46,8 @@ export default function SalesDashboard() {
         const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
 
         const params = new URLSearchParams()
-        params.set("sales_date_from", startOfMonth.toLocaleDateString("sv-SE"))
-        params.set("sales_date_until", today.toLocaleDateString("sv-SE"))
+        params.set("sales_date_from", startOfMonth.toISOString().split("T")[0])
+        params.set("sales_date_until", today.toISOString().split("T")[0])
 
         if (selectedBranch !== undefined) {
           params.set("location_id", selectedBranch)
@@ -84,8 +80,8 @@ export default function SalesDashboard() {
       try {
         setError("")
         const params = new URLSearchParams()
-        if (dateRange?.from) params.set("sales_date_from", dateRange.from.toLocaleDateString("sv-SE"))
-        if (dateRange?.to) params.set("sales_date_until", dateRange.to.toLocaleDateString("sv-SE"))
+        if (dateRange?.from) params.set("sales_date_from", dateRange.from.toISOString().split("T")[0])
+        if (dateRange?.to) params.set("sales_date_until", dateRange.to.toISOString().split("T")[0])
         // location_id はここでは **追加しない**（全拠点取得のため）
 
         const url = `/api/get-sales?${params.toString()}`
@@ -119,7 +115,7 @@ export default function SalesDashboard() {
 
 
 
-  const targetAmount = 15000000
+  const targetAmount = 1500000
 
   const useFixedRevenueData = (selectedBranch?: string, isMockMode = false, mockSalesData?: any[]) => {
     const [monthlyRevenue, setMonthlyRevenue] = useState(0)
@@ -152,8 +148,8 @@ export default function SalesDashboard() {
           // ✅ クエリ文字列生成
           const createParams = (from: Date, to: Date) => {
             const params = new URLSearchParams()
-            params.set("sales_date_from", from.toLocaleDateString("sv-SE"))
-            params.set("sales_date_until", to.toLocaleDateString("sv-SE"))
+            params.set("sales_date_from", from.toISOString().split("T")[0])
+            params.set("sales_date_until", to.toISOString().split("T")[0])
             if (selectedBranch !== undefined) {
               params.set("location_id", selectedBranch)
             }
@@ -213,8 +209,8 @@ export default function SalesDashboard() {
       try {
         setError("")
         const params = new URLSearchParams()
-        if (dateRange?.from) params.set("sales_date_from", dateRange.from.toLocaleDateString("sv-SE"))
-        if (dateRange?.to) params.set("sales_date_until", dateRange.to.toLocaleDateString("sv-SE"))
+        if (dateRange?.from) params.set("sales_date_from", dateRange.from.toISOString().split("T")[0])
+        if (dateRange?.to) params.set("sales_date_until", dateRange.to.toISOString().split("T")[0])
         if (selectedBranch !== undefined) params.set("location_id", selectedBranch)
 
         const url = `/api/get-sales?${params.toString()}`
@@ -271,29 +267,29 @@ export default function SalesDashboard() {
   ]
 
   return (
-    <main className="flex flex-col gap-4 p-6 md:ml">
+    <main className="flex flex-col gap-6 p-6 md:ml">
       <BranchTabs value={selectedBranch} onValueChange={setSelectedBranch} />
       <div className="mt-4 max-w-md">
         <Card>
-          <CardContent>
+          <CardContent className="p-4">
             <DateRangePicker date={dateRange} setDate={setDateRange} />
           </CardContent>
         </Card>
       </div>
-      <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <RevenueCard value={monthlyRevenue} />
         <WeeklyRevenueCard value={weeklyRevenue} />
-        <CurrentSalesCard amount={currentAmount} />
         <AchievementCard
+          currentAmount={currentAmount}
           percentage={achievementRate}
-          target={targetAmount}
+          target={15000000}
         />
       </section>
       {/* グラフ */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <BranchSalesPieChart data={branchPieData} highlightLabel={selectedBranch} />
         <Card>
-          <CardContent className="p-3 flex justify-center">
+          <CardContent className="pt-6 pb-4 px-4 flex justify-center">
             <PieChartComponent
               data={pieData}
               analysisType={analysisType}
@@ -302,7 +298,7 @@ export default function SalesDashboard() {
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-3">
+          <CardContent className="p-4">
             <SalesChart data={chartData} />
           </CardContent>
         </Card>
@@ -313,14 +309,13 @@ export default function SalesDashboard() {
         <div className="flex justify-between items-center">
           <h2 className="text-lg font-semibold">売上一覧</h2>
         </div>
-        <div className="overflow-auto">
-          <CsvSortableTableCard
-            columns={columns}
-            data={salesData}
-            dateRange={dateRange} // ← 追加
-          />
-
-        </div>
+        <Card>
+          <CardContent>
+            <div className="overflow-auto">
+              <SortableTable data={salesData} columns={columns} />
+            </div>
+          </CardContent>
+        </Card>
       </section>
     </main>
   )

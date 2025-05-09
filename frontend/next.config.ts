@@ -1,8 +1,11 @@
+
+
 const nextConfig = {
   eslint: {
-    ignoreDuringBuilds: true, // ビルド時に ESLint エラーを無視
+    ignoreDuringBuilds: true, // ✅ Vercelビルド時にESLintエラーを無視
   },
-  // 他の必要な設定があればここに追加
+  
+  // 他の設定があればここに追加
 };
 
 export default nextConfig;
