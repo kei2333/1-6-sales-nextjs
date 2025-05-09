@@ -16,13 +16,13 @@ export default function Home() {
     } else {
       const role = session.user.role;
       if (role === 'Sales') {
-        router.push('/sales/today');
+        router.push('/sales');
       } else if (role === 'Manager') {
         router.push('/admin/dashboard');
       } else if (role === 'IT') {
         router.push('/users');
       } else {
-        router.push('/users');
+        router.push('/');
       }
     }
   }, [session, status, router]);
