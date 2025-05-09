@@ -64,7 +64,9 @@ export const authConfig: NextAuthConfig = {
           return false;
         }
 
-        const res = await fetch(`${process.env.BASE_API_URL_PYTHON}/get_employee_callback?employee_address=${resolvedEmail}`);
+        const res = await fetch(
+          `${process.env.BASE_API_URL_PYTHON}/get_employee_callback?employee_address=${resolvedEmail}`
+        );
         console.log("signIn: fetch status ->", res.status);
 
         if (!res.ok) {
@@ -82,9 +84,11 @@ export const authConfig: NextAuthConfig = {
 
         user.role = data.employee_role;
         user.location_id = data.location_id;
+        user.employee_number = data.employee_number; // ✅ 追加
 
         console.log("signIn: assigned user.role ->", user.role);
         console.log("signIn: assigned user.location_id ->", user.location_id);
+        console.log("signIn: assigned user.employee_number ->", user.employee_number);
         return true;
       } catch (error) {
         console.error("signIn callback error:", error);
@@ -94,16 +98,21 @@ export const authConfig: NextAuthConfig = {
 
     async jwt({ token, user, account }) {
       if (account) {
-        const decoded = account.id_token ? jwt.decode(account.id_token) as JwtPayload : null;
+        const decoded = account.id_token
+          ? (jwt.decode(account.id_token) as JwtPayload)
+          : null;
         token.emailVerified = decoded?.email_verified ?? null;
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
-        token.expiresAt = account.expires_in ? Date.now() + account.expires_in * 1000 : undefined;
+        token.expiresAt = account.expires_in
+          ? Date.now() + account.expires_in * 1000
+          : undefined;
       }
 
       if (user) {
         token.role = user.role;
         token.location_id = user.location_id;
+        token.employee_number = user.employee_number; // ✅ 追加
       }
 
       if (token.expiresAt && Date.now() >= token.expiresAt && token.refreshToken) {
@@ -128,6 +137,7 @@ export const authConfig: NextAuthConfig = {
         emailVerified: token.emailVerified === true ? new Date() : null,
         role: token.role ?? "",
         location_id: token.location_id ?? 0,
+        employee_number: token.employee_number ?? 0, // ✅ 追加
       };
       session.error = token.error ?? null;
       return session;

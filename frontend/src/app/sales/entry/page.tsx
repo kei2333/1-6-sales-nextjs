@@ -12,7 +12,7 @@ type SalesReport = {
   employee_number: number | string;
   employee_name: string;
   sales_date: string;
-  amount: number;
+  amount: number | string;
   sales_channel: string;
   category: string;
   tactics: string;
@@ -25,6 +25,7 @@ export default function ReportEntryDashboard() {
   const [todayReports, setTodayReports] = useState<SalesReport[]>([]);
   const [date, setDate] = useState(new Date());
   const [newReport, setNewReport] = useState<SalesReport | null>(null);
+  const [amountError, setAmountError] = useState("");
 
   useEffect(() => {
     if (session?.user) {
@@ -32,7 +33,7 @@ export default function ReportEntryDashboard() {
         employee_number: session.user.employee_number ?? "",
         employee_name: session.user.name ?? "",
         sales_date: date.toDateString(),
-        amount: 0,
+        amount: "",
         sales_channel: "SM",
         category: "飲料",
         tactics: "チラシ",
@@ -69,13 +70,28 @@ export default function ReportEntryDashboard() {
     return <p>ログインが必要です。</p>;
   }
 
-  const handleSubmitReport = async () => {
-    try {
-      if (!date || !newReport.employee_number || !newReport.amount || !newReport.sales_channel || !newReport.category || !newReport.tactics || !newReport.location_id) {
-        alert("全ての項目を入力してください。");
-        return;
-      }
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (/^[0-9]*$/.test(value)) {
+      setAmountError("");
+      setNewReport({ ...newReport, amount: value });
+    } else {
+      setAmountError("売上は半角数字で入力してください。");
+    }
+  };
 
+  const handleSubmitReport = async () => {
+    if (amountError) {
+      alert("エラーを修正してください。");
+      return;
+    }
+
+    if (!date || !newReport.employee_number || !newReport.amount || !newReport.sales_channel || !newReport.category || !newReport.tactics || !newReport.location_id) {
+      alert("全ての項目を入力してください。");
+      return;
+    }
+
+    try {
       alert("報告が完了しました。");
 
       const res = await fetch(
@@ -88,7 +104,7 @@ export default function ReportEntryDashboard() {
 
       setNewReport({
         ...newReport,
-        amount: 0,
+        amount: "",
         memo: "",
       });
     } catch (err) {
@@ -142,8 +158,10 @@ export default function ReportEntryDashboard() {
                   <Input
                     type="text"
                     value={newReport.employee_number}
-                    onChange={(e) => setNewReport({ ...newReport, employee_number: e.target.value })}
+                    disabled
+                    className="bg-gray-100 cursor-not-allowed"
                   />
+                  <input type="hidden" name="employee_number" value={newReport.employee_number} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">商品カテゴリ</label>
@@ -186,13 +204,13 @@ export default function ReportEntryDashboard() {
               <div>
                 <label className="block text-sm font-medium mb-1">売上（円）</label>
                 <Input
-                  type="number"
-                  min={0}
+                  type="text"
                   placeholder="0"
-                  value={newReport.amount || ""}
-                  onChange={(e) => setNewReport({ ...newReport, amount: parseInt(e.target.value) })}
+                  value={newReport.amount}
+                  onChange={handleAmountChange}
                   required
                 />
+                {amountError && <p className="text-red-600 text-sm mt-1">{amountError}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">メモ</label>
@@ -202,7 +220,11 @@ export default function ReportEntryDashboard() {
                   onChange={(e) => setNewReport({ ...newReport, memo: e.target.value })}
                 />
               </div>
-              <Button className="w-full bg-black text-white hover:bg-gray-800" onClick={handleSubmitReport}>
+              <Button
+                className="w-full bg-black text-white hover:bg-gray-800"
+                onClick={handleSubmitReport}
+                disabled={!!amountError}
+              >
                 Submit
               </Button>
             </form>

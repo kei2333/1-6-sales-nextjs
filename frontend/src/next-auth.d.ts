@@ -15,6 +15,10 @@ declare module "next-auth" {
   }
 
   interface User extends DefaultUser {
+    id?: string;
+    name?: string;
+    email?: string;
+    emailVerified?: Date | null;
     role?: string;
     location_id?: number;
     employee_number?: number;
