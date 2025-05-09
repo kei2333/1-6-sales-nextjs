@@ -55,24 +55,36 @@ export function UserTable({
   };
 
   const saveEdit = async (id: number) => {
-    if (!editedName.trim() || !editedRole.trim()) {
-      alert("名前と役職を入力してください");
+    const nameChanged = editedName.trim() !== "" && editedName !== users.find(u => u.id === id)?.name;
+    const roleChanged = editedRole.trim() !== "" && editedRole !== users.find(u => u.id === id)?.role;
+  
+    if (!nameChanged && !roleChanged) {
+      alert("変更内容がありません");
+      cancelEdit();
       return;
     }
-
+  
     try {
-      const nameUrl = `https://team6-sales-function.azurewebsites.net/api/update_employee_name?employee_number=${id}&new_employee_name=${encodeURIComponent(editedName)}`;
-      const roleUrl = `https://team6-sales-function.azurewebsites.net/api/edit_employee_role?employee_number=${id}&employee_role=${encodeURIComponent(editedRole)}`;
-
-      const nameRes = await fetch(nameUrl, { method: "POST" });
-      const roleRes = await fetch(roleUrl, { method: "POST" });
-
-      if (!nameRes.ok || !roleRes.ok) throw new Error("保存エラー");
-
+      if (nameChanged) {
+        const nameUrl = `https://team6-sales-function.azurewebsites.net/api/update_employee_name?employee_number=${id}&new_employee_name=${encodeURIComponent(editedName)}`;
+        const nameRes = await fetch(nameUrl, { method: "POST" });
+        if (!nameRes.ok) throw new Error("名前の保存エラー");
+      }
+  
+      if (roleChanged) {
+        const roleUrl = `https://team6-sales-function.azurewebsites.net/api/edit_employee_role?employee_number=${id}&employee_role=${encodeURIComponent(editedRole)}`;
+        const roleRes = await fetch(roleUrl, { method: "POST" });
+        if (!roleRes.ok) throw new Error("役職の保存エラー");
+      }
+  
       setUsers((prev) =>
         prev.map((user) =>
           user.id === id
-            ? { ...user, name: editedName, role: editedRole }
+            ? {
+                ...user,
+                name: nameChanged ? editedName : user.name,
+                role: roleChanged ? editedRole : user.role,
+              }
             : user
         )
       );
@@ -82,6 +94,7 @@ export function UserTable({
       alert("保存に失敗しました");
     }
   };
+  
 
   const deleteUser = (id: number) => {
     setUsers((prev) => prev.filter((user) => user.id !== id));
