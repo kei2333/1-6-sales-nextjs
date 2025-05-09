@@ -10,10 +10,16 @@ export async function middleware(req: NextRequest) {
   console.log("pathname:", pathname);
   console.log("cookie header:", cookieHeader);
 
+  // v5 cookie name: authjs.session-token or __Secure-authjs.session-token
+  const cookieName =
+    process.env.NODE_ENV === "production"
+      ? "__Secure-authjs.session-token"
+      : "authjs.session-token";
+
   const token = await getToken({
     req,
     secret: process.env.NEXTAUTH_SECRET,
-    cookieName: "__Secure-authjs.session-token",
+    cookieName,
   });
 
   console.log("token result:", token);
