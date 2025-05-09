@@ -12,7 +12,7 @@ export function AppSidebar() {
   ];
 
   return (
-    <aside className="w-64 border-r bg-muted h-full p-4 flex flex-col">
+    <aside className="w-64 border-r bg-lime-100 h-full p-4 flex flex-col">
       <div className="text-lg font-bold mb-6">売上管理おまかせくん</div>
 
       <div className="space-y-2">
