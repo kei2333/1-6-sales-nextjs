@@ -48,7 +48,7 @@ export default function ReportEntryDashboard() {
       if (!session?.user) return;
       try {
         const res = await fetch(
-          `https://team6-sales-function.azurewebsites.net/api/get_sales?sales_date_from=${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}&sales_date_until=${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}&location_id=${session.user.location_id}`
+          `https://team6-sales-function-2.azurewebsites.net/api/get_sales?sales_date_from=${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}&sales_date_until=${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}&location_id=${session.user.location_id}`
         );
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
@@ -95,7 +95,7 @@ export default function ReportEntryDashboard() {
       alert("報告が完了しました。");
 
       const res = await fetch(
-        `https://team6-sales-function.azurewebsites.net/api/send_sales?sales_date=${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}&location_id=${newReport.location_id}&employee_number=${newReport.employee_number}&amount=${newReport.amount}&sales_channel=${newReport.sales_channel}&category=${newReport.category}&tactics=${newReport.tactics}&memo=${newReport.memo}`
+        `https://team6-sales-function-2.azurewebsites.net/api/send_sales?sales_date=${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}&location_id=${newReport.location_id}&employee_number=${newReport.employee_number}&amount=${newReport.amount}&sales_channel=${newReport.sales_channel}&category=${newReport.category}&tactics=${newReport.tactics}&memo=${newReport.memo}`
       );
 
       if (!res.ok) {

@@ -35,7 +35,7 @@ export default function SalesReportPage() {
       const location_id = session.user.location_id;
       try {
         const res = await fetch(
-          `https://team6-sales-function.azurewebsites.net/api/get_sales?sales_date=${today_year}-${today_month}-${today_day}&location_id=${location_id}`
+          `https://team6-sales-function-2.azurewebsites.net/api/get_sales?sales_date=${today_year}-${today_month}-${today_day}&location_id=${location_id}`
         );
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
