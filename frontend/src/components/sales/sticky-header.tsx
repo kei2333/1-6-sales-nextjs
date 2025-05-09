@@ -1,6 +1,5 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -16,31 +15,15 @@ export default function StickyHeader() {
   const pathname = usePathname();
   const title = pathTitleMap[pathname] || "売上報告";
 
-  const { data: session, status } = useSession();
-
   const handleLogout = () => {
-    signOut({ callbackUrl: "/" });
+    signOut({ callbackUrl: "/" }); // ログアウト後トップページに戻る
   };
-
-  // loading中はユーザー表示を保留する
-  if (status === "loading") {
-    return (
-      <header className="sticky top-0 z-50 bg-white border-b shadow-sm px-6 py-3 flex justify-between items-center">
-        <h1 className="text-xl font-bold text-gray-600">{title}</h1>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-500">読み込み中...</span>
-        </div>
-      </header>
-    );
-  }
-
-  const displayName = session?.user?.name || "不明なユーザー";
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b shadow-sm px-6 py-3 flex justify-between items-center">
       <h1 className="text-xl font-bold text-gray-600">{title}</h1>
       <div className="flex items-center gap-3">
-        <span className="underline text-sm">{displayName} さん</span>
+        <span className="underline text-sm">田中さん</span>
         <Button
           className="bg-lime-400 hover:bg-lime-500 text-black"
           onClick={handleLogout}

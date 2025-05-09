@@ -6,7 +6,7 @@ import { CsvUserTable } from "@/components/users/CsvUserTable"; // ★ ここが
 export default function UserManagementPage() {
   return (
     <div className="p-6">
-      <CsvUserTable location_id={0}/>
+      <CsvUserTable location_id={4}/>
     </div>
   );
 }

@@ -18,8 +18,8 @@ export function WeeklyRevenueCard({ value, changePercentage }: WeeklyRevenueCard
         <p className="text-sm text-muted-foreground">先週の売り上げ</p>
       </CardHeader>
       <CardContent>
-        <div className="text-3xl font-bold">{formattedValue}</div>
-        <div className="text-xs text-green-600 flex items-center gap-1 mt-1">
+        <div className="text-4xl font-bold">{formattedValue}</div>
+        <div className="text-sm text-green-600 flex items-center gap-1 mt-1">
           <ArrowUpRight className="w-4 h-4" />
           前週比 +5%
         </div>
