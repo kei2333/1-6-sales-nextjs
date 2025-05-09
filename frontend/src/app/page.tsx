@@ -12,7 +12,7 @@ export default function Home() {
     if (status === "loading") return; // 読み込み中
 
     if (!session) {
-      router.push('/login');
+      router.push('/users');
     } else {
       const role = session.user.role;
       if (role === 'Sales') {
@@ -22,7 +22,7 @@ export default function Home() {
       } else if (role === 'IT') {
         router.push('/users');
       } else {
-        router.push('/login');
+        router.push('/users');
       }
     }
   }, [session, status, router]);
