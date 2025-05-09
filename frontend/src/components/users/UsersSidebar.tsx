@@ -3,6 +3,7 @@ import Link from "next/link";
 
 export function AppSidebar() {
   const locations = [
+    { label: "すべて", value: "" },
     { label: "関東広域", value: "kat" },
     { label: "北陸", value: "hok" },
     { label: "東海", value: "tok" },

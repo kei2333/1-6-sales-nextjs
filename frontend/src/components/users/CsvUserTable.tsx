@@ -33,8 +33,13 @@ export function CsvUserTable({location_id}: Location) {
         updatedAt: new Date().toISOString().split("T")[0],
         location_id: emp.location_id,
       }));
-      const filteredUsers = formatted.filter((user:User) => user.location_id === location_id)
-      setUsers(filteredUsers);
+      if(location_id !== 0) {
+        const filteredUsers = formatted.filter((user:User) => user.location_id === location_id)
+        setUsers(filteredUsers);
+      }
+      else {
+        setUsers(formatted);
+      }
     }
     fetchUsers();
   }, [location_id]);
