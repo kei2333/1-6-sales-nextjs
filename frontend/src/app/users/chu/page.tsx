@@ -10,7 +10,7 @@ export default function UserManagementPage() {
       <div className="flex items-center justify-between mb-4">
         <UserSearchBar />
       </div>
-      <UserTable />
+      <UserTable location_id={5}/>
     </>
   );
 }

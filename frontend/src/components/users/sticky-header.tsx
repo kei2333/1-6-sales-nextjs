@@ -7,10 +7,13 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 
 const pathTitleMap: { [key: string]: string } = {
-  "/users": "従業員管理画面",
-  "/users/tokyo": "東京本社",
-  "/users/osaka": "大阪支店",
-  "/users/nagoya": "名古屋支店",
+  "/users": "全拠点の従業員管理画面",
+  "/users/kat": "関東広域拠点の従業員管理画面",
+  "/users/hok": "北陸拠点の従業員管理画面",
+  "/users/tok": "東海拠点の従業員管理画面",
+  "/users/kin": "近畿拠点の従業員管理画面",
+  "/users/chu": "中四国拠点の従業員管理画面",
+  "/users/kyu": "九州拠点の従業員管理画面",
 };
 
 export default function StickyHeader() {
