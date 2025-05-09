@@ -6,7 +6,7 @@ export async function GET(req: NextRequest) {
   const branch = url.searchParams.get("branch") ?? "all"
 
   try {
-    const targetUrl = `https://team6-sales-function.azurewebsites.net/api/get_target?branch=${branch}`
+    const targetUrl = `https://team6-sales-function-2.azurewebsites.net/api/get_target?branch=${branch}`
     const res = await fetch(targetUrl)
     const data = await res.json()
     return NextResponse.json(data)

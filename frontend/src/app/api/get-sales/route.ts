@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server'
 export async function GET(req: Request) {
   const url = new URL(req.url)
   const params = url.searchParams.toString()
-  const target = `https://team6-sales-function.azurewebsites.net/api/get_sales?${params}`
+  const target = `https://team6-sales-function-2.azurewebsites.net/api/get_sales?${params}`
 
   try {
     const res = await fetch(target)

@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server'
 
 export async function GET() {
-  const target = `https://team6-sales-function.azurewebsites.net/api/get_employee`
+  const target = `https://team6-sales-function-2.azurewebsites.net/api/get_employee`
 
   try {
     const res = await fetch(target)

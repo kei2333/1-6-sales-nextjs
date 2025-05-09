@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 
 export async function POST(req: Request) {
   const url = new URL(req.url)
-  const target = `https://team6-sales-function.azurewebsites.net/api/add_employee?${url.searchParams.toString()}`
+  const target = `https://team6-sales-function-2.azurewebsites.net/api/add_employee?${url.searchParams.toString()}`
 
   try {
     const res = await fetch(target, { method: 'POST' })
