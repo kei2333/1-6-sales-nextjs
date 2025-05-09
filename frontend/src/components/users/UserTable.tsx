@@ -18,6 +18,7 @@ export type User = {
   role: string;
   email: string;
   updatedAt: string;
+  location_id: number;
 };
 
 export type SortConfig = {

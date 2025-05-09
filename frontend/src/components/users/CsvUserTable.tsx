@@ -6,7 +6,18 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ExportCsvButton } from "@/components/general/ExportCsvButton";
 import { UserTable, User, SortConfig } from "./UserTable";
 
-export function CsvUserTable() {
+type Location = {
+  location_id: number;
+};
+type Employee = {
+  employee_number: number;
+  employee_name: string;
+  employee_role: string;
+  email : string;
+  updatedAt: string;
+  location_id: number;
+}
+export function CsvUserTable({location_id}: Location) {
   const [users, setUsers] = useState<User[]>([]);
   const [sortConfig, setSortConfig] = useState<SortConfig>(null);
 
@@ -14,18 +25,19 @@ export function CsvUserTable() {
     async function fetchUsers() {
       const response = await fetch("https://team6-sales-function.azurewebsites.net/api/get_employee");
       const employees = await response.json();
-      const formatted = employees.map((emp: any) => ({
+      const formatted = employees.map((emp: Employee) => ({
         id: emp.employee_number,
         name: emp.employee_name,
         role: emp.employee_role,
         email: `${emp.employee_name.replace(/\s+/g, "").toLowerCase()}@example.com`,
         updatedAt: new Date().toISOString().split("T")[0],
+        location_id: emp.location_id,
       }));
-      setUsers(formatted);
+      const filteredUsers = formatted.filter((user:User) => user.location_id === location_id)
+      setUsers(filteredUsers);
     }
-
     fetchUsers();
-  }, []);
+  }, [location_id]);
   const sortedUsers = useMemo(() => {
     const sorted = [...users];
     if (sortConfig) {

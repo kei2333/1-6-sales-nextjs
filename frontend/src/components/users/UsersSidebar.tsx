@@ -3,9 +3,12 @@ import Link from "next/link";
 
 export function AppSidebar() {
   const locations = [
-    { label: "東京本社", value: "tokyo" },
-    { label: "大阪支店", value: "osaka" },
-    { label: "名古屋支店", value: "nagoya" },
+    { label: "関東広域", value: "kat" },
+    { label: "北陸", value: "hok" },
+    { label: "東海", value: "tok" },
+    { label: "近畿", value: "kin" },
+    { label: "中四国", value: "chu" },
+    { label: "九州", value: "kyu" },
   ];
 
   return (
