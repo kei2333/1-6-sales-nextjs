@@ -4,13 +4,9 @@ import { getToken } from "next-auth/jwt";
 
 export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  console.log("middleware token:", token);
+  console.log("middleware token raw:", token);
 
-  if (!token) {
-    console.warn("middleware: no token → redirecting to /login");
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
-
+  // 一旦、token があれば通過、なくても通過（完全にフリー）
   return NextResponse.next();
 }
 
