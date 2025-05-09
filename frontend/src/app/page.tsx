@@ -16,9 +16,9 @@ export default function Home() {
     } else {
       const role = session.user.role;
       if (role === 'Sales') {
-        router.push('/sales');
+        router.push('/sales/today');
       } else if (role === 'Manager') {
-        router.push('/admin');
+        router.push('/admin/dashboard');
       } else if (role === 'IT') {
         router.push('/users');
       } else {
