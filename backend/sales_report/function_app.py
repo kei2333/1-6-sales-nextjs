@@ -370,33 +370,24 @@ def update_employee_name(req: func.HttpRequest) -> func.HttpResponse:
 # get_employee for callback after logging in
 @app.route(route="get_employee_callback")
 def get_employee_callback(req: func.HttpRequest) -> func.HttpResponse:
-    employee_address = req.params.get('employee_address')
-    if not employee_address:
-        return func.HttpResponse("employee_address parameter missing", status_code=400)
- 
+    email = req.params.get('email')
+    if not email:
+        return func.HttpResponse("Email parameter missing", status_code=400)
+
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
             cursor.execute(
-                "SELECT employee_name, employee_number, employee_role, location_id FROM users WHERE employee_address = %s;",
-                (employee_address,)
+                "SELECT employee_role, location_id FROM users WHERE employee_address = %s;",
+                (email,)
             )
             row = cursor.fetchone()
  
         if not row:
-            return func.HttpResponse(
-                json.dumps({}),
-                status_code=200,
-                mimetype="application/json"
-            )
- 
+            return func.HttpResponse(json.dumps({}), status_code=200, mimetype="application/json")
+
         return func.HttpResponse(
-            json.dumps({
-                "employee_name": row["employee_name"],
-                "employee_number": row["employee_number"],
-                "employee_role": row["employee_role"],
-                "location_id": row["location_id"]
-            }),
+            json.dumps({"employee_role": row[0], "region": row[1]}),
             status_code=200,
             mimetype="application/json"
         )
@@ -408,3 +399,4 @@ def get_employee_callback(req: func.HttpRequest) -> func.HttpResponse:
         )
     finally:
         conn.close()
+
