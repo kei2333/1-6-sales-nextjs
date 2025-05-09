@@ -42,7 +42,7 @@ export default function LoginPage() {
 
           <Button
             className="w-full bg-green-700 hover:bg-green-800 text-white"
-            onClick={() => signIn('microsoft-entra-id', { callbackUrl: '/login' })}
+            onClick={() => signIn('microsoft-entra-id', { callbackUrl: '/' })}
           >
             Microsoft でログイン
           </Button>

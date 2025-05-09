@@ -1,14 +1,15 @@
-import { DefaultUser } from 'next-auth';
+import { DefaultUser, DefaultSession } from "next-auth";
 
-declare module 'next-auth' {
+declare module "next-auth" {
   interface Session {
     user: {
       id: string;
       name: string;
       email: string;
-      emailVerified: Date | null;  // ← 修正: Date 型に統一
+      emailVerified: Date | null;
       role: string;
       location_id: number;
+      employee_number: number;
     };
     error?: string | null;
   }
@@ -16,15 +17,19 @@ declare module 'next-auth' {
   interface User extends DefaultUser {
     role?: string;
     location_id?: number;
+    employee_number?: number;
   }
+}
 
+declare module "next-auth/jwt" {
   interface JWT {
     sub?: string;
     name?: string;
     email?: string;
-    emailVerified?: boolean | null;  // JWT 側は boolean | null で OK
+    emailVerified?: boolean | null;
     role?: string;
     location_id?: number;
+    employee_number?: number;
     accessToken?: string;
     refreshToken?: string;
     expiresAt?: number;

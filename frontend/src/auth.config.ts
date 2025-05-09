@@ -6,8 +6,8 @@ import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
 const msalInstance = new ConfidentialClientApplication({
   auth: {
     clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_ID!,
-    authority: `https://login.microsoftonline.com/${process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID}/v2.0`,
     clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_SECRET!,
+    authority: `https://login.microsoftonline.com/${process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID}/v2.0`,
   },
 });
 
@@ -35,47 +35,70 @@ export const authConfig: NextAuthConfig = {
   secret: process.env.NEXTAUTH_SECRET,
   trustHost: true,
   session: { strategy: "jwt" },
+
   providers: [
     MicrosoftEntraID({
-      clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_ID,
-      clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_SECRET,
+      clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_ID!,
+      clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_CLIENT_SECRET!,
       issuer: `https://login.microsoftonline.com/${process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID}/v2.0`,
       authorization: { params: { scope: "openid profile email offline_access" } },
     }),
   ],
+
   pages: {
-    error: '/login', // ここでエラー時のリダイレクト先を指定
+    error: "/login",
   },
+
   callbacks: {
-    async signIn({ user }) {
+    async signIn({ user, profile }) {
       try {
-        const res = await fetch(`${process.env.BASE_API_URL_PYTHON}/get_employee_callback?email=${user.email}`);
-        if (!res.ok) return false;
+        const resolvedEmail =
+          user.email ||
+          profile.email ||
+          profile.preferred_username;
+
+        console.log("signIn: resolved email ->", resolvedEmail);
+
+        if (!resolvedEmail) {
+          console.error("signIn error: email not found");
+          return false;
+        }
+
+        const res = await fetch(`${process.env.BASE_API_URL_PYTHON}/get_employee_callback?employee_address=${resolvedEmail}`);
+        console.log("signIn: fetch status ->", res.status);
+
+        if (!res.ok) {
+          console.error(`Backend API error: ${res.status}`);
+          return false;
+        }
 
         const data = await res.json();
-        if (!data.employee_role || data.employee_role === "権限なし") return false;
+        console.log("signIn: fetched data ->", data);
+
+        if (!data.employee_role || data.employee_role === "権限なし") {
+          console.warn(`User ${resolvedEmail} has no valid role`);
+          return false;
+        }
 
         user.role = data.employee_role;
         user.location_id = data.location_id;
 
+        console.log("signIn: assigned user.role ->", user.role);
+        console.log("signIn: assigned user.location_id ->", user.location_id);
         return true;
-      } catch (e) {
-        console.error("signIn error:", e);
+      } catch (error) {
+        console.error("signIn callback error:", error);
         return false;
       }
     },
 
     async jwt({ token, user, account }) {
       if (account) {
-        const { id_token, access_token, refresh_token, expires_in } = account;
-        if (id_token) {
-          const decoded = jwt.decode(id_token) as JwtPayload;
-          token.emailVerified = typeof decoded?.email_verified === "boolean" ? decoded.email_verified : null;
-        }
-        token.accessToken = access_token ?? token.accessToken;
-        token.refreshToken = refresh_token ?? token.refreshToken;
-        token.expiresAt = expires_in ? Date.now() + expires_in * 1000 : token.expiresAt;
-        token.error = undefined;
+        const decoded = account.id_token ? jwt.decode(account.id_token) as JwtPayload : null;
+        token.emailVerified = decoded?.email_verified ?? null;
+        token.accessToken = account.access_token;
+        token.refreshToken = account.refresh_token;
+        token.expiresAt = account.expires_in ? Date.now() + account.expires_in * 1000 : undefined;
       }
 
       if (user) {
@@ -83,19 +106,12 @@ export const authConfig: NextAuthConfig = {
         token.location_id = user.location_id;
       }
 
-      let isExpiredToken = false;
-
-      if (typeof token.expiresAt === "number") {
-        isExpiredToken = Date.now() >= token.expiresAt;
-      }
-
-      if (isExpiredToken && typeof token.refreshToken === "string") {
-        const refreshedTokens = await refreshAccessToken(token.refreshToken);
-        if (refreshedTokens && refreshedTokens.accessToken) {
-          token.idToken = refreshedTokens.idToken;
-          token.accessToken = refreshedTokens.accessToken;
-          token.expiresAt = refreshedTokens.expiresAt;
-          token.error = undefined;
+      if (token.expiresAt && Date.now() >= token.expiresAt && token.refreshToken) {
+        const refreshed = await refreshAccessToken(token.refreshToken);
+        if (refreshed) {
+          token.idToken = refreshed.idToken;
+          token.accessToken = refreshed.accessToken;
+          token.expiresAt = refreshed.expiresAt;
         } else {
           token.error = "FAILED_TO_REFRESH_ACCESS_TOKEN";
         }
@@ -109,12 +125,11 @@ export const authConfig: NextAuthConfig = {
         id: token.sub!,
         name: token.name!,
         email: token.email!,
-        emailVerified: null,
-        role: typeof token.role === "string" ? token.role : "",
-        location_id: typeof token.location_id === "number" ? token.location_id : 0,
+        emailVerified: token.emailVerified === true ? new Date() : null,
+        role: token.role ?? "",
+        location_id: token.location_id ?? 0,
       };
-      session.error =
-        typeof token.error === "string" ? token.error : null;
+      session.error = token.error ?? null;
       return session;
     },
   },
