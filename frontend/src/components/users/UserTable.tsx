@@ -119,7 +119,7 @@ export function UserTable({
   };
 
   return (
-    <table className="w-full text-sm border">
+    <table className="w-full text-md border">
       <thead className="bg-lime-200">
         <tr>
           <th className="p-2 cursor-pointer" onClick={() => handleSort("id")}>
@@ -131,16 +131,16 @@ export function UserTable({
           <th className="p-2 cursor-pointer" onClick={() => handleSort("role")}>
             役職 {renderArrow("role")}
           </th>
-          <th className="p-2 text-right">操作</th>
+          <th className="p-2 text-cemter">操作</th>
         </tr>
       </thead>
       <tbody>
         {users.map((user) => (
           <tr key={user.id} className="border-b even:bg-lime-50">            
-            <td className="p-2">              
+            <td className="p-2 text-center">              
                 {user.id}
             </td>
-            <td className="p-2">
+            <td className="p-2 text-center">
               {editingId === user.id ? (
                 <Input
                   value={editedName}
@@ -150,7 +150,7 @@ export function UserTable({
                 user.name
               )}
             </td>
-            <td className="p-2">
+            <td className="p-2 text-center">
               {editingId === user.id ? (
                 <select
                   value={editedRole}
@@ -167,7 +167,7 @@ export function UserTable({
                 user.role
               )}
             </td>
-            <td className="p-2 text-right">
+            <td className="p-2 text-center">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon">

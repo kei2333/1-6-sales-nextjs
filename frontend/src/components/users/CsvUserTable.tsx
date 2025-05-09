@@ -29,7 +29,7 @@ export function CsvUserTable({location_id}: Location) {
         id: emp.employee_number,
         name: emp.employee_name,
         role: emp.employee_role,
-        email: `${emp.employee_name.replace(/\s+/g, "").toLowerCase()}@example.com`,
+        email: emp.email,
         updatedAt: new Date().toISOString().split("T")[0],
         location_id: emp.location_id,
       }));
@@ -47,7 +47,7 @@ export function CsvUserTable({location_id}: Location) {
     const sorted = [...users];
     if (sortConfig) {
       const { key, direction } = sortConfig;
-      const k = key as keyof User; // ✅ ここがポイント！
+      const k = key as keyof User;
   
       sorted.sort((a, b) => {
         const aVal = a[k];
@@ -64,7 +64,7 @@ export function CsvUserTable({location_id}: Location) {
   return (
     <Card className="rounded-2xl shadow-md p-4">
       <CardHeader className="flex justify-between items-center">
-        <CardTitle>ユーザー管理</CardTitle>
+        <CardTitle>{location_id == 0 ? '全' : location_id == 1 ? '関東広域' : location_id == 2 ? '北陸' : location_id == 3 ? '東海' : location_id == 4 ? '近畿' : location_id == 5 ? '中四国' : location_id == 6 ? '九州' : ''}拠点のユーザー管理</CardTitle>
         <ExportCsvButton data={sortedUsers} filename="users.csv" />
       </CardHeader>
       <CardContent>
