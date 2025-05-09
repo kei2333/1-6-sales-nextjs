@@ -25,14 +25,18 @@ type User = {
   role: string;
   email: string;
   updatedAt: string;
+  location_id: number;
 };
 
+type Location = {
+  location_id: number;
 
+}
 
 
 const roleOptions = ["Sales", "IT", "Manager","権限なし"];
 
-export default function UserTable() {
+export default function UserTable({ location_id }: Location) {
   const [users, setUsers] = useState<User[]>([]);
   const [, setLoading] = useState(false);
   // Removed unused error state
@@ -56,9 +60,14 @@ export default function UserTable() {
           role: emp.employee_role,
           email: `${emp.employee_name.replace(/\s+/g, "").toLowerCase()}@example.com`,
           updatedAt: new Date().toISOString().split("T")[0],
+          location_id: emp.location_id,
         }));
-
-        setUsers(formattedUsers);
+        if (location_id !== 0) {
+          const filteredUsers = formattedUsers.filter((user) => user.location_id === location_id);
+          setUsers(filteredUsers);
+        } else {
+          setUsers(formattedUsers);
+        }
       } catch (err) {
         console.error("データ取得エラー:", err);
         console.error("ユーザーデータの読み込みに失敗しました。");
@@ -68,7 +77,7 @@ export default function UserTable() {
     }
 
     fetchUsers();
-  }, []);
+  }, [location_id]);
 
   
 
@@ -141,14 +150,16 @@ export default function UserTable() {
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>社員番号</TableHead>
             <TableHead>名前</TableHead>
             <TableHead>役職</TableHead>
-            <TableHead className="text-right">操作</TableHead>
+            <TableHead className="text-center">操作</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {users.map((user) => (
             <TableRow key={user.id}>
+              <TableCell>{user.id}</TableCell>
               <TableCell>
                 {editingId === user.id ? (
                   <Input
@@ -177,7 +188,7 @@ export default function UserTable() {
                   user.role
                 )}
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell className="text-center">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="p-1 rounded hover:bg-muted">
