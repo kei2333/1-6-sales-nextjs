@@ -18,6 +18,7 @@ export type User = {
   role: string;
   email: string;
   updatedAt: string;
+  location_id: number;
 };
 
 export type SortConfig = {
@@ -121,6 +122,9 @@ export function UserTable({
     <table className="w-full text-sm border">
       <thead className="bg-lime-200">
         <tr>
+          <th className="p-2 cursor-pointer" onClick={() => handleSort("id")}>
+            社員番号 {renderArrow("id")}
+          </th>
           <th className="p-2 cursor-pointer" onClick={() => handleSort("name")}>
             名前 {renderArrow("name")}
           </th>
@@ -132,7 +136,10 @@ export function UserTable({
       </thead>
       <tbody>
         {users.map((user) => (
-          <tr key={user.id} className="border-b even:bg-lime-50">
+          <tr key={user.id} className="border-b even:bg-lime-50">            
+            <td className="p-2">              
+                {user.id}
+            </td>
             <td className="p-2">
               {editingId === user.id ? (
                 <Input

@@ -25,7 +25,7 @@ export default function ReportEntryDashboard() {
   const [date, setDate] = useState(new Date());
   const location_id=1 //TODO:ユーザーのlocation_id参照
   const [newReport, setNewReport] = useState<SalesReport>({
-    employee_number: 0,
+    employee_number: '00000000',
     employee_name: "",
     sales_date: date.toDateString(),
     amount: 0,
@@ -70,13 +70,13 @@ export default function ReportEntryDashboard() {
         alert("報告が完了しました。");
       }
       const res = await fetch(
-        `https://team6-sales-function.azurewebsites.net/api/send_sales?sales_date=${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}&location_id=${newReport.location_id}&employee_number=${newReport.employee_number}&amount=${newReport.amount}&sales_channel=${newReport.sales_channel}&category=${newReport.category}&tactics=${newReport.tactics}&memo=${newReport.memo}`      
+        `https://team6-sales-function.azurewebsites.net/api/send_sales?sales_date=${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}&location_id=${newReport.location_id}&employee_number=${Number(newReport.employee_number)}&amount=${newReport.amount}&sales_channel=${newReport.sales_channel}&category=${newReport.category}&tactics=${newReport.tactics}&memo=${newReport.memo}`      
       );
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
       setNewReport({
-        employee_number: 0,
+        employee_number: '00000000',
         employee_name: "",
         sales_date: date.toDateString(),
         amount: 0,
@@ -149,7 +149,7 @@ export default function ReportEntryDashboard() {
                   type="text"
                   placeholder="社員番号"
                   value={newReport.employee_number || ""}
-                  onChange={(e) => setNewReport({ ...newReport, employee_number: Number(e.target.value) })}
+                  onChange={(e) => setNewReport({ ...newReport, employee_number: e.target.value })}
                   required
                 />
               </div>

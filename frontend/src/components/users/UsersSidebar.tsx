@@ -3,13 +3,17 @@ import Link from "next/link";
 
 export function AppSidebar() {
   const locations = [
-    { label: "東京本社", value: "tokyo" },
-    { label: "大阪支店", value: "osaka" },
-    { label: "名古屋支店", value: "nagoya" },
+    { label: "すべて", value: "" },
+    { label: "関東広域", value: "kat" },
+    { label: "北陸", value: "hok" },
+    { label: "東海", value: "tok" },
+    { label: "近畿", value: "kin" },
+    { label: "中四国", value: "chu" },
+    { label: "九州", value: "kyu" },
   ];
 
   return (
-    <aside className="w-64 border-r bg-muted h-full p-4 flex flex-col">
+    <aside className="w-64 border-r bg-lime-100 h-full p-4 flex flex-col">
       <div className="text-lg font-bold mb-6">売上管理おまかせくん</div>
 
       <div className="space-y-2">
