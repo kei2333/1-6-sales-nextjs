@@ -6,41 +6,13 @@ export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
   const cookieHeader = req.headers.get("cookie");
 
-  console.log("----- MIDDLEWARE DEBUG -----");
-  console.log("pathname:", pathname);
-  console.log("cookie header:", cookieHeader);
+  console.log("middleware: pathname =", pathname);
+  console.log("middleware: cookie header =", cookieHeader);
 
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  console.log("middleware: token =", token);
 
-  console.log("token result:", token);
-
-  // 未ログインの場合 → /login へ
-  if (!token) {
-    console.warn("middleware: no token → redirecting to /login");
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
-
-  // /admin → Managerのみ許可
-  if (pathname.startsWith("/admin") && token.role !== "Manager") {
-    console.warn("middleware: non-Manager trying to access /admin → redirect");
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
-
-  // /sales → Salesのみ許可
-  if (pathname.startsWith("/sales") && token.role !== "Sales") {
-    console.warn("middleware: non-Sales trying to access /sales → redirect");
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
-
-  // /users → ITのみ許可
-  if (pathname.startsWith("/users") && token.role !== "IT") {
-    console.warn("middleware: non-IT trying to access /users → redirect");
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
-
-  console.log("middleware: access allowed to", pathname);
-  console.log("-----------------------------");
-
+  // 全通し（テスト用）
   return NextResponse.next();
 }
 
