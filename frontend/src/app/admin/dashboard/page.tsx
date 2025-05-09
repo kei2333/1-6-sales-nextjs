@@ -18,6 +18,7 @@ import { BranchSalesPieChart } from "@/components/dashboard/BranchSalesPieChart"
 import { CurrentSalesCard } from "@/components/dashboard/CurrentSalesCard"
 import LogoutButton from '@/components/dashboard/sticky-header';
 import { CsvSortableTableCard } from "@/components/general/CsvSortableTableCard"
+import { Eye, EyeOff } from "lucide-react"
 
 
 export default function SalesDashboard() {
@@ -39,6 +40,7 @@ export default function SalesDashboard() {
   })
   const [currentAmount, setCurrentAmount] = useState(0)
   const isMockMode = process.env.NEXT_PUBLIC_USE_MOCK === "true"
+  const [showCards, setShowCards] = useState(true);
 
   useEffect(() => {
     if (!dateRange?.from || !dateRange?.to || dateRange.from === dateRange.to) return
@@ -273,55 +275,79 @@ export default function SalesDashboard() {
   return (
     <main className="flex flex-col gap-4 p-6 md:ml">
       <BranchTabs value={selectedBranch} onValueChange={setSelectedBranch} />
-      <div className="mt-4 max-w-md">
-        <Card>
-          <CardContent>
-            <DateRangePicker date={dateRange} setDate={setDateRange} />
-          </CardContent>
-        </Card>
-      </div>
-      <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <RevenueCard value={monthlyRevenue} />
-        <WeeklyRevenueCard value={weeklyRevenue} />
-        <CurrentSalesCard amount={currentAmount} />
-        <AchievementCard
-          percentage={achievementRate}
-          target={targetAmount}
-        />
-      </section>
-      {/* グラフ */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <BranchSalesPieChart data={branchPieData} highlightLabel={selectedBranch} />
-        <Card>
-          <CardContent className="p-3 flex justify-center">
-            <PieChartComponent
-              data={pieData}
-              analysisType={analysisType}
-              onChangeAnalysisType={setAnalysisType}
+        <div className="flex flex-wrap items-center gap-4 mt-4">
+          {/* Date Picker */}
+          <div className="max-w-md w-full sm:w-auto">
+            <Card>
+              <CardContent className="p-3">
+                <DateRangePicker date={dateRange} setDate={setDateRange} />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Toggle Button */}
+          <div>
+          <Button
+            variant="secondary"
+            className="flex items-center gap-2"
+            onClick={() => setShowCards(prev => !prev)}
+          >
+            {showCards ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            {showCards ? "統計カードを隠す" : "統計カードを表示"}
+          </Button>
+          </div>
+        </div>
+
+        {showCards && (
+          <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <RevenueCard value={monthlyRevenue} />
+            <WeeklyRevenueCard value={weeklyRevenue} />
+            <CurrentSalesCard amount={currentAmount} />
+            <AchievementCard
+              percentage={achievementRate}
+              target={targetAmount}
             />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-3">
-            <SalesChart data={chartData} />
-          </CardContent>
-        </Card>
-      </section>
+          </section>
+        )}
 
-      {/* テーブル */}
-      <section className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold">売上一覧</h2>
-        </div>
-        <div className="overflow-auto">
-          <CsvSortableTableCard
-            columns={columns}
-            data={salesData}
-            dateRange={dateRange} // ← 追加
-          />
+        {/* ログアウトボタン */}
+        {/* グラフ */}
+        {showCards && (
+          <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <BranchSalesPieChart data={branchPieData} highlightLabel={selectedBranch} />
 
-        </div>
-      </section>
+            <Card>
+              <CardContent className="p-3 flex justify-center">
+                <PieChartComponent
+                  data={pieData}
+                  analysisType={analysisType}
+                  onChangeAnalysisType={setAnalysisType}
+                />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-3">
+                <SalesChart data={chartData} />
+              </CardContent>
+            </Card>
+          </section>
+        )}
+
+
+        {/* テーブル */}
+        <section className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-semibold">売上一覧</h2>
+          </div>
+          <div className="overflow-auto">
+            <CsvSortableTableCard
+              columns={columns}
+              data={salesData}
+              dateRange={dateRange} // ← 追加
+            />
+
+          </div>
+        </section>
     </main>
   )
 }
