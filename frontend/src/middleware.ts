@@ -6,14 +6,16 @@ export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
   const cookieHeader = req.headers.get("cookie");
 
-  console.log("middleware: pathname =", pathname);
-  console.log("middleware: cookie header =", cookieHeader);
+  console.log("----- MIDDLEWARE DEBUG -----");
+  console.log("pathname:", pathname);
+  console.log("cookie header:", cookieHeader);
 
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  console.log("middleware: token =", token);
 
-  // 全通し（テスト用）
-  return NextResponse.next();
+  console.log("token result:", token);
+  console.log("-----------------------------");
+
+  return NextResponse.next();  // テスト用に全部通す
 }
 
 export const config = {
