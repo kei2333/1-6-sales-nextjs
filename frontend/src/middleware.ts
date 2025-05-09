@@ -10,7 +10,6 @@ export async function middleware(req: NextRequest) {
   console.log("pathname:", pathname);
   console.log("cookie header:", cookieHeader);
 
-  // v5 cookie name: authjs.session-token or __Secure-authjs.session-token
   const cookieName =
     process.env.NODE_ENV === "production"
       ? "__Secure-authjs.session-token"
