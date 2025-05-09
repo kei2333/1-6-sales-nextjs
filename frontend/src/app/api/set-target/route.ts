@@ -7,7 +7,7 @@ export async function POST(req: Request) {
 
     console.log("受け取った目標データ:", body)
 
-    const targetUrl = "https://team6-sales-function.azurewebsites.net/api/set_target"
+    const targetUrl = "https://team6-sales-function-2.azurewebsites.net/api/set_target"
     const res = await fetch(targetUrl, {
       method: "POST",
       headers: {

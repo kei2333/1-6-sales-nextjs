@@ -48,7 +48,7 @@ export default function UserTable({ location_id }: Location) {
     async function fetchUsers() {
       try {
         setLoading(true);
-        const response = await fetch("https://team6-sales-function.azurewebsites.net/api/get_employee");
+        const response = await fetch("https://team6-sales-function-2.azurewebsites.net/api/get_employee");
         if (!response.ok) {
           throw new Error(`APIエラー: ${response.status}`);
         }
@@ -107,7 +107,7 @@ export default function UserTable({ location_id }: Location) {
       }
   
       // 이름 변경 API
-      const nameUrl = `https://team6-sales-function.azurewebsites.net/api/update_employee_name?employee_number=${userId}&new_employee_name=${encodeURIComponent(editedName)}`;
+      const nameUrl = `https://team6-sales-function-2.azurewebsites.net/api/update_employee_name?employee_number=${userId}&new_employee_name=${encodeURIComponent(editedName)}`;
       console.log("名前API URL:", nameUrl);
   
       const nameResponse = await fetch(nameUrl, { method: "POST" });
@@ -116,7 +116,7 @@ export default function UserTable({ location_id }: Location) {
       }
   
       // 권한 변경 API
-      const roleUrl = `https://team6-sales-function.azurewebsites.net/api/edit_employee_role?employee_number=${userId}&employee_role=${encodeURIComponent(editedRole)}`;
+      const roleUrl = `https://team6-sales-function-2.azurewebsites.net/api/edit_employee_role?employee_number=${userId}&employee_role=${encodeURIComponent(editedRole)}`;
       console.log("役職API URL:", roleUrl);
   
       const roleResponse = await fetch(roleUrl, { method: "POST" });

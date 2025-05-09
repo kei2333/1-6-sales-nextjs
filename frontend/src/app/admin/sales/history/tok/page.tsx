@@ -43,7 +43,7 @@ export default function OsakaMarchReport() {
           var lastDayOfMonth = 30;
         }
         const res = await fetch(
-          `https://team6-sales-function.azurewebsites.net/api/get_sales?sales_date_from=${selectedYear}-${selectedMonth}-1&sales_date_until=${selectedYear}-${selectedMonth}-${lastDayOfMonth}&location_id=${location_id}`
+          `https://team6-sales-function-2.azurewebsites.net/api/get_sales?sales_date_from=${selectedYear}-${selectedMonth}-1&sales_date_until=${selectedYear}-${selectedMonth}-${lastDayOfMonth}&location_id=${location_id}`
         );
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
