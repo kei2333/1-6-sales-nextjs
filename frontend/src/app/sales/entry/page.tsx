@@ -138,8 +138,20 @@ export default function ReportEntryDashboard() {
                   <label className="block text-sm font-medium mb-1">日付</label>
                   <Input
                     type="date"
-                    onChange={(e) => setDate(new Date(e.target.value))}
                     value={date.toISOString().split("T")[0]}
+                    onChange={(e) => {
+                      const newValue = e.target.value;
+                      if (newValue) {
+                        setDate(new Date(newValue));
+                      }
+                    }}
+                    onBlur={(e) => {
+                      if (!e.target.value) {
+                        const todayStr = new Date().toISOString().split("T")[0];
+                        e.target.value = todayStr;
+                        setDate(new Date());
+                      }
+                    }}
                     required
                   />
                 </div>
