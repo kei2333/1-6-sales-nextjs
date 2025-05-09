@@ -373,25 +373,27 @@ def get_employee_callback(req: func.HttpRequest) -> func.HttpResponse:
     employee_address = req.params.get('employee_address')
     if not employee_address:
         return func.HttpResponse("employee_address parameter missing", status_code=400)
-
+ 
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
             cursor.execute(
-                "SELECT employee_role, location_id FROM users WHERE employee_address = %s;",
+                "SELECT employee_name, employee_number, employee_role, location_id FROM users WHERE employee_address = %s;",
                 (employee_address,)
             )
             row = cursor.fetchone()
-
+ 
         if not row:
             return func.HttpResponse(
                 json.dumps({}),
                 status_code=200,
                 mimetype="application/json"
             )
-
+ 
         return func.HttpResponse(
             json.dumps({
+                "employee_name": row["employee_name"],
+                "employee_number": row["employee_number"],
                 "employee_role": row["employee_role"],
                 "location_id": row["location_id"]
             }),
@@ -406,4 +408,3 @@ def get_employee_callback(req: func.HttpRequest) -> func.HttpResponse:
         )
     finally:
         conn.close()
-
