@@ -29,9 +29,21 @@ export function SortableTable<T>({ data, columns }: Props<T>) {
     const aVal = a[key];
     const bVal = b[key];
 
-    if (aVal === undefined || bVal === undefined) return 0;
-    if (aVal < bVal) return direction === "asc" ? -1 : 1;
-    if (aVal > bVal) return direction === "asc" ? 1 : -1;
+    // null / undefined 対応
+    if (aVal == null && bVal == null) return 0;
+    if (aVal == null) return 1;
+    if (bVal == null) return -1;
+
+    // 比較値がstringまたはnumberの場合のみ比較
+    if (typeof aVal === "number" && typeof bVal === "number") {
+      return direction === "asc" ? aVal - bVal : bVal - aVal;
+    }
+    if (typeof aVal === "string" && typeof bVal === "string") {
+      return direction === "asc"
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    }
+
     return 0;
   });
 
