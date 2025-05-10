@@ -31,6 +31,17 @@ async function refreshAccessToken(refreshToken: string) {
   }
 }
 
+// 拡張用ユーザー型
+type ExtendedUser = {
+  email?: string | null;
+  name?: string | null;
+  image?: string | null;
+  role?: string;
+  location_id?: number;
+  employee_number?: number;
+  employee_name?: string;
+};
+
 export const {
   handlers: { GET, POST },
   auth,
@@ -81,10 +92,11 @@ export const {
           return false;
         }
 
-        user.role = data.employee_role;
-        user.location_id = data.location_id;
-        user.employee_number = data.employee_number;
-        user.employee_name = data.employee_name;
+        const extendedUser = user as ExtendedUser;
+        extendedUser.role = data.employee_role;
+        extendedUser.location_id = data.location_id;
+        extendedUser.employee_number = data.employee_number;
+        extendedUser.employee_name = data.employee_name;
 
         return true;
       } catch (error) {
@@ -112,10 +124,11 @@ export const {
       }
 
       if (user) {
-        token.role = user.role;
-        token.location_id = user.location_id;
-        token.employee_number = user.employee_number;
-        token.employee_name = user.employee_name;
+        const extendedUser = user as ExtendedUser;
+        token.role = extendedUser.role;
+        token.location_id = extendedUser.location_id;
+        token.employee_number = extendedUser.employee_number;
+        token.employee_name = extendedUser.employee_name;
       }
 
       if (token.expiresAt && Date.now() >= token.expiresAt && token.refreshToken) {
