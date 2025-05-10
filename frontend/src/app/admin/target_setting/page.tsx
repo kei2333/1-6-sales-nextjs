@@ -16,8 +16,7 @@ type TargetItem = {
 type ApiResponseItem = {
   target_date: string;
   target_amount: number;
-  actual_amount?: number;
-  memo?: string; // ← Python側に合わせて memo で受け取る
+  memo?: string;
 };
 
 export default function TargetSettingPage() {
@@ -31,9 +30,9 @@ export default function TargetSettingPage() {
       );
 
       if (!res.ok) {
-        const error = await res.json();
-        console.error("詳細エラー:", error);
-        throw new Error(error.error || "取得失敗");
+        const errorText = await res.text();
+        console.error("取得失敗:", errorText);
+        throw new Error("取得失敗");
       }
 
       const data: ApiResponseItem[] = await res.json();
@@ -41,11 +40,9 @@ export default function TargetSettingPage() {
       const transformedData: TargetItem[] = data.map((item) => ({
         month: item.target_date.slice(0, 7),
         targetAmount: item.target_amount,
-        actualAmount: item.actual_amount ?? 0,
-        achievementRate: item.actual_amount
-          ? ((item.actual_amount / item.target_amount) * 100).toFixed(1)
-          : "0",
-        comment: item.memo ?? "-", // ← memo を comment にマッピング
+        actualAmount: 0, // actualAmount は現在DBにないので0固定
+        achievementRate: "0", // 仮で0%固定
+        comment: item.memo ?? "-",
       }));
 
       setTargetData(transformedData);
@@ -63,12 +60,12 @@ export default function TargetSettingPage() {
     month: string;
     target: number;
     comment: string;
-  }) => {
+  }): Promise<boolean> => {
     const payload = {
       target_date: `${formData.month}-01`,
       location_id: branch ? Number(branch) : 1,
       target_amount: formData.target,
-      memo: formData.comment, // ← POST時は memo に送る
+      memo: formData.comment,
     };
 
     try {
@@ -79,17 +76,17 @@ export default function TargetSettingPage() {
       });
 
       if (!res.ok) {
-        const error = await res.json();
-        console.error("詳細送信エラー:", error);
-        throw new Error(error.error || "送信失敗");
+        const errorText = await res.text();
+        console.error("送信失敗:", errorText);
+        return false;
       }
 
-      const result = await res.json();
-      console.log("登録成功:", result);
-
+      await res.json();
       fetchTargetData();
+      return true;
     } catch (err) {
       console.error("送信エラー:", err);
+      return false;
     }
   };
 
