@@ -14,7 +14,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, ChevronDown, ChevronUp } from "lucide-react";
+import { MoreHorizontal, ChevronDown, ChevronUp, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 
@@ -37,7 +37,7 @@ const locationMap: { [key: number]: string } = {
 };
 
 type SortConfig = {
-  key: "employee_name" | "employee_role";
+  key: keyof Employee;
   direction: "asc" | "desc";
 };
 
@@ -49,8 +49,12 @@ export default function UserTable({ location_id }: { location_id: number }) {
   const [editedLocationId, setEditedLocationId] = useState<number>(1);
   const [editedAddress, setEditedAddress] = useState("");
 
-  const [filterName, setFilterName] = useState("");
-  const [filterRole, setFilterRole] = useState("");
+  const [filterVisible, setFilterVisible] = useState<{
+    [key in keyof Employee]?: boolean;
+  }>({});
+  const [filters, setFilters] = useState<{
+    [key in keyof Employee]?: string;
+  }>({});
 
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
 
@@ -71,31 +75,38 @@ export default function UserTable({ location_id }: { location_id: number }) {
     fetchUsers();
   }, [location_id]);
 
-  const sortedAndFilteredUsers = () => {
-    let filtered = users.filter(
-      (u) =>
-        u.employee_name.toLowerCase().includes(filterName.toLowerCase()) &&
-        u.employee_role.toLowerCase().includes(filterRole.toLowerCase())
-    );
-
-    if (sortConfig) {
-      filtered.sort((a, b) => {
-        const aValue = a[sortConfig.key].toLowerCase();
-        const bValue = b[sortConfig.key].toLowerCase();
-        if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
-        if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
-        return 0;
-      });
-    }
-    return filtered;
-  };
-
   const toggleSort = (key: SortConfig["key"]) => {
     setSortConfig((prev) =>
       prev?.key === key
         ? { key, direction: prev.direction === "asc" ? "desc" : "asc" }
         : { key, direction: "asc" }
     );
+  };
+
+  const handleFilterChange = (key: keyof Employee, value: string) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const sortedAndFilteredUsers = () => {
+    const filtered = users.filter((u) =>
+      Object.entries(filters).every(([key, val]) =>
+        u[key as keyof Employee]
+          ?.toString()
+          .toLowerCase()
+          .includes(val.toLowerCase())
+      )
+    );
+
+    if (sortConfig) {
+      filtered.sort((a, b) => {
+        const aValue = a[sortConfig.key]?.toString().toLowerCase() || "";
+        const bValue = b[sortConfig.key]?.toString().toLowerCase() || "";
+        if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+    return filtered;
   };
 
   const startEdit = (user: Employee) => {
@@ -165,52 +176,63 @@ export default function UserTable({ location_id }: { location_id: number }) {
 
   return (
     <div className="rounded-md border overflow-x-auto p-2 space-y-2">
-      {/* フィルター入力欄 */}
-      <div className="flex gap-4">
-        <Input
-          placeholder="名前でフィルター"
-          value={filterName}
-          onChange={(e) => setFilterName(e.target.value)}
-          className="max-w-sm"
-        />
-        <Input
-          placeholder="役職でフィルター"
-          value={filterRole}
-          onChange={(e) => setFilterRole(e.target.value)}
-          className="max-w-sm"
-        />
-      </div>
-
       <Table className="min-w-full text-sm">
         <TableHeader>
           <TableRow>
-            <TableHead className="w-16">社員番号</TableHead>
-            <TableHead
-              className="cursor-pointer w-40"
-              onClick={() => toggleSort("employee_name")}
-            >
-              名前
-              {sortConfig?.key === "employee_name" &&
-                (sortConfig.direction === "asc" ? (
-                  <ChevronUp className="inline w-4 h-4 ml-1" />
-                ) : (
-                  <ChevronDown className="inline w-4 h-4 ml-1" />
-                ))}
-            </TableHead>
-            <TableHead
-              className="cursor-pointer w-32"
-              onClick={() => toggleSort("employee_role")}
-            >
-              役職
-              {sortConfig?.key === "employee_role" &&
-                (sortConfig.direction === "asc" ? (
-                  <ChevronUp className="inline w-4 h-4 ml-1" />
-                ) : (
-                  <ChevronDown className="inline w-4 h-4 ml-1" />
-                ))}
-            </TableHead>
-            <TableHead className="w-32">拠点</TableHead>
-            <TableHead className="w-56">メールアドレス</TableHead>
+            {[
+              { key: "employee_number", label: "社員番号" },
+              { key: "employee_name", label: "名前" },
+              { key: "employee_role", label: "役職" },
+              { key: "location_id", label: "拠点" },
+              { key: "employee_address", label: "メールアドレス" },
+            ].map(({ key, label }) => (
+              <TableHead
+                key={key}
+                className="cursor-pointer"
+                onClick={() =>
+                  key !== "employee_number" && toggleSort(key as keyof Employee)
+                }
+              >
+                <div className="flex items-center">
+                  {label}
+                  {sortConfig?.key === key && (
+                    <>
+                      {sortConfig.direction === "asc" ? (
+                        <ChevronUp className="w-4 h-4 ml-1" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 ml-1" />
+                      )}
+                    </>
+                  )}
+                  <button
+                    className="ml-1"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFilterVisible((prev) => ({
+                        ...prev,
+                        [key]: !prev[key],
+                      }));
+                    }}
+                    aria-label="フィルターを開く"
+                  >
+                    <Search className="w-4 h-4" />
+                  </button>
+                </div>
+                {filterVisible[key as keyof Employee] && (
+                  <Input
+                    placeholder={`${label}でフィルター`}
+                    value={filters[key as keyof Employee] || ""}
+                    onChange={(e) =>
+                      handleFilterChange(
+                        key as keyof Employee,
+                        e.target.value
+                      )
+                    }
+                    className="mt-1"
+                  />
+                )}
+              </TableHead>
+            ))}
             <TableHead className="text-center w-20">操作</TableHead>
           </TableRow>
         </TableHeader>
