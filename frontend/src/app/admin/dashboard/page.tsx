@@ -1,3 +1,4 @@
+//app/admin/dashboard/page.tsx
 'use client'
 
 import { RevenueCard } from "@/components/dashboard/RevenueCard"

@@ -1,3 +1,4 @@
+//src/components/dashboard/SalesChart.tsx
 'use client'
 
 import {

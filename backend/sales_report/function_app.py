@@ -368,3 +368,52 @@ def add_employee(req: func.HttpRequest) -> func.HttpResponse:
         )
     finally:
         conn.close()
+
+@app.route(route="get_sales_targets")
+def get_sales_targets(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info("Processing get_sales_targets HTTP request.")
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT id, target_date, location_id, target_amount FROM sales_target;")
+            sales_targets = cursor.fetchall()
+        return func.HttpResponse(
+            json.dumps(sales_targets, ensure_ascii=False),
+            status_code=200,
+            mimetype="application/json",
+        )
+    except pymysql.err.OperationalError as e:
+        logging.error(f"Operational error: {e}")
+        return func.HttpResponse(
+            f"Database operational error: {str(e)}", status_code=500
+        )
+    finally:
+        conn.close()
+
+@app.route(route="post_sales_target", methods=["POST"])
+def post_sales_target(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info("Processing post_sales_target HTTP request.")
+    try:
+        req_body = req.get_json()
+        target_date = req_body.get('target_date')
+        location_id = req_body.get('location_id')
+        target_amount = req_body.get('target_amount')
+
+        conn = get_db_connection()
+        with conn.cursor() as cursor:
+            sql = "INSERT INTO sales_target (target_date, location_id, target_amount) VALUES (%s, %s, %s)"
+            cursor.execute(sql, (target_date, location_id, target_amount))
+        conn.commit()
+
+        return func.HttpResponse(
+            json.dumps({'message': 'Target added successfully'}, ensure_ascii=False),
+            status_code=201,
+            mimetype="application/json",
+        )
+    except Exception as e:
+        logging.error(f"Error: {e}")
+        return func.HttpResponse(
+            f"Error processing request: {str(e)}", status_code=500
+        )
+    finally:
+        conn.close()
