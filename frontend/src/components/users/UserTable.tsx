@@ -84,18 +84,29 @@ export default function UserTable({ location_id }: { location_id: number }) {
   };
 
   const saveEdit = async (userId: number) => {
-    if (!window.confirm("本当に保存しますか？")) {
-      return;
-    }
     try {
       if (!editedName.trim() || !editedRole.trim() || !editedAddress.trim()) {
-        alert("すべて入力してください。");
+        alert("すべての項目を入力してください。");
         return;
       }
 
-      await fetch(`/api/update-employee-name?employee_number=${userId}&new_employee_name=${encodeURIComponent(editedName)}`, { method: "POST" });
+      const params = new URLSearchParams({
+        employee_number: userId.toString(),
+        employee_name: editedName,
+        employee_role: editedRole,
+        employee_address: editedAddress,
+        location_id: editedLocationId.toString(),
+      });
 
-      await fetch(`/api/edit-employee-role?employee_number=${userId}&employee_role=${encodeURIComponent(editedRole)}&location_id=${editedLocationId}&employee_address=${encodeURIComponent(editedAddress)}`, { method: "POST" });
+      const res = await fetch(`/api/edit-employee?${params.toString()}`, {
+        method: "POST",
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw new Error(result.error || "更新失敗");
+      }
 
       setUsers((prev) =>
         prev.map((u) =>
@@ -110,11 +121,9 @@ export default function UserTable({ location_id }: { location_id: number }) {
             : u
         )
       );
-      setEditingId(null);
-      setEditedName("");
-      setEditedRole("");
-      setEditedLocationId(1);
-      setEditedAddress("");
+
+      cancelEdit();
+      alert("保存が完了しました。");
     } catch (e) {
       console.error("保存エラー:", e);
       alert("保存に失敗しました。");
