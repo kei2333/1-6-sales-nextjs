@@ -22,7 +22,6 @@ export default function StickyHeader() {
     signOut({ callbackUrl: "/" });
   };
 
-  // loading中はユーザー表示を保留する
   if (status === "loading") {
     return (
       <header className="sticky top-0 z-50 bg-white border-b shadow-sm px-6 py-3 flex justify-between items-center">
@@ -34,7 +33,9 @@ export default function StickyHeader() {
     );
   }
 
-  const displayName = session?.user?.name || "不明なユーザー";
+  // ここで employee_name を優先して使う
+  const displayName =
+    session?.user?.employee_name || session?.user?.name || "不明なユーザー";
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b shadow-sm px-6 py-3 flex justify-between items-center">
