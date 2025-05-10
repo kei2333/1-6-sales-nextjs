@@ -28,7 +28,7 @@ export default function SalesReportPage() {
   const today_day = now.getDate();
 
   useEffect(() => {
-    if (status !== "authenticated" || !session || !session.user) return;
+    if (status !== "authenticated" || !session?.user) return;
 
     const location_id = session.user.location_id;
 
@@ -55,12 +55,11 @@ export default function SalesReportPage() {
     return <p>読み込み中...</p>;
   }
 
-  if (status === "unauthenticated" || !session || !session.user) {
+  if (status === "unauthenticated" || !session?.user) {
     return <p>ログインが必要です。</p>;
   }
 
-  const location_id = session.user.location_id;
-  const employee_number = session.user.employee_number;
+  const { location_id, employee_number } = session.user;
 
   const locationName =
     location_id === 1 ? "関東" :
