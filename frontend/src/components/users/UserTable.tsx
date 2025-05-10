@@ -1,3 +1,4 @@
+//components/user/UserTable.tsx
 "use client";
 import {
   Table,
@@ -7,11 +8,15 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 
 type Employee = {
   employee_number: number;
@@ -19,6 +24,7 @@ type Employee = {
   employee_role: string;
   location_id: number;
 };
+
 type User = {
   id: number;
   name: string;
@@ -28,18 +34,24 @@ type User = {
   location_id: number;
 };
 
-type Location = {
+type Props = {
   location_id: number;
+};
 
-}
+const roleOptions = ["Sales", "IT", "Manager", "権限なし"];
 
+const locationMap: { [key: number]: string } = {
+  1: "関東",
+  2: "北陸",
+  3: "東海",
+  4: "近畿",
+  5: "中四国",
+  6: "九州",
+};
 
-const roleOptions = ["Sales", "IT", "Manager","権限なし"];
-
-export default function UserTable({ location_id }: Location) {
+export default function UserTable({ location_id }: Props) {
   const [users, setUsers] = useState<User[]>([]);
   const [, setLoading] = useState(false);
-  // Removed unused error state
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editedName, setEditedName] = useState("");
   const [editedRole, setEditedRole] = useState("");
@@ -48,29 +60,25 @@ export default function UserTable({ location_id }: Location) {
     async function fetchUsers() {
       try {
         setLoading(true);
-        const response = await fetch("https://team6-sales-function-2.azurewebsites.net/api/get_employee");
-        if (!response.ok) {
-          throw new Error(`APIエラー: ${response.status}`);
-        }
-        const employees: Employee[] = await response.json();
+        const res = await fetch("/api/get-employee");
+        const employees: Employee[] = await res.json();
 
-        const formattedUsers: User[] = employees.map((emp) => ({
-          id: emp.employee_number,
-          name: emp.employee_name,
-          role: emp.employee_role,
-          email: `${emp.employee_name.replace(/\s+/g, "").toLowerCase()}@example.com`,
+        const formatted: User[] = employees.map((e) => ({
+          id: e.employee_number,
+          name: e.employee_name,
+          role: e.employee_role,
+          email: `${e.employee_name.replace(/\s+/g, "")}@example.com`,
           updatedAt: new Date().toISOString().split("T")[0],
-          location_id: emp.location_id,
+          location_id: e.location_id,
         }));
-        if (location_id !== 0) {
-          const filteredUsers = formattedUsers.filter((user) => user.location_id === location_id);
-          setUsers(filteredUsers);
-        } else {
-          setUsers(formattedUsers);
-        }
-      } catch (err) {
-        console.error("データ取得エラー:", err);
-        console.error("ユーザーデータの読み込みに失敗しました。");
+
+        setUsers(
+          location_id === 0
+            ? formatted
+            : formatted.filter((u) => u.location_id === location_id)
+        );
+      } catch (e) {
+        console.error("データ取得エラー:", e);
       } finally {
         setLoading(false);
       }
@@ -79,12 +87,10 @@ export default function UserTable({ location_id }: Location) {
     fetchUsers();
   }, [location_id]);
 
-  
-
-  const startEdit = (userId: number, currentName: string, currentRole: string) => {
-    setEditingId(userId);
-    setEditedName(currentName);
-    setEditedRole(currentRole);
+  const startEdit = (id: number, name: string, role: string) => {
+    setEditingId(id);
+    setEditedName(name);
+    setEditedRole(role);
   };
 
   const cancelEdit = () => {
@@ -95,54 +101,37 @@ export default function UserTable({ location_id }: Location) {
 
   const saveEdit = async (userId: number) => {
     try {
-      console.log("=== 保存処理開始 ===");
-      console.log("User ID:", userId);
-      console.log("Edited Name:", editedName);
-      console.log("Edited Role:", editedRole);
-  
-      // 빈 값 확인
       if (!editedName.trim() || !editedRole.trim()) {
         alert("名前と役職を入力してください。");
         return;
       }
-  
-      // 이름 변경 API
-      const nameUrl = `https://team6-sales-function-2.azurewebsites.net/api/update_employee_name?employee_number=${userId}&new_employee_name=${encodeURIComponent(editedName)}`;
-      console.log("名前API URL:", nameUrl);
-  
-      const nameResponse = await fetch(nameUrl, { method: "POST" });
-      if (!nameResponse.ok) {
-        throw new Error("名前の更新に失敗しました");
-      }
-  
-      // 권한 변경 API
-      const roleUrl = `https://team6-sales-function-2.azurewebsites.net/api/edit_employee_role?employee_number=${userId}&employee_role=${encodeURIComponent(editedRole)}`;
-      console.log("役職API URL:", roleUrl);
-  
-      const roleResponse = await fetch(roleUrl, { method: "POST" });
-      if (!roleResponse.ok) {
-        throw new Error("役職の更新に失敗しました");
-      }
-  
-      // 상태 업데이트
+
+      const nameRes = await fetch(
+        `/api/update-employee-name?employee_number=${userId}&new_employee_name=${encodeURIComponent(
+          editedName
+        )}`,
+        { method: "POST" }
+      );
+
+      const roleRes = await fetch(
+        `/api/edit-employee-role?employee_number=${userId}&employee_role=${encodeURIComponent(
+          editedRole
+        )}`,
+        { method: "POST" }
+      );
+
+      if (!nameRes.ok || !roleRes.ok) throw new Error("更新失敗");
+
       setUsers((prev) =>
-        prev.map((user) =>
-          user.id === userId
-            ? { ...user, name: editedName, role: editedRole }
-            : user
+        prev.map((u) =>
+          u.id === userId ? { ...u, name: editedName, role: editedRole } : u
         )
       );
       cancelEdit();
-      console.log("=== 保存完了 ===");
-    } catch (error) {
-      console.error("保存エラー:", error);
+    } catch (e) {
+      console.error("保存エラー:", e);
       alert("保存に失敗しました。");
     }
-  };
-  
-
-  const deleteUser = (userId: number) => {
-    setUsers((prev) => prev.filter((user) => user.id !== userId));
   };
 
   return (
@@ -153,6 +142,7 @@ export default function UserTable({ location_id }: Location) {
             <TableHead>社員番号</TableHead>
             <TableHead>名前</TableHead>
             <TableHead>役職</TableHead>
+            <TableHead>拠点</TableHead>
             <TableHead className="text-center">操作</TableHead>
           </TableRow>
         </TableHeader>
@@ -177,10 +167,11 @@ export default function UserTable({ location_id }: Location) {
                     value={editedRole}
                     onChange={(e) => setEditedRole(e.target.value)}
                     className="border rounded px-2 py-1"
+                    aria-label="役職を選択"
                   >
-                    {roleOptions.map((role) => (
-                      <option key={role} value={role}>
-                        {role}
+                    {roleOptions.map((r) => (
+                      <option key={r} value={r}>
+                        {r}
                       </option>
                     ))}
                   </select>
@@ -188,10 +179,16 @@ export default function UserTable({ location_id }: Location) {
                   user.role
                 )}
               </TableCell>
+              <TableCell>
+                {locationMap[user.location_id] || `ID: ${user.location_id}`}
+              </TableCell>
               <TableCell className="text-center">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="p-1 rounded hover:bg-muted">
+                    <button
+                      className="p-1 rounded hover:bg-muted"
+                      aria-label="操作メニュー"
+                    >
                       <MoreHorizontal size={18} />
                     </button>
                   </DropdownMenuTrigger>
@@ -201,17 +198,18 @@ export default function UserTable({ location_id }: Location) {
                         <DropdownMenuItem onClick={() => saveEdit(user.id)}>
                           保存
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={cancelEdit}>キャンセル</DropdownMenuItem>
+                        <DropdownMenuItem onClick={cancelEdit}>
+                          キャンセル
+                        </DropdownMenuItem>
                       </>
                     ) : (
                       <>
                         <DropdownMenuItem
-                          onClick={() => startEdit(user.id, user.name, user.role)}
+                          onClick={() =>
+                            startEdit(user.id, user.name, user.role)
+                          }
                         >
                           編集
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => deleteUser(user.id)}>
-                          削除
                         </DropdownMenuItem>
                       </>
                     )}

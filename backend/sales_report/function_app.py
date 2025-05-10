@@ -203,7 +203,7 @@ def get_employee(req: func.HttpRequest) -> func.HttpResponse:
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
-            cursor.execute("SELECT employee_number, employee_name, location_id, employee_role FROM users;")
+            cursor.execute("SELECT employee_number, employee_name, location_id, employee_role, employee_address FROM users;")
             employee = cursor.fetchall()
         return func.HttpResponse(
             json.dumps(employee, ensure_ascii=False),
@@ -227,7 +227,7 @@ def add_employee(req: func.HttpRequest) -> func.HttpResponse:
         employee_name = req.params.get('employee_name')
         location_id = req.params.get('location_id')
         employee_role = req.params.get('employee_role')
-        employee_password = req.params.get('employee_password')
+        employee_address = req.params.get('employee_address')
 
         if not employee_number or not employee_name or not location_id or not employee_role:
             return func.HttpResponse(
@@ -237,10 +237,10 @@ def add_employee(req: func.HttpRequest) -> func.HttpResponse:
 
         with conn.cursor() as cursor:
             insert_sql = """
-                INSERT INTO users (employee_number, employee_name, location_id, employee_role, employee_password) VALUES
+                INSERT INTO users (employee_number, employee_name, location_id, employee_role, employee_address) VALUES
                 (%s, %s, %s, %s, %s);
             """
-            cursor.execute(insert_sql,(employee_number, employee_name, location_id, employee_role, employee_password,))
+            cursor.execute(insert_sql,(employee_number, employee_name, location_id, employee_role, employee_address,))
             conn.commit()
         return func.HttpResponse(
             "Employee data inserted successfully.",
@@ -250,118 +250,6 @@ def add_employee(req: func.HttpRequest) -> func.HttpResponse:
         logging.error(f"Error inserting employee data: {str(e)}")
         return func.HttpResponse(
             f"Failed to insert employee data. Error: {str(e)}",
-            status_code=500
-        )
-    finally:
-        conn.close()
-
-@app.route(route="edit_employee_role")
-def edit_employee_role(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info("Processing edit_employee_role HTTP request.")
-    conn = get_db_connection()
-    try:
-        employee_number = req.params.get('employee_number')
-        new_employee_role = req.params.get('employee_role')
-
-        if not employee_number or not new_employee_role:
-            return func.HttpResponse(
-                "Missing required parameters.",
-                status_code=400
-            )
-
-        with conn.cursor() as cursor:
-            update_sql = """
-                UPDATE users SET employee_role = %s WHERE employee_number = %s;
-            """
-            cursor.execute(update_sql,(new_employee_role, employee_number,))
-            conn.commit()
-        return func.HttpResponse(
-            "Employee role updated successfully.",
-            status_code=200
-        )
-    except Exception as e:
-        logging.error(f"Error updating employee role: {str(e)}")
-        return func.HttpResponse(
-            f"Failed to update employee role. Error: {str(e)}",
-            status_code=500
-        )
-    finally:
-        conn.close()
-
-
-@app.route(route="delete_employee")
-def delete_employee(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info("Processing delete_employee HTTP request.")
-    conn = get_db_connection()
-    try:
-        employee_number = req.params.get('employee_number')
-
-        if not employee_number:
-            return func.HttpResponse(
-                "Missing required parameters.",
-                status_code=400
-            )
-
-        with conn.cursor() as cursor:
-            delete_sql = """
-                DELETE FROM users WHERE employee_number = %s;
-            """
-            cursor.execute(delete_sql,(employee_number,))
-            conn.commit()
-        return func.HttpResponse(
-            "Employee data deleted successfully.",
-            status_code=200
-        )
-    except Exception as e:
-        logging.error(f"Error deleting employee data: {str(e)}")
-        return func.HttpResponse(
-            f"Failed to delete employee data. Error: {str(e)}",
-            status_code=500
-        )
-    finally:
-        conn.close()
-
-@app.route(route="update_employee_name")
-def update_employee_name(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info("Processing update_employee_name HTTP request.")
-    conn = get_db_connection()
-    try:
-        # リクエストボディから employee_number と new_employee_name を取得
-        employee_number = req.params.get('employee_number')
-        new_employee_name = req.params.get('new_employee_name')
-
-        # 必要なパラメータが欠けている場合、エラーレスポンスを返す
-        if not employee_number or not new_employee_name:
-            return func.HttpResponse(
-                "Missing required parameters: employee_number or employee_name.",
-                status_code=400
-            )
-
-        with conn.cursor() as cursor:
-            # 名前を更新するSQL文
-            update_sql = """
-                UPDATE users
-                SET employee_name = %s
-                WHERE employee_number = %s;
-            """
-            cursor.execute(update_sql, (new_employee_name, employee_number))
-            conn.commit()
-
-            # 更新された行数をチェック
-            if cursor.rowcount == 0:
-                return func.HttpResponse(
-                    "Employee not found.",
-                    status_code=404
-                )
-
-        return func.HttpResponse(
-            "Employee name updated successfully.",
-            status_code=200
-        )
-    except Exception as e:
-        logging.error(f"Error updating employee name: {str(e)}")
-        return func.HttpResponse(
-            f"Failed to update employee name. Error: {str(e)}",
             status_code=500
         )
     finally:
@@ -408,3 +296,72 @@ def get_employee_callback(req: func.HttpRequest) -> func.HttpResponse:
         )
     finally:
         conn.close()
+
+@app.route(route="edit_employee")
+def edit_employee(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info("Processing edit_employee HTTP request.")
+    conn = get_db_connection()
+    try:
+        employee_number = req.params.get('employee_number')
+        new_employee_name = req.params.get('employee_name')
+        new_employee_role = req.params.get('employee_role')
+        new_employee_address = req.params.get('employee_address')
+        new_location_id = req.params.get('location_id')
+
+        if not employee_number:
+            return func.HttpResponse(
+                "Missing required parameter: employee_number.",
+                status_code=400
+            )
+
+        update_fields = []
+        update_values = []
+
+        if new_employee_name:
+            update_fields.append("employee_name = %s")
+            update_values.append(new_employee_name)
+        if new_employee_role:
+            update_fields.append("employee_role = %s")
+            update_values.append(new_employee_role)
+        if new_employee_address:
+            update_fields.append("employee_address = %s")
+            update_values.append(new_employee_address)
+        if new_location_id:
+            update_fields.append("location_id = %s")
+            update_values.append(new_location_id)
+
+        if not update_fields:
+            return func.HttpResponse(
+                "No update fields provided.",
+                status_code=400
+            )
+
+        update_values.append(employee_number)
+
+        update_sql = f"""
+            UPDATE users SET {', '.join(update_fields)} WHERE employee_number = %s;
+        """
+
+        with conn.cursor() as cursor:
+            cursor.execute(update_sql, tuple(update_values))
+            conn.commit()
+
+            if cursor.rowcount == 0:
+                return func.HttpResponse(
+                    "Employee not found.",
+                    status_code=404
+                )
+
+        return func.HttpResponse(
+            "Employee updated successfully.",
+            status_code=200
+        )
+    except Exception as e:
+        logging.error(f"Error updating employee: {str(e)}")
+        return func.HttpResponse(
+            f"Failed to update employee. Error: {str(e)}",
+            status_code=500
+        )
+    finally:
+        conn.close()
+
