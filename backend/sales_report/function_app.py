@@ -371,21 +371,36 @@ def add_employee(req: func.HttpRequest) -> func.HttpResponse:
 
 @app.route(route="get_sales_target")
 def get_sales_target(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info("Processing get_sales_targets HTTP request.")
+    logging.info("Processing get_sales_target HTTP request.")
     conn = get_db_connection()
+    location_id = req.params.get('location_id') or 'all'
+
     try:
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT id, target_date, location_id, target_amount FROM sales_target;")
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            if location_id == 'all':
+                sql = "SELECT id, target_date, location_id, target_amount, memo FROM sales_target;"
+                cursor.execute(sql)
+            else:
+                sql = "SELECT id, target_date, location_id, target_amount, memo FROM sales_target WHERE location_id = %s;"
+                cursor.execute(sql, (location_id,))
+            
             sales_targets = cursor.fetchall()
+            logging.info(f"Fetched {len(sales_targets)} records.")
+
         return func.HttpResponse(
             json.dumps(sales_targets, ensure_ascii=False),
             status_code=200,
             mimetype="application/json",
         )
-    except pymysql.err.OperationalError as e:
-        logging.error(f"Operational error: {e}")
+    except pymysql.MySQLError as e:
+        logging.error(f"MySQL error: {e}")
         return func.HttpResponse(
-            f"Database operational error: {str(e)}", status_code=500
+            f"MySQL error: {str(e)}", status_code=500
+        )
+    except Exception as e:
+        logging.error(f"Unexpected error: {e}")
+        return func.HttpResponse(
+            f"Unexpected server error: {str(e)}", status_code=500
         )
     finally:
         conn.close()
@@ -393,16 +408,28 @@ def get_sales_target(req: func.HttpRequest) -> func.HttpResponse:
 @app.route(route="post_sales_target", methods=["POST"])
 def post_sales_target(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("Processing post_sales_target HTTP request.")
+    conn = None
+
     try:
         req_body = req.get_json()
         target_date = req_body.get('target_date')
         location_id = req_body.get('location_id')
         target_amount = req_body.get('target_amount')
+        comment = req_body.get('comment')
+
+        # 入力値検証
+        if not (target_date and location_id and target_amount):
+            return func.HttpResponse(
+                "Missing required fields.", status_code=400
+            )
 
         conn = get_db_connection()
         with conn.cursor() as cursor:
-            sql = "INSERT INTO sales_target (target_date, location_id, target_amount) VALUES (%s, %s, %s)"
-            cursor.execute(sql, (target_date, location_id, target_amount))
+            sql = """
+                INSERT INTO sales_target (target_date, location_id, target_amount, comment)
+                VALUES (%s, %s, %s, %s)
+            """
+            cursor.execute(sql, (target_date, location_id, target_amount, comment))
         conn.commit()
 
         return func.HttpResponse(
@@ -416,4 +443,5 @@ def post_sales_target(req: func.HttpRequest) -> func.HttpResponse:
             f"Error processing request: {str(e)}", status_code=500
         )
     finally:
-        conn.close()
+        if conn:
+            conn.close()

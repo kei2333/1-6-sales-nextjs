@@ -68,7 +68,7 @@ export default function TargetSettingPage() {
       target_date: `${formData.month}-01`,
       location_id: branch ? Number(branch) : 1,
       target_amount: formData.target,
-      comment: formData.comment,
+      comment: formData.comment, // ← 修正: memo → comment
     };
 
     try {
