@@ -1,4 +1,3 @@
-// app/api/post-target/route.ts
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -17,13 +16,20 @@ export async function POST(req: Request) {
       body: JSON.stringify(body),
     });
 
+    const responseText = await res.text();
+
     if (!res.ok) {
-      const errorText = await res.text();
-      console.error("外部APIエラー詳細:", errorText);
-      throw new Error("外部APIエラー");
+      console.error(`外部APIエラー: ${res.status} - ${responseText}`);
+      throw new Error(`外部APIエラー: ${res.status}`);
     }
 
-    const result = await res.json();
+    let result;
+    try {
+      result = JSON.parse(responseText);
+    } catch {
+      result = { message: responseText };
+    }
+
     return NextResponse.json(result);
   } catch (e) {
     console.error("APIエラー:", e);

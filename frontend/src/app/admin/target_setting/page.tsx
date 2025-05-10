@@ -17,7 +17,7 @@ type ApiResponseItem = {
   target_date: string;
   target_amount: number;
   actual_amount?: number;
-  comment?: string;
+  memo?: string; // ← Python側に合わせて memo で受け取る
 };
 
 export default function TargetSettingPage() {
@@ -45,7 +45,7 @@ export default function TargetSettingPage() {
         achievementRate: item.actual_amount
           ? ((item.actual_amount / item.target_amount) * 100).toFixed(1)
           : "0",
-        comment: item.comment ?? "-",
+        comment: item.memo ?? "-", // ← memo を comment にマッピング
       }));
 
       setTargetData(transformedData);
@@ -68,7 +68,7 @@ export default function TargetSettingPage() {
       target_date: `${formData.month}-01`,
       location_id: branch ? Number(branch) : 1,
       target_amount: formData.target,
-      comment: formData.comment, // ← 修正: memo → comment
+      memo: formData.comment, // ← POST時は memo に送る
     };
 
     try {
