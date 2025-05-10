@@ -1,5 +1,4 @@
 //components/user/UserTable.tsx
-"use client";
 import {
   Table,
   TableHeader,
@@ -14,7 +13,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, ChevronDown, ChevronUp } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 
@@ -36,6 +35,11 @@ const locationMap: { [key: number]: string } = {
   6: "九州",
 };
 
+type SortConfig = {
+  key: "employee_name" | "employee_role";
+  direction: "asc" | "desc";
+};
+
 export default function UserTable({ location_id }: { location_id: number }) {
   const [users, setUsers] = useState<Employee[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -43,6 +47,11 @@ export default function UserTable({ location_id }: { location_id: number }) {
   const [editedRole, setEditedRole] = useState("");
   const [editedLocationId, setEditedLocationId] = useState<number>(1);
   const [editedAddress, setEditedAddress] = useState("");
+
+  const [filterName, setFilterName] = useState("");
+  const [filterRole, setFilterRole] = useState("");
+
+  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
 
   useEffect(() => {
     async function fetchUsers() {
@@ -58,9 +67,35 @@ export default function UserTable({ location_id }: { location_id: number }) {
         console.error("データ取得エラー:", e);
       }
     }
-
     fetchUsers();
   }, [location_id]);
+
+  const sortedAndFilteredUsers = () => {
+    const filtered = users.filter(
+      (u) =>
+        u.employee_name.toLowerCase().includes(filterName.toLowerCase()) &&
+        u.employee_role.toLowerCase().includes(filterRole.toLowerCase())
+    );
+
+    if (sortConfig) {
+      filtered.sort((a, b) => {
+        const aValue = a[sortConfig.key].toLowerCase();
+        const bValue = b[sortConfig.key].toLowerCase();
+        if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+    return filtered;
+  };
+
+  const toggleSort = (key: SortConfig["key"]) => {
+    setSortConfig((prev) =>
+      prev?.key === key
+        ? { key, direction: prev.direction === "asc" ? "desc" : "asc" }
+        : { key, direction: "asc" }
+    );
+  };
 
   const startEdit = (user: Employee) => {
     setEditingId(user.employee_number);
@@ -128,28 +163,69 @@ export default function UserTable({ location_id }: { location_id: number }) {
   };
 
   return (
-    <div className="rounded-md border">
-      <Table>
+    <div className="rounded-md border overflow-x-auto p-2 space-y-2">
+      {/* フィルター入力欄 */}
+      <div className="flex gap-4">
+        <Input
+          placeholder="名前でフィルター"
+          value={filterName}
+          onChange={(e) => setFilterName(e.target.value)}
+          className="max-w-sm"
+        />
+        <Input
+          placeholder="役職でフィルター"
+          value={filterRole}
+          onChange={(e) => setFilterRole(e.target.value)}
+          className="max-w-sm"
+        />
+      </div>
+
+      <Table className="min-w-full text-sm">
         <TableHeader>
           <TableRow>
-            <TableHead>社員番号</TableHead>
-            <TableHead>名前</TableHead>
-            <TableHead>役職</TableHead>
-            <TableHead>拠点</TableHead>
-            <TableHead>メールアドレス</TableHead>
-            <TableHead className="text-center">操作</TableHead>
+            <TableHead className="w-16">社員番号</TableHead>
+            <TableHead
+              className="cursor-pointer w-40"
+              onClick={() => toggleSort("employee_name")}
+            >
+              名前
+              {sortConfig?.key === "employee_name" &&
+                (sortConfig.direction === "asc" ? (
+                  <ChevronUp className="inline w-4 h-4 ml-1" />
+                ) : (
+                  <ChevronDown className="inline w-4 h-4 ml-1" />
+                ))}
+            </TableHead>
+            <TableHead
+              className="cursor-pointer w-32"
+              onClick={() => toggleSort("employee_role")}
+            >
+              役職
+              {sortConfig?.key === "employee_role" &&
+                (sortConfig.direction === "asc" ? (
+                  <ChevronUp className="inline w-4 h-4 ml-1" />
+                ) : (
+                  <ChevronDown className="inline w-4 h-4 ml-1" />
+                ))}
+            </TableHead>
+            <TableHead className="w-32">拠点</TableHead>
+            <TableHead className="w-56">メールアドレス</TableHead>
+            <TableHead className="text-center w-20">操作</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users.map((user) => (
-            <TableRow key={user.employee_number} onKeyDown={handleKeyDown}>
+          {sortedAndFilteredUsers().map((user) => (
+            <TableRow
+              key={user.employee_number}
+              onKeyDown={handleKeyDown}
+              className="hover:bg-gray-100 transition-colors"
+            >
               <TableCell>{user.employee_number}</TableCell>
               <TableCell>
                 {editingId === user.employee_number ? (
                   <Input
                     value={editedName}
                     onChange={(e) => setEditedName(e.target.value)}
-                    className="w-40"
                   />
                 ) : (
                   user.employee_name
@@ -160,7 +236,7 @@ export default function UserTable({ location_id }: { location_id: number }) {
                   <select
                     value={editedRole}
                     onChange={(e) => setEditedRole(e.target.value)}
-                    className="border rounded px-2 py-1"
+                    className="border rounded px-2 py-1 w-full"
                     aria-label="役職を選択"
                   >
                     {roleOptions.map((r) => (
@@ -178,7 +254,7 @@ export default function UserTable({ location_id }: { location_id: number }) {
                   <select
                     value={editedLocationId}
                     onChange={(e) => setEditedLocationId(Number(e.target.value))}
-                    className="border rounded px-2 py-1"
+                    className="border rounded px-2 py-1 w-full"
                     aria-label="拠点を選択"
                   >
                     {Object.entries(locationMap).map(([id, name]) => (
@@ -196,10 +272,14 @@ export default function UserTable({ location_id }: { location_id: number }) {
                   <Input
                     value={editedAddress}
                     onChange={(e) => setEditedAddress(e.target.value)}
-                    className="w-52"
                   />
                 ) : (
-                  user.employee_address
+                  <span
+                    className="truncate max-w-[200px]"
+                    title={user.employee_address}
+                  >
+                    {user.employee_address}
+                  </span>
                 )}
               </TableCell>
               <TableCell className="text-center">
