@@ -1,29 +1,29 @@
-'use client'
+"use client";
 
-import { useState } from "react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 type Props = {
-  onSubmit: (data: { month: string; target: number; comment: string }) => void
-}
+  onSubmit: (data: { month: string; target: number; comment: string }) => void;
+};
 
 export function TargetForm({ onSubmit }: Props) {
-  const [month, setMonth] = useState("")
-  const [target, setTarget] = useState("")
-  const [comment, setComment] = useState("")
+  const [month, setMonth] = useState("");
+  const [target, setTarget] = useState("");
+  const [comment, setComment] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!month || !target) return
-    onSubmit({ month, target: Number(target), comment })
+    e.preventDefault();
+    if (!month || !target) return;
+    onSubmit({ month, target: Number(target), comment });
     // オプション：初期化
-    setMonth("")
-    setTarget("")
-    setComment("")
-  }
+    setMonth("");
+    setTarget("");
+    setComment("");
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 mt-4">
@@ -59,5 +59,5 @@ export function TargetForm({ onSubmit }: Props) {
       </div>
       <Button type="submit">保存</Button>
     </form>
-  )
+  );
 }
