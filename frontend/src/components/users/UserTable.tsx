@@ -74,7 +74,7 @@ export default function UserTable({ location_id }: { location_id: number }) {
   };
 
   const cancelEdit = () => {
-    if (window.confirm("キャンセルしてもよいですか？ 編集内容は破棄されます。")) {
+    if (window.confirm("編集をキャンセルしてもよいですか？内容は破棄されます。")) {
       setEditingId(null);
       setEditedName("");
       setEditedRole("");
@@ -84,9 +84,13 @@ export default function UserTable({ location_id }: { location_id: number }) {
   };
 
   const saveEdit = async (userId: number) => {
+    if (!window.confirm("この内容で保存しますか？")) {
+      return;
+    }
+
     try {
       if (!editedName.trim() || !editedRole.trim() || !editedAddress.trim()) {
-        alert("すべての項目を入力してください。");
+        alert("すべて入力してください。");
         return;
       }
 
@@ -102,10 +106,9 @@ export default function UserTable({ location_id }: { location_id: number }) {
         method: "POST",
       });
 
-      const result = await res.json();
-
       if (!res.ok) {
-        throw new Error(result.error || "更新失敗");
+        const result = await res.text();
+        throw new Error(result || "更新失敗");
       }
 
       setUsers((prev) =>
@@ -122,7 +125,12 @@ export default function UserTable({ location_id }: { location_id: number }) {
         )
       );
 
-      cancelEdit();
+      setEditingId(null);
+      setEditedName("");
+      setEditedRole("");
+      setEditedLocationId(1);
+      setEditedAddress("");
+
       alert("保存が完了しました。");
     } catch (e) {
       console.error("保存エラー:", e);
@@ -138,7 +146,6 @@ export default function UserTable({ location_id }: { location_id: number }) {
 
   return (
     <div className="rounded-md border overflow-x-auto p-4 space-y-2">
-      {/* ▼ フィルター欄 */}
       <div className="flex gap-4 mb-4">
         <Input
           placeholder="名前で検索"
