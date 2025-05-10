@@ -23,23 +23,10 @@ type Employee = {
   employee_name: string;
   employee_role: string;
   location_id: number;
-};
-
-type User = {
-  id: number;
-  name: string;
-  role: string;
-  email: string;
-  updatedAt: string;
-  location_id: number;
-};
-
-type Props = {
-  location_id: number;
+  employee_address: string;
 };
 
 const roleOptions = ["Sales", "IT", "Manager", "権限なし"];
-
 const locationMap: { [key: number]: string } = {
   1: "関東",
   2: "北陸",
@@ -49,60 +36,56 @@ const locationMap: { [key: number]: string } = {
   6: "九州",
 };
 
-export default function UserTable({ location_id }: Props) {
-  const [users, setUsers] = useState<User[]>([]);
-  const [, setLoading] = useState(false);
+export default function UserTable({ location_id }: { location_id: number }) {
+  const [users, setUsers] = useState<Employee[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editedName, setEditedName] = useState("");
   const [editedRole, setEditedRole] = useState("");
+  const [editedLocationId, setEditedLocationId] = useState<number>(1);
+  const [editedAddress, setEditedAddress] = useState("");
 
   useEffect(() => {
     async function fetchUsers() {
       try {
-        setLoading(true);
         const res = await fetch("/api/get-employee");
         const employees: Employee[] = await res.json();
-
-        const formatted: User[] = employees.map((e) => ({
-          id: e.employee_number,
-          name: e.employee_name,
-          role: e.employee_role,
-          email: `${e.employee_name.replace(/\s+/g, "")}@example.com`,
-          updatedAt: new Date().toISOString().split("T")[0],
-          location_id: e.location_id,
-        }));
-
-        setUsers(
+        const filtered =
           location_id === 0
-            ? formatted
-            : formatted.filter((u) => u.location_id === location_id)
-        );
+            ? employees
+            : employees.filter((u) => u.location_id === location_id);
+        setUsers(filtered);
       } catch (e) {
         console.error("データ取得エラー:", e);
-      } finally {
-        setLoading(false);
       }
     }
 
     fetchUsers();
   }, [location_id]);
 
-  const startEdit = (id: number, name: string, role: string) => {
-    setEditingId(id);
-    setEditedName(name);
-    setEditedRole(role);
+  const startEdit = (user: Employee) => {
+    setEditingId(user.employee_number);
+    setEditedName(user.employee_name);
+    setEditedRole(user.employee_role);
+    setEditedLocationId(user.location_id);
+    setEditedAddress(user.employee_address);
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setEditedName("");
     setEditedRole("");
+    setEditedLocationId(1);
+    setEditedAddress("");
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") cancelEdit();
   };
 
   const saveEdit = async (userId: number) => {
     try {
-      if (!editedName.trim() || !editedRole.trim()) {
-        alert("名前と役職を入力してください。");
+      if (!editedName.trim() || !editedRole.trim() || !editedAddress.trim()) {
+        alert("すべての項目を入力してください。");
         return;
       }
 
@@ -116,6 +99,8 @@ export default function UserTable({ location_id }: Props) {
       const roleRes = await fetch(
         `/api/edit-employee-role?employee_number=${userId}&employee_role=${encodeURIComponent(
           editedRole
+        )}&location_id=${editedLocationId}&employee_address=${encodeURIComponent(
+          editedAddress
         )}`,
         { method: "POST" }
       );
@@ -124,7 +109,15 @@ export default function UserTable({ location_id }: Props) {
 
       setUsers((prev) =>
         prev.map((u) =>
-          u.id === userId ? { ...u, name: editedName, role: editedRole } : u
+          u.employee_number === userId
+            ? {
+                ...u,
+                employee_name: editedName,
+                employee_role: editedRole,
+                location_id: editedLocationId,
+                employee_address: editedAddress,
+              }
+            : u
         )
       );
       cancelEdit();
@@ -143,26 +136,27 @@ export default function UserTable({ location_id }: Props) {
             <TableHead>名前</TableHead>
             <TableHead>役職</TableHead>
             <TableHead>拠点</TableHead>
+            <TableHead>メールアドレス</TableHead>
             <TableHead className="text-center">操作</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {users.map((user) => (
-            <TableRow key={user.id}>
-              <TableCell>{user.id}</TableCell>
+            <TableRow key={user.employee_number} onKeyDown={handleKeyDown}>
+              <TableCell>{user.employee_number}</TableCell>
               <TableCell>
-                {editingId === user.id ? (
+                {editingId === user.employee_number ? (
                   <Input
                     value={editedName}
                     onChange={(e) => setEditedName(e.target.value)}
                     className="w-40"
                   />
                 ) : (
-                  user.name
+                  user.employee_name
                 )}
               </TableCell>
               <TableCell>
-                {editingId === user.id ? (
+                {editingId === user.employee_number ? (
                   <select
                     value={editedRole}
                     onChange={(e) => setEditedRole(e.target.value)}
@@ -176,11 +170,37 @@ export default function UserTable({ location_id }: Props) {
                     ))}
                   </select>
                 ) : (
-                  user.role
+                  user.employee_role
                 )}
               </TableCell>
               <TableCell>
-                {locationMap[user.location_id] || `ID: ${user.location_id}`}
+                {editingId === user.employee_number ? (
+                  <select
+                    value={editedLocationId}
+                    onChange={(e) => setEditedLocationId(Number(e.target.value))}
+                    className="border rounded px-2 py-1"
+                    aria-label="拠点を選択"
+                  >
+                    {Object.entries(locationMap).map(([id, name]) => (
+                      <option key={id} value={id}>
+                        {name}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  locationMap[user.location_id] || `ID: ${user.location_id}`
+                )}
+              </TableCell>
+              <TableCell>
+                {editingId === user.employee_number ? (
+                  <Input
+                    value={editedAddress}
+                    onChange={(e) => setEditedAddress(e.target.value)}
+                    className="w-52"
+                  />
+                ) : (
+                  user.employee_address
+                )}
               </TableCell>
               <TableCell className="text-center">
                 <DropdownMenu>
@@ -193,9 +213,11 @@ export default function UserTable({ location_id }: Props) {
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    {editingId === user.id ? (
+                    {editingId === user.employee_number ? (
                       <>
-                        <DropdownMenuItem onClick={() => saveEdit(user.id)}>
+                        <DropdownMenuItem
+                          onClick={() => saveEdit(user.employee_number)}
+                        >
                           保存
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={cancelEdit}>
@@ -203,15 +225,9 @@ export default function UserTable({ location_id }: Props) {
                         </DropdownMenuItem>
                       </>
                     ) : (
-                      <>
-                        <DropdownMenuItem
-                          onClick={() =>
-                            startEdit(user.id, user.name, user.role)
-                          }
-                        >
-                          編集
-                        </DropdownMenuItem>
-                      </>
+                      <DropdownMenuItem onClick={() => startEdit(user)}>
+                        編集
+                      </DropdownMenuItem>
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
