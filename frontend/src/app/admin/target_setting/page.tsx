@@ -27,7 +27,7 @@ export default function TargetSettingPage() {
   const fetchTargetData = useCallback(async () => {
     try {
       const res = await fetch(
-        `/api/get-target${branch ? `?location_id=${branch}` : ""}`
+        `/api/get-sales-target${branch ? `?location_id=${branch}` : ""}`
       );
 
       if (!res.ok) {
@@ -72,7 +72,7 @@ export default function TargetSettingPage() {
     };
 
     try {
-      const res = await fetch("/api/post-target", {
+      const res = await fetch("/api/post-sales-target", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
