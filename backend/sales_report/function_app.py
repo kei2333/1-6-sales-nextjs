@@ -7,6 +7,7 @@ from enum import Enum
 from pathlib import Path
 import os
 import json
+import datetime
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
@@ -383,9 +384,15 @@ def get_sales_target(req: func.HttpRequest) -> func.HttpResponse:
             else:
                 sql = "SELECT id, target_date, location_id, target_amount, memo FROM sales_target WHERE location_id = %s;"
                 cursor.execute(sql, (location_id,))
-            
+
             sales_targets = cursor.fetchall()
-            logging.info(f"Fetched {len(sales_targets)} records.")
+
+            # date型を文字列に変換
+            for row in sales_targets:
+                if isinstance(row.get('target_date'), datetime.date):
+                    row['target_date'] = row['target_date'].isoformat()
+
+            logging.info(f"Fetched {len(sales_targets)} records: {sales_targets}")
 
         return func.HttpResponse(
             json.dumps(sales_targets, ensure_ascii=False),
@@ -415,7 +422,7 @@ def post_sales_target(req: func.HttpRequest) -> func.HttpResponse:
         target_date = req_body.get('target_date')
         location_id = req_body.get('location_id')
         target_amount = req_body.get('target_amount')
-        comment = req_body.get('comment')
+        memo = req_body.get('memo')
 
         # 入力値検証
         if not (target_date and location_id and target_amount):
@@ -426,10 +433,10 @@ def post_sales_target(req: func.HttpRequest) -> func.HttpResponse:
         conn = get_db_connection()
         with conn.cursor() as cursor:
             sql = """
-                INSERT INTO sales_target (target_date, location_id, target_amount, comment)
+                INSERT INTO sales_target (target_date, location_id, target_amount, memo)
                 VALUES (%s, %s, %s, %s)
             """
-            cursor.execute(sql, (target_date, location_id, target_amount, comment))
+            cursor.execute(sql, (target_date, location_id, target_amount, memo))
         conn.commit()
 
         return func.HttpResponse(

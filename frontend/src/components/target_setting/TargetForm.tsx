@@ -7,22 +7,41 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
 type Props = {
-  onSubmit: (data: { month: string; target: number; comment: string }) => void;
+  onSubmit: (data: {
+    month: string;
+    target: number;
+    comment: string;
+  }) => Promise<boolean>;
 };
 
 export function TargetForm({ onSubmit }: Props) {
   const [month, setMonth] = useState("");
   const [target, setTarget] = useState("");
   const [comment, setComment] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!month || !target) return;
-    onSubmit({ month, target: Number(target), comment });
-    // オプション：初期化
-    setMonth("");
-    setTarget("");
-    setComment("");
+
+    if (!/^\d+$/.test(target)) {
+      setError("目標金額は半角数字のみ入力してください。");
+      return;
+    }
+
+    setError("");
+
+    const success = await onSubmit({ month, target: Number(target), comment });
+
+    if (success) {
+      alert("保存に成功しました！");
+      setMonth("");
+      setTarget("");
+      setComment("");
+    } else {
+      alert("保存に失敗しました。");
+    }
   };
 
   return (
@@ -41,12 +60,13 @@ export function TargetForm({ onSubmit }: Props) {
         <Label htmlFor="target">目標金額</Label>
         <Input
           id="target"
-          type="number"
+          type="text"
           value={target}
           onChange={(e) => setTarget(e.target.value)}
           placeholder="例: 1000000"
           required
         />
+        {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
       </div>
       <div>
         <Label htmlFor="comment">備考（任意）</Label>
@@ -57,7 +77,12 @@ export function TargetForm({ onSubmit }: Props) {
           placeholder="補足など"
         />
       </div>
-      <Button type="submit">保存</Button>
+      <Button
+        type="submit"
+        style={{ backgroundColor: "#88e100", color: "black" }}
+      >
+        保存
+      </Button>
     </form>
   );
 }
