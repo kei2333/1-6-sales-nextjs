@@ -6,8 +6,12 @@ import {
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
+import {
+  Dialog, DialogTrigger, DialogContent, DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { MoreHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type Employee = {
@@ -36,10 +40,21 @@ export default function UserTable({ location_id }: { location_id: number }) {
   const [editedRole, setEditedRole] = useState("");
   const [editedLocationId, setEditedLocationId] = useState<number>(1);
   const [editedAddress, setEditedAddress] = useState("");
+  const [editedEmailError, setEditedEmailError] = useState("");
 
   const [filterName, setFilterName] = useState("");
   const [filterRole, setFilterRole] = useState("");
   const [filterEmail, setFilterEmail] = useState("");
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [newEmployeeNumber, setNewEmployeeNumber] = useState("");
+  const [newEmployeeName, setNewEmployeeName] = useState("");
+  const [newEmployeeRole, setNewEmployeeRole] = useState("Sales");
+  const [newLocationId, setNewLocationId] = useState(1);
+  const [newEmployeeAddress, setNewEmployeeAddress] = useState("");
+  const [newEmailError, setNewEmailError] = useState("");
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   useEffect(() => {
     async function fetchUsers() {
@@ -71,6 +86,7 @@ export default function UserTable({ location_id }: { location_id: number }) {
     setEditedRole(u.employee_role);
     setEditedLocationId(u.location_id);
     setEditedAddress(u.employee_address);
+    setEditedEmailError("");
   };
 
   const cancelEdit = () => {
@@ -80,11 +96,15 @@ export default function UserTable({ location_id }: { location_id: number }) {
       setEditedRole("");
       setEditedLocationId(1);
       setEditedAddress("");
+      setEditedEmailError("");
     }
   };
 
   const saveEdit = async (userId: number) => {
-    if (!window.confirm("この内容で保存しますか？")) {
+    if (!window.confirm("この内容で保存しますか？")) return;
+
+    if (!emailRegex.test(editedAddress)) {
+      setEditedEmailError("有効なメールアドレス形式を入力してください。");
       return;
     }
 
@@ -130,12 +150,85 @@ export default function UserTable({ location_id }: { location_id: number }) {
       setEditedRole("");
       setEditedLocationId(1);
       setEditedAddress("");
+      setEditedEmailError("");
 
       alert("保存が完了しました。");
     } catch (e) {
       console.error("保存エラー:", e);
       alert("保存に失敗しました。");
     }
+  };
+
+  const handleAddUser = async () => {
+    if (!emailRegex.test(newEmployeeAddress)) {
+      setNewEmailError("有効なメールアドレス形式を入力してください。");
+      return;
+    }
+
+    try {
+      if (
+        !newEmployeeNumber.trim() ||
+        !newEmployeeName.trim() ||
+        !newEmployeeRole.trim() ||
+        !newEmployeeAddress.trim()
+      ) {
+        alert("すべて入力してください。");
+        return;
+      }
+
+      const params = new URLSearchParams({
+        employee_number: newEmployeeNumber,
+        employee_name: newEmployeeName,
+        employee_role: newEmployeeRole,
+        employee_address: newEmployeeAddress,
+        location_id: newLocationId.toString(),
+      });
+
+      const res = await fetch(`/api/add-employee?${params.toString()}`, {
+        method: "POST",
+      });
+
+      if (!res.ok) {
+        const result = await res.text();
+        throw new Error(result || "登録失敗");
+      }
+
+      const newUser: Employee = {
+        employee_number: Number(newEmployeeNumber),
+        employee_name: newEmployeeName,
+        employee_role: newEmployeeRole,
+        location_id: newLocationId,
+        employee_address: newEmployeeAddress,
+      };
+
+      setUsers((prev) => [...prev, newUser]);
+
+      setNewEmployeeNumber("");
+      setNewEmployeeName("");
+      setNewEmployeeRole("Sales");
+      setNewLocationId(1);
+      setNewEmployeeAddress("");
+      setNewEmailError("");
+
+      setDialogOpen(false);
+
+      alert("新規登録が完了しました。");
+    } catch (e) {
+      console.error("登録エラー:", e);
+      alert("登録に失敗しました。");
+    }
+  };
+
+  const handleDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      setNewEmployeeNumber("");
+      setNewEmployeeName("");
+      setNewEmployeeRole("Sales");
+      setNewLocationId(1);
+      setNewEmployeeAddress("");
+      setNewEmailError("");
+    }
+    setDialogOpen(open);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -145,8 +238,8 @@ export default function UserTable({ location_id }: { location_id: number }) {
   };
 
   return (
-    <div className="rounded-md border overflow-x-auto p-4 space-y-2">
-      <div className="flex gap-4 mb-4">
+    <div className="rounded-md border overflow-x-auto p-4 space-y-4">
+      <div className="flex gap-4">
         <Input
           placeholder="名前で検索"
           value={filterName}
@@ -172,6 +265,70 @@ export default function UserTable({ location_id }: { location_id: number }) {
           onChange={(e) => setFilterEmail(e.target.value)}
           className="max-w-sm"
         />
+
+        <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
+          <DialogTrigger asChild>
+            <Button className="bg-lime-500 hover:bg-lime-600 text-white">
+              新規追加
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogTitle>新規従業員を追加</DialogTitle>
+            <div className="space-y-2">
+              <Input
+                type="text"
+                placeholder="社員番号 (半角数字)"
+                value={newEmployeeNumber}
+                onChange={(e) =>
+                  setNewEmployeeNumber(e.target.value.replace(/\D/g, ""))
+                }
+              />
+              <Input
+                type="text"
+                placeholder="名前"
+                value={newEmployeeName}
+                onChange={(e) => setNewEmployeeName(e.target.value)}
+              />
+              <select
+                value={newEmployeeRole}
+                onChange={(e) => setNewEmployeeRole(e.target.value)}
+                className="border rounded px-2 py-1 w-full"
+              >
+                {roleOptions.map((r) => (
+                  <option key={r} value={r}>
+                    {roleDisplayMap[r] || r}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={newLocationId}
+                onChange={(e) => setNewLocationId(Number(e.target.value))}
+                className="border rounded px-2 py-1 w-full"
+              >
+                {Object.entries(locationOptions).map(([id, name]) => (
+                  <option key={id} value={id}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+              <Input
+                type="text"
+                placeholder="メールアドレス (半角)"
+                value={newEmployeeAddress}
+                onChange={(e) =>
+                  setNewEmployeeAddress(e.target.value.replace(/[^\x20-\x7E]/g, ""))
+                }
+              />
+              {newEmailError && <p className="text-red-500 text-sm">{newEmailError}</p>}
+              <Button
+                onClick={handleAddUser}
+                className="bg-lime-500 hover:bg-lime-600 text-white w-full"
+              >
+                登録
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Table className="min-w-full text-sm">
@@ -243,12 +400,21 @@ export default function UserTable({ location_id }: { location_id: number }) {
                 {editingId === user.employee_number ? (
                   <Input
                     value={editedAddress}
-                    onChange={(e) => setEditedAddress(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^\x20-\x7E]/g, "");
+                      setEditedAddress(val);
+                      setEditedEmailError(
+                        emailRegex.test(val) ? "" : "有効なメールアドレス形式を入力してください。"
+                      );
+                    }}
                   />
                 ) : (
                   <span className="truncate max-w-[200px]" title={user.employee_address}>
                     {user.employee_address}
                   </span>
+                )}
+                {editingId === user.employee_number && editedEmailError && (
+                  <p className="text-red-500 text-sm">{editedEmailError}</p>
                 )}
               </TableCell>
               <TableCell className="text-center">
