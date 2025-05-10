@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { SortableTable } from "@/components/general/SortableTable";
 
-// データ型定義
 type SalesReport = {
   id: number;
   employee_name: string;
@@ -29,9 +28,9 @@ export default function SalesReportPage() {
   const today_day = now.getDate();
 
   useEffect(() => {
-    async function fetchSales() {
-      if (!session?.user) return;
+    if (status !== "authenticated" || !session?.user) return;
 
+    async function fetchSales() {
       const location_id = session.user.location_id;
       try {
         const res = await fetch(
@@ -49,13 +48,13 @@ export default function SalesReportPage() {
     }
 
     fetchSales();
-  }, [session, today_year, today_month, today_day]);
+  }, [status, session, today_year, today_month, today_day]);
 
   if (status === "loading") {
     return <p>読み込み中...</p>;
   }
 
-  if (!session?.user) {
+  if (status === "unauthenticated" || !session?.user) {
     return <p>ログインが必要です。</p>;
   }
 
@@ -72,14 +71,12 @@ export default function SalesReportPage() {
 
   return (
     <main className="flex-1 p-6 space-y-8">
-      {/* ページタイトル */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-muted-foreground">
           本日{today_year}年{today_month}月{today_day}日の売上報告
         </h2>
       </div>
 
-      {/* 所属拠点の報告状況 */}
       <Card>
         <CardHeader>
           <CardTitle>本日の{locationName}拠点の報告状況</CardTitle>
@@ -104,7 +101,6 @@ export default function SalesReportPage() {
         </CardContent>
       </Card>
 
-      {/* 自分の報告履歴 */}
       <Card>
         <CardHeader>
           <CardTitle>本日のあなたの報告履歴</CardTitle>
