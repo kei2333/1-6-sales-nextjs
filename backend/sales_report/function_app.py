@@ -369,8 +369,8 @@ def add_employee(req: func.HttpRequest) -> func.HttpResponse:
     finally:
         conn.close()
 
-@app.route(route="get_sales_targets")
-def get_sales_targets(req: func.HttpRequest) -> func.HttpResponse:
+@app.route(route="get_sales_target")
+def get_sales_target(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("Processing get_sales_targets HTTP request.")
     conn = get_db_connection()
     try:

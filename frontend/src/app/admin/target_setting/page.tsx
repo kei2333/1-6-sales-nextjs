@@ -29,7 +29,7 @@ export default function TargetSettingPage() {
   const fetchTargetData = useCallback(async () => {
     try {
       const res = await fetch(
-        `/api/get-target${branch ? `?branch=${branch}` : ""}`
+        `/api/get-sales-target${branch ? `?branch=${branch}` : ""}`
       );
       if (!res.ok) throw new Error("取得失敗");
       const data: ApiResponseItem[] = await res.json();
@@ -68,7 +68,7 @@ export default function TargetSettingPage() {
     };
 
     try {
-      const res = await fetch("/api/set-target", {
+      const res = await fetch("/api/post-sales-target", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
