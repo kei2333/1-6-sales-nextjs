@@ -28,10 +28,11 @@ export default function SalesReportPage() {
   const today_day = now.getDate();
 
   useEffect(() => {
-    if (status !== "authenticated" || !session?.user) return;
+    if (status !== "authenticated" || !session || !session.user) return;
+
+    const location_id = session.user.location_id;
 
     async function fetchSales() {
-      const location_id = session.user.location_id;
       try {
         const res = await fetch(
           `https://team6-sales-function-2.azurewebsites.net/api/get_sales?sales_date=${today_year}-${today_month}-${today_day}&location_id=${location_id}`
@@ -54,7 +55,7 @@ export default function SalesReportPage() {
     return <p>読み込み中...</p>;
   }
 
-  if (status === "unauthenticated" || !session?.user) {
+  if (status === "unauthenticated" || !session || !session.user) {
     return <p>ログインが必要です。</p>;
   }
 
