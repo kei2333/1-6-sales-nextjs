@@ -1,3 +1,5 @@
+"use client";
+
 import { TargetForm } from "@/components/target_setting/TargetForm";
 import { BranchTabs } from "@/components/dashboard/BranchTabs";
 import { SortableTable } from "@/components/general/SortableTable";
