@@ -49,12 +49,20 @@ export default function UserTable({ location_id }: { location_id: number }) {
   const [editedLocationId, setEditedLocationId] = useState<number>(1);
   const [editedAddress, setEditedAddress] = useState("");
 
-  const [filterVisible, setFilterVisible] = useState<{
-    [key in keyof Employee]?: boolean;
-  }>({});
-  const [filters, setFilters] = useState<{
-    [key in keyof Employee]?: string;
-  }>({});
+  const [filterVisible, setFilterVisible] = useState<Record<keyof Employee, boolean>>({
+    employee_number: false,
+    employee_name: false,
+    employee_role: false,
+    location_id: false,
+    employee_address: false,
+  });
+  const [filters, setFilters] = useState<Record<keyof Employee, string>>({
+    employee_number: "",
+    employee_name: "",
+    employee_role: "",
+    location_id: "",
+    employee_address: "",
+  });
 
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
 
@@ -75,7 +83,7 @@ export default function UserTable({ location_id }: { location_id: number }) {
     fetchUsers();
   }, [location_id]);
 
-  const toggleSort = (key: SortConfig["key"]) => {
+  const toggleSort = (key: keyof Employee) => {
     setSortConfig((prev) =>
       prev?.key === key
         ? { key, direction: prev.direction === "asc" ? "desc" : "asc" }
@@ -88,12 +96,9 @@ export default function UserTable({ location_id }: { location_id: number }) {
   };
 
   const sortedAndFilteredUsers = () => {
-    const filtered = users.filter((u) =>
-      Object.entries(filters).every(([key, val]) =>
-        u[key as keyof Employee]
-          ?.toString()
-          .toLowerCase()
-          .includes(val.toLowerCase())
+    let filtered = users.filter((u) =>
+      (Object.keys(filters) as (keyof Employee)[]).every((key) =>
+        u[key]?.toString().toLowerCase().includes(filters[key].toLowerCase())
       )
     );
 
@@ -210,7 +215,7 @@ export default function UserTable({ location_id }: { location_id: number }) {
                       e.stopPropagation();
                       setFilterVisible((prev) => ({
                         ...prev,
-                        [key]: !prev[key],
+                        [key as keyof Employee]: !prev[key as keyof Employee],
                       }));
                     }}
                     aria-label="フィルターを開く"
@@ -223,10 +228,7 @@ export default function UserTable({ location_id }: { location_id: number }) {
                     placeholder={`${label}でフィルター`}
                     value={filters[key as keyof Employee] || ""}
                     onChange={(e) =>
-                      handleFilterChange(
-                        key as keyof Employee,
-                        e.target.value
-                      )
+                      handleFilterChange(key as keyof Employee, e.target.value)
                     }
                     className="mt-1"
                   />
@@ -276,7 +278,9 @@ export default function UserTable({ location_id }: { location_id: number }) {
                 {editingId === user.employee_number ? (
                   <select
                     value={editedLocationId}
-                    onChange={(e) => setEditedLocationId(Number(e.target.value))}
+                    onChange={(e) =>
+                      setEditedLocationId(Number(e.target.value))
+                    }
                     className="border rounded px-2 py-1 w-full"
                     aria-label="拠点を選択"
                   >
