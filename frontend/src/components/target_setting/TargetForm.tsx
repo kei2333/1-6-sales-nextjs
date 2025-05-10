@@ -20,6 +20,12 @@ export function TargetForm({ onSubmit }: Props) {
   const [comment, setComment] = useState("");
   const [error, setError] = useState("");
 
+  const handleTargetChange = (value: string) => {
+    // 半角数字以外を除去
+    const filtered = value.replace(/[^\d]/g, "");
+    setTarget(filtered);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -61,8 +67,10 @@ export function TargetForm({ onSubmit }: Props) {
         <Input
           id="target"
           type="text"
+          inputMode="numeric"
+          pattern="\d*"
           value={target}
-          onChange={(e) => setTarget(e.target.value)}
+          onChange={(e) => handleTargetChange(e.target.value)}
           placeholder="例: 1000000"
           required
         />
