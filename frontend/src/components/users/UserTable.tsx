@@ -1,4 +1,5 @@
-//components/user/UserTable.tsx
+"use client";
+
 import {
   Table,
   TableHeader,
@@ -71,7 +72,7 @@ export default function UserTable({ location_id }: { location_id: number }) {
   }, [location_id]);
 
   const sortedAndFilteredUsers = () => {
-    const filtered = users.filter(
+    let filtered = users.filter(
       (u) =>
         u.employee_name.toLowerCase().includes(filterName.toLowerCase()) &&
         u.employee_role.toLowerCase().includes(filterRole.toLowerCase())
