@@ -19,15 +19,14 @@ type Employee = {
 };
 
 const roleOptions = ["Sales", "IT", "Manager", "権限なし"];
-const locationMap: { [key: number]: string } = {
-  1: "関東", 2: "北陸", 3: "東海", 4: "近畿", 5: "中四国", 6: "九州",
-};
-
 const roleDisplayMap: { [key: string]: string } = {
   Sales: "営業",
-  Manager: "管理",
   IT: "サポート",
+  Manager: "管理",
   "権限なし": "権限なし",
+};
+const locationOptions: { [key: number]: string } = {
+  1: "関東", 2: "北陸", 3: "東海", 4: "近畿", 5: "中四国", 6: "九州",
 };
 
 export default function UserTable({ location_id }: { location_id: number }) {
@@ -75,14 +74,19 @@ export default function UserTable({ location_id }: { location_id: number }) {
   };
 
   const cancelEdit = () => {
-    setEditingId(null);
-    setEditedName("");
-    setEditedRole("");
-    setEditedLocationId(1);
-    setEditedAddress("");
+    if (window.confirm("キャンセルしてもよいですか？ 編集内容は破棄されます。")) {
+      setEditingId(null);
+      setEditedName("");
+      setEditedRole("");
+      setEditedLocationId(1);
+      setEditedAddress("");
+    }
   };
 
   const saveEdit = async (userId: number) => {
+    if (!window.confirm("本当に保存しますか？")) {
+      return;
+    }
     try {
       if (!editedName.trim() || !editedRole.trim() || !editedAddress.trim()) {
         alert("すべて入力してください。");
@@ -96,19 +100,36 @@ export default function UserTable({ location_id }: { location_id: number }) {
       setUsers((prev) =>
         prev.map((u) =>
           u.employee_number === userId
-            ? { ...u, employee_name: editedName, employee_role: editedRole, location_id: editedLocationId, employee_address: editedAddress }
+            ? {
+                ...u,
+                employee_name: editedName,
+                employee_role: editedRole,
+                location_id: editedLocationId,
+                employee_address: editedAddress,
+              }
             : u
         )
       );
-      cancelEdit();
+      setEditingId(null);
+      setEditedName("");
+      setEditedRole("");
+      setEditedLocationId(1);
+      setEditedAddress("");
     } catch (e) {
       console.error("保存エラー:", e);
       alert("保存に失敗しました。");
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") {
+      cancelEdit();
+    }
+  };
+
   return (
     <div className="rounded-md border overflow-x-auto p-4 space-y-2">
+      {/* ▼ フィルター欄 */}
       <div className="flex gap-4 mb-4">
         <Input
           placeholder="名前で検索"
@@ -150,11 +171,18 @@ export default function UserTable({ location_id }: { location_id: number }) {
         </TableHeader>
         <TableBody>
           {filteredUsers.map((user) => (
-            <TableRow key={user.employee_number}>
+            <TableRow
+              key={user.employee_number}
+              onKeyDown={handleKeyDown}
+              className="hover:bg-gray-100 transition-colors"
+            >
               <TableCell>{user.employee_number}</TableCell>
               <TableCell>
                 {editingId === user.employee_number ? (
-                  <Input value={editedName} onChange={(e) => setEditedName(e.target.value)} />
+                  <Input
+                    value={editedName}
+                    onChange={(e) => setEditedName(e.target.value)}
+                  />
                 ) : (
                   user.employee_name
                 )}
@@ -164,8 +192,8 @@ export default function UserTable({ location_id }: { location_id: number }) {
                   <select
                     value={editedRole}
                     onChange={(e) => setEditedRole(e.target.value)}
-                    aria-label="役職を選択"
                     className="border rounded px-2 py-1 w-full"
+                    aria-label="役職を選択"
                   >
                     {roleOptions.map((r) => (
                       <option key={r} value={r}>
@@ -177,10 +205,30 @@ export default function UserTable({ location_id }: { location_id: number }) {
                   roleDisplayMap[user.employee_role] || user.employee_role
                 )}
               </TableCell>
-              <TableCell>{locationMap[user.location_id]}</TableCell>
               <TableCell>
                 {editingId === user.employee_number ? (
-                  <Input value={editedAddress} onChange={(e) => setEditedAddress(e.target.value)} />
+                  <select
+                    value={editedLocationId}
+                    onChange={(e) => setEditedLocationId(Number(e.target.value))}
+                    className="border rounded px-2 py-1 w-full"
+                    aria-label="拠点を選択"
+                  >
+                    {Object.entries(locationOptions).map(([id, name]) => (
+                      <option key={id} value={id}>
+                        {name}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  locationOptions[user.location_id] || `ID: ${user.location_id}`
+                )}
+              </TableCell>
+              <TableCell>
+                {editingId === user.employee_number ? (
+                  <Input
+                    value={editedAddress}
+                    onChange={(e) => setEditedAddress(e.target.value)}
+                  />
                 ) : (
                   <span className="truncate max-w-[200px]" title={user.employee_address}>
                     {user.employee_address}
@@ -190,18 +238,27 @@ export default function UserTable({ location_id }: { location_id: number }) {
               <TableCell className="text-center">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="p-1 rounded hover:bg-muted" aria-label="操作メニュー">
+                    <button
+                      className="p-1 rounded hover:bg-muted"
+                      aria-label="操作メニュー"
+                    >
                       <MoreHorizontal size={18} />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     {editingId === user.employee_number ? (
                       <>
-                        <DropdownMenuItem onClick={() => saveEdit(user.employee_number)}>保存</DropdownMenuItem>
-                        <DropdownMenuItem onClick={cancelEdit}>キャンセル</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => saveEdit(user.employee_number)}>
+                          保存
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={cancelEdit}>
+                          キャンセル
+                        </DropdownMenuItem>
                       </>
                     ) : (
-                      <DropdownMenuItem onClick={() => startEdit(user)}>編集</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => startEdit(user)}>
+                        編集
+                      </DropdownMenuItem>
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
