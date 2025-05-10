@@ -28,8 +28,16 @@ export default function LoginClient() {
   })();
 
   const handleSignIn = async () => {
-    await signIn("microsoft-entra-id", { callbackUrl: "/" });
-    router.refresh(); // サインイン後に強制リフレッシュ
+    const result = await signIn("microsoft-entra-id", {
+      redirect: false, // リダイレクトさせず結果を取得
+      callbackUrl: "/",
+    });
+
+    if (result?.ok) {
+      router.push(result.url || "/");
+    } else if (result?.error) {
+      console.error("Sign-in error:", result.error);
+    }
   };
 
   return (
