@@ -20,7 +20,7 @@ export default function Home() {
       const role = session.user.role;
       console.log("role:", role);
       if (role === 'Sales') {
-        router.push('/sales/today');
+        router.push('/sales');
       } else if (role === 'Manager') {
         router.push('/admin/dashboard');
       } else if (role === 'IT') {

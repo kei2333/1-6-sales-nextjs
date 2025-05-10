@@ -1,44 +1,30 @@
-"use client";
+'use client';
 
-import { signIn } from "next-auth/react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { signIn } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
 
 export default function LoginClient() {
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const error = searchParams.get("error");
+  const error = searchParams.get('error');
 
   const errorMessage = (() => {
     if (!error) return null;
 
     switch (error) {
-      case "AccessDenied":
-        return "アクセスが拒否されました。権限がありません。";
-      case "OAuthSignin":
-        return "サインイン中にエラーが発生しました。";
-      case "OAuthCallback":
-        return "外部サービスからの応答でエラーが発生しました。";
-      case "Configuration":
-        return "認証設定に問題があります。";
-      case "SessionRequired":
-        return "保護されたページにアクセスするにはログインが必要です。";
+      case 'AccessDenied':
+        return 'アクセスが拒否されました。権限がありません。';
+      case 'OAuthSignin':
+        return 'サインイン中にエラーが発生しました。';
+      case 'OAuthCallback':
+        return '外部サービスからの応答でエラーが発生しました。';
+      case 'Configuration':
+        return '認証設定に問題があります。';
+      case 'SessionRequired':
+        return '保護されたページにアクセスするにはログインが必要です。';
       default:
-        return "ログインできませんでした。もう一度お試しください。";
+        return 'ログインできませんでした。もう一度お試しください。';
     }
   })();
-
-  const handleSignIn = async () => {
-    const result = await signIn("microsoft-entra-id", {
-      redirect: false, // リダイレクトさせず結果を取得
-      callbackUrl: "/",
-    });
-
-    if (result?.ok) {
-      router.push(result.url || "/");
-    } else if (result?.error) {
-      console.error("Sign-in error:", result.error);
-    }
-  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#BAC43E]/40 space-y-4">
@@ -54,7 +40,7 @@ export default function LoginClient() {
 
           <button
             className="w-full bg-green-700 hover:bg-green-800 text-white py-2 px-4 rounded"
-            onClick={handleSignIn}
+            onClick={() => signIn('microsoft-entra-id', { callbackUrl: '/' })}
           >
             Microsoft でログイン
           </button>
