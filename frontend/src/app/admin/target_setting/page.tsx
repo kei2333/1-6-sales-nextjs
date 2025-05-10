@@ -1,68 +1,120 @@
-"use client";
+import { TargetForm } from "@/components/target_setting/TargetForm";
+import { BranchTabs } from "@/components/dashboard/BranchTabs";
+import { SortableTable } from "@/components/general/SortableTable";
+import { useState, useEffect, useCallback } from "react";
 
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-
-type Props = {
-  onSubmit: (data: { month: string; target: number; comment: string }) => void;
+type TargetItem = {
+  month: string;
+  targetAmount: number;
+  actualAmount: number;
+  achievementRate: string;
+  comment: string;
 };
 
-export function TargetForm({ onSubmit }: Props) {
-  const [month, setMonth] = useState("");
-  const [target, setTarget] = useState("");
-  const [comment, setComment] = useState("");
+type ApiResponseItem = {
+  target_date: string;
+  target_amount: number;
+  actual_amount?: number;
+  comment?: string;
+};
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!month || !target) return;
-    onSubmit({ month, target: Number(target), comment });
-    // オプション：送信後にフォームを初期化
-    setMonth("");
-    setTarget("");
-    setComment("");
+export default function TargetSettingPage() {
+  const [branch, setBranch] = useState<string | undefined>(undefined);
+  const [targetData, setTargetData] = useState<TargetItem[]>([]);
+
+  const fetchTargetData = useCallback(async () => {
+    try {
+      const res = await fetch(
+        `/api/get-target${branch ? `?location_id=${branch}` : ""}`
+      );
+
+      if (!res.ok) {
+        const error = await res.json();
+        console.error("詳細エラー:", error);
+        throw new Error(error.error || "取得失敗");
+      }
+
+      const data: ApiResponseItem[] = await res.json();
+
+      const transformedData: TargetItem[] = data.map((item) => ({
+        month: item.target_date.slice(0, 7),
+        targetAmount: item.target_amount,
+        actualAmount: item.actual_amount ?? 0,
+        achievementRate: item.actual_amount
+          ? ((item.actual_amount / item.target_amount) * 100).toFixed(1)
+          : "0",
+        comment: item.comment ?? "-",
+      }));
+
+      setTargetData(transformedData);
+      console.log("🎯 実データ取得:", transformedData);
+    } catch (err) {
+      console.error("目標取得エラー:", err);
+    }
+  }, [branch]);
+
+  useEffect(() => {
+    fetchTargetData();
+  }, [fetchTargetData]);
+
+  const handleSubmit = async (formData: {
+    month: string;
+    target: number;
+    comment: string;
+  }) => {
+    const payload = {
+      target_date: `${formData.month}-01`,
+      location_id: branch ? Number(branch) : 1,
+      target_amount: formData.target,
+      comment: formData.comment,
+    };
+
+    try {
+      const res = await fetch("/api/post-target", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        console.error("詳細送信エラー:", error);
+        throw new Error(error.error || "送信失敗");
+      }
+
+      const result = await res.json();
+      console.log("登録成功:", result);
+
+      fetchTargetData();
+    } catch (err) {
+      console.error("送信エラー:", err);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-      <div>
-        <Label htmlFor="month">対象年月</Label>
-        <Input
-          id="month"
-          type="month"
-          value={month}
-          onChange={(e) => setMonth(e.target.value)}
-          required
+    <div className="flex flex-col w-full h-full p-4 space-y-6">
+      <BranchTabs value={branch} onValueChange={setBranch} />
+      <div className="flex flex-col gap-6">
+        <TargetForm onSubmit={handleSubmit} />
+        <SortableTable
+          data={targetData}
+          columns={[
+            { key: "month", label: "年月" },
+            {
+              key: "targetAmount",
+              label: "目標",
+              format: (v) => `¥${v.toLocaleString()}`,
+            },
+            {
+              key: "actualAmount",
+              label: "実績",
+              format: (v) => `¥${v.toLocaleString()}`,
+            },
+            { key: "achievementRate", label: "達成率", format: (v) => `${v}%` },
+            { key: "comment", label: "備考" },
+          ]}
         />
       </div>
-      <div>
-        <Label htmlFor="target">目標金額</Label>
-        <Input
-          id="target"
-          type="number"
-          value={target}
-          onChange={(e) => setTarget(e.target.value)}
-          placeholder="例: 1000000"
-          required
-        />
-      </div>
-      <div>
-        <Label htmlFor="comment">備考（任意）</Label>
-        <Textarea
-          id="comment"
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          placeholder="補足など"
-        />
-      </div>
-      <Button
-        type="submit"
-        className="bg-lime-400 hover:bg-lime-500 text-black"
-      >
-        保存
-      </Button>
-    </form>
+    </div>
   );
 }
