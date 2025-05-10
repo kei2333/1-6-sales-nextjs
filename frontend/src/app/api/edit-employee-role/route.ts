@@ -1,4 +1,3 @@
-// app/api/edit-employee/route.ts
 import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
@@ -8,10 +7,7 @@ export async function POST(req: Request) {
   try {
     const res = await fetch(target, { method: 'POST' });
 
-    // ここは res.text() にして、レスポンスが JSON でない場合に備える
     const text = await res.text();
-
-    // 試しにJSONとしてパースできるか確認
     let data;
     try {
       data = JSON.parse(text);
