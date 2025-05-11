@@ -16,6 +16,7 @@ type TargetItem = {
 type ApiResponseItem = {
   target_date: string;
   target_amount: number;
+  actual_amount?: number;
   memo?: string;
 };
 
@@ -37,13 +38,19 @@ export default function TargetSettingPage() {
 
       const data: ApiResponseItem[] = await res.json();
 
-      const transformedData: TargetItem[] = data.map((item) => ({
-        month: item.target_date.slice(0, 7),
-        targetAmount: item.target_amount,
-        actualAmount: 0, // actualAmount は現在DBにないので0固定
-        achievementRate: "0", // 仮で0%固定
-        comment: item.memo ?? "-",
-      }));
+      const transformedData: TargetItem[] = data.map((item) => {
+        const actual = item.actual_amount ?? 0;
+        const target = item.target_amount;
+        const rate = target > 0 ? ((actual / target) * 100).toFixed(1) : "-";
+
+        return {
+          month: item.target_date.slice(0, 7),
+          targetAmount: target,
+          actualAmount: actual,
+          achievementRate: rate,
+          comment: item.memo ?? "-",
+        };
+      });
 
       setTargetData(transformedData);
       console.log("🎯 実データ取得:", transformedData);

@@ -1,95 +1,79 @@
-import { useState } from "react";
-import React from "react";
+"use client";
+import { useEffect, useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 
-// 列定義型
-type Column<T> = {
-  key: keyof T;
-  label: string;
-  format?: (value: T[keyof T]) => React.ReactNode;
+type TargetData = {
+  id: number;
+  target_date: string;
+  location_id: number;
+  target_amount: number;
+  actual_amount: number | null;
+  memo: string;
 };
 
-// ソート設定型
-type SortConfig<T> = {
-  key: keyof T;
-  direction: "asc" | "desc";
-} | null;
+export function TargetHistory({ locationId }: { locationId: number }) {
+  const [targets, setTargets] = useState<TargetData[]>([]);
+  const [error, setError] = useState("");
 
-// コンポーネントProps型
-type Props<T> = {
-  data: T[];
-  columns: Column<T>[];
-};
+  useEffect(() => {
+    const fetchTargets = async () => {
+      try {
+        const res = await fetch(`/api/get-target?location_id=${locationId}`);
+        const data = await res.json();
+        setTargets(data);
+      } catch (e) {
+        console.error("データ取得エラー:", e);
+        setError("データ取得に失敗しました");
+      }
+    };
 
-export function SortableTable<T>({ data, columns }: Props<T>) {
-  const [sortConfig, setSortConfig] = useState<SortConfig<T>>(null);
-
-  const sortedData = [...data].sort((a, b) => {
-    if (!sortConfig) return 0;
-    const { key, direction } = sortConfig;
-    const aVal = a[key];
-    const bVal = b[key];
-
-    // null / undefined 対応
-    if (aVal == null && bVal == null) return 0;
-    if (aVal == null) return 1;
-    if (bVal == null) return -1;
-
-    // 比較値がstringまたはnumberの場合のみ比較
-    if (typeof aVal === "number" && typeof bVal === "number") {
-      return direction === "asc" ? aVal - bVal : bVal - aVal;
-    }
-    if (typeof aVal === "string" && typeof bVal === "string") {
-      return direction === "asc"
-        ? aVal.localeCompare(bVal)
-        : bVal.localeCompare(aVal);
-    }
-
-    return 0;
-  });
-
-  const handleSort = (key: keyof T) => {
-    setSortConfig((prev) =>
-      prev?.key === key
-        ? { key, direction: prev.direction === "asc" ? "desc" : "asc" }
-        : { key, direction: "asc" }
-    );
-  };
-
-  const renderArrow = (key: keyof T) => {
-    if (sortConfig?.key !== key) return "↕";
-    return sortConfig.direction === "asc" ? "↑" : "↓";
-  };
+    fetchTargets();
+  }, [locationId]);
 
   return (
-    <table className="w-full text-sm text-left border">
-      <thead>
-        <tr className="border-b">
-          {columns.map((col) => (
-            <th
-              key={String(col.key)}
-              className="p-2 cursor-pointer"
-              onClick={() => handleSort(col.key)}
-            >
-              {col.label} {renderArrow(col.key)}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {sortedData.map((row, idx) => (
-          <tr key={idx} className="border-b">
-            {columns.map((col) => (
-              <td key={String(col.key)} className="p-2">
-                {col.format
-                  ? col.format(row[col.key])
-                  : row[col.key] !== undefined && row[col.key] !== null
-                  ? String(row[col.key])
-                  : "-"}
-              </td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <Card>
+      <CardContent className="p-4">
+        <h2 className="text-lg font-bold mb-2">売上目標履歴</h2>
+        {error ? (
+          <p className="text-red-500">{error}</p>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="bg-gray-100 text-left">
+              <tr>
+                <th className="p-2">月</th>
+                <th className="p-2">目標額</th>
+                <th className="p-2">実績額</th>
+                <th className="p-2">達成率</th>
+                <th className="p-2">メモ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {targets.map((t) => {
+                const rate =
+                  t.actual_amount !== null && t.target_amount > 0
+                    ? `${((t.actual_amount / t.target_amount) * 100).toFixed(
+                        1
+                      )}%`
+                    : "-";
+
+                return (
+                  <tr key={t.id} className="border-t">
+                    <td className="p-2">{t.target_date.slice(0, 7)}</td>
+                    <td className="p-2">¥{t.target_amount.toLocaleString()}</td>
+                    <td className="p-2">
+                      {t.actual_amount !== null
+                        ? `¥${t.actual_amount.toLocaleString()}`
+                        : "-"}
+                    </td>
+                    <td className="p-2">{rate}</td>
+                    <td className="p-2">{t.memo || "-"}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </CardContent>
+    </Card>
   );
 }
