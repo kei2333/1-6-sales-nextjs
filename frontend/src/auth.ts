@@ -39,7 +39,11 @@ export const {
 } = NextAuth({
   secret: process.env.NEXTAUTH_SECRET,
   trustHost: true,
-  session: { strategy: "jwt" },
+  session: {
+    strategy: "jwt",
+    maxAge: 60 * 30,
+    updateAge: 60 * 5
+   },
 
   providers: [
     MicrosoftEntraIDProvider({
