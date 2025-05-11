@@ -1,5 +1,4 @@
-//src/components/dashboard/SalesChart.tsx
-'use client'
+"use client";
 
 import {
   LineChart,
@@ -9,11 +8,11 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
-} from 'recharts'
+} from "recharts";
 
 type Props = {
-  data: { date: string; value: number }[]
-}
+  data: { date: string; value: number }[];
+};
 
 export function SalesChart({ data }: Props) {
   return (
@@ -33,11 +32,11 @@ export function SalesChart({ data }: Props) {
             dataKey="value"
             stroke="#000"
             strokeWidth={3}
-            dot={{ r: 4, fill: '#000' }}
-            activeDot={{ r: 8, fill: '#00000022' }}
+            dot={{ r: 4, fill: "#000" }}
+            activeDot={{ r: 8, fill: "#00000022" }}
           />
         </LineChart>
       </ResponsiveContainer>
     </div>
-  )
+  );
 }

@@ -1,16 +1,18 @@
-import { ArrowUpRight, ArrowDownRight } from "lucide-react"
-import { Card, CardHeader, CardContent } from "@/components/ui/card"
+import { ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 
 interface RevenueCardProps {
-  value: number
-  changePercentage?: number // 前月比（任意）
+  value: number;
+  changePercentage?: number; // 先々月比
 }
 
 export function RevenueCard({ value, changePercentage }: RevenueCardProps) {
-  const isPositive = changePercentage === undefined || changePercentage >= 0
-  const formattedValue = `¥${(value ?? 0).toLocaleString()}`
+  const isPositive = changePercentage === undefined || changePercentage >= 0;
+  const formattedValue = `¥${(value ?? 0).toLocaleString()}`;
   const formattedChange =
-    changePercentage !== undefined ? `${isPositive ? "+" : "-"}${Math.abs(changePercentage)}%` : null
+    changePercentage !== undefined
+      ? `${isPositive ? "+" : "-"}${Math.abs(changePercentage)}%`
+      : null;
 
   return (
     <Card>
@@ -19,11 +21,22 @@ export function RevenueCard({ value, changePercentage }: RevenueCardProps) {
       </CardHeader>
       <CardContent>
         <div className="text-3xl font-bold">{formattedValue}</div>
-        <div className="text-xs text-green-600 flex items-center gap-1 mt-1">
-          <ArrowUpRight className="w-4 h-4" />
-          前週比 +5%
-        </div>
+
+        {formattedChange !== null && (
+          <div
+            className={`text-xs mt-1 flex items-center gap-1 ${
+              isPositive ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {isPositive ? (
+              <ArrowUpRight className="w-4 h-4" />
+            ) : (
+              <ArrowDownRight className="w-4 h-4" />
+            )}
+            先々月比 {formattedChange}
+          </div>
+        )}
       </CardContent>
     </Card>
-  )
+  );
 }

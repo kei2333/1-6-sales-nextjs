@@ -452,3 +452,43 @@ def post_sales_target(req: func.HttpRequest) -> func.HttpResponse:
     finally:
         if conn:
             conn.close()
+
+@app.route(route="add_sales_target", methods=["POST"])
+def add_sales_target(req: func.HttpRequest) -> func.HttpResponse:
+    try:
+        data = req.get_json()
+        location_id = int(data.get("location_id"))
+        sales_date = data.get("sales_date")  # 例: '2025-05-01'
+        actual_amount = int(data.get("actual_amount"))
+
+        # 対象月を YYYY-MM-01 に変換
+        target_month = sales_date[:7] + "-01"
+
+        conn = get_db_connection()
+        with conn.cursor() as cursor:
+            # 既にその月のレコードがあるか確認
+            cursor.execute(
+                "SELECT id FROM sales_target WHERE target_date = %s AND location_id = %s",
+                (target_month, location_id)
+            )
+            row = cursor.fetchone()
+
+            if row:
+                # actual_amount を加算
+                cursor.execute(
+                    "UPDATE sales_target SET actual_amount = COALESCE(actual_amount, 0) + %s WHERE id = %s",
+                    (actual_amount, row["id"])
+                )
+            else:
+                # 新しい行を作成（actual_amount のみ設定、target_amount は 0 または NULL）
+                cursor.execute(
+                    "INSERT INTO sales_target (target_date, location_id, actual_amount) VALUES (%s, %s, %s)",
+                    (target_month, location_id, actual_amount)
+                )
+
+        conn.commit()
+        return func.HttpResponse("OK", status_code=200)
+
+    except Exception as e:
+        return func.HttpResponse(f"Error: {str(e)}", status_code=500)
+

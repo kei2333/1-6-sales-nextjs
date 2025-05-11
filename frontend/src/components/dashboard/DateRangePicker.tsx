@@ -1,27 +1,36 @@
-'use client'
+"use client";
 
-import * as React from "react"
-import { format } from "date-fns"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Button } from "@/components/ui/button"
-import { CalendarIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { DateRange } from "react-day-picker"
+import * as React from "react";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { DateRange } from "react-day-picker";
 
 type Props = {
-  date: DateRange | undefined
-  setDate: React.Dispatch<React.SetStateAction<DateRange | undefined>>
-  className?: string
-}
+  date: DateRange | undefined;
+  setDate: React.Dispatch<React.SetStateAction<DateRange | undefined>>;
+  className?: string;
+};
 
 export function DateRangePicker({ date, setDate, className }: Props) {
   return (
     <div className={cn("grid gap-2", className)}>
-      <div className="flex items-center justify-between">
+      {/* タイトルとリセットボタンを横並び・右端揃え */}
+      <div
+        className="flex justify-between items-center"
+        style={{ width: "300px" }}
+      >
         <h2 className="text-lg font-semibold">日付範囲を選択</h2>
         <Button
           variant="outline"
+          size="sm"
           className="text-sm"
           onClick={() => setDate(undefined)}
         >
@@ -55,19 +64,18 @@ export function DateRangePicker({ date, setDate, className }: Props) {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0">
-        <Calendar
+          <Calendar
             selected={date}
             onSelect={(val) => {
-              if (!val || typeof val === 'object' && 'from' in val) {
-                setDate(val as DateRange)
+              if (!val || (typeof val === "object" && "from" in val)) {
+                setDate(val as DateRange);
               }
             }}
             defaultMonth={date?.from}
             numberOfMonths={2}
           />
-
         </PopoverContent>
       </Popover>
     </div>
-  )
+  );
 }

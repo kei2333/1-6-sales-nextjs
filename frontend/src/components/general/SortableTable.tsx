@@ -1,65 +1,89 @@
-import { useState } from "react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "../ui/select"
+import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+
 type Column = {
-  key: string
-  label: string
-  format?: (value: any) => React.ReactNode
-}
+  key: string;
+  label: string;
+  format?: (value: any) => React.ReactNode;
+};
 
 type SortConfig = {
-  key: string
-  direction: "asc" | "desc"
-} | null
+  key: string;
+  direction: "asc" | "desc";
+} | null;
 
 type Props = {
-  data: any[]
-  columns: Column[]
-}
+  data: any[];
+  columns: Column[];
+};
+
+const branchNameMap: { [key: string]: string } = {
+  "1": "関東広域",
+  "2": "北陸",
+  "3": "東海",
+  "4": "近畿",
+  "5": "中四国",
+  "6": "九州",
+};
 
 export function SortableTable({ data, columns }: Props) {
-  const [sortConfig, setSortConfig] = useState<SortConfig>(null)
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 10
-  const [selectedSalesChannel, setSelectedSalesChannel] = useState<string>('すべて')
-  const [selectedCategory, setSelectedCategory] = useState<string>('すべて')
-  const [selectedTactics, setSelectedTactics] = useState<string>('すべて')
+  const [sortConfig, setSortConfig] = useState<SortConfig>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const [selectedSalesChannel, setSelectedSalesChannel] =
+    useState<string>("すべて");
+  const [selectedCategory, setSelectedCategory] = useState<string>("すべて");
+  const [selectedTactics, setSelectedTactics] = useState<string>("すべて");
 
-  const safeData = Array.isArray(data) ? data : []
+  const safeData = Array.isArray(data) ? data : [];
 
   const sortedData = [...safeData].sort((a, b) => {
-    if (!sortConfig) return 0
-    const { key, direction } = sortConfig
-    const aVal = a[key]
-    const bVal = b[key]
+    if (!sortConfig) return 0;
+    const { key, direction } = sortConfig;
+    const aVal = a[key];
+    const bVal = b[key];
 
-    if (aVal < bVal) return direction === "asc" ? -1 : 1
-    if (aVal > bVal) return direction === "asc" ? 1 : -1
-    return 0
-  })
+    if (aVal < bVal) return direction === "asc" ? -1 : 1;
+    if (aVal > bVal) return direction === "asc" ? 1 : -1;
+    return 0;
+  });
 
-  const startIndex = (currentPage - 1) * itemsPerPage
+  const startIndex = (currentPage - 1) * itemsPerPage;
   const filteredData = sortedData.filter((row) => {
-    const matchSales = selectedSalesChannel === "すべて" || row.sales_channel === selectedSalesChannel
-    const matchCategory = selectedCategory === "すべて" || row.category === selectedCategory
-    const matchTactics = selectedTactics === "すべて" || row.tactics === selectedTactics
-    return matchSales && matchCategory && matchTactics
-  })
-  const currentPageData = filteredData.slice(startIndex, startIndex + itemsPerPage)
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage)
+    const matchSales =
+      selectedSalesChannel === "すべて" ||
+      row.sales_channel === selectedSalesChannel;
+    const matchCategory =
+      selectedCategory === "すべて" || row.category === selectedCategory;
+    const matchTactics =
+      selectedTactics === "すべて" || row.tactics === selectedTactics;
+    return matchSales && matchCategory && matchTactics;
+  });
+  const currentPageData = filteredData.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   const handleSort = (key: string) => {
     setSortConfig((prev) =>
       prev?.key === key
         ? { key, direction: prev.direction === "asc" ? "desc" : "asc" }
         : { key, direction: "asc" }
-    )
-    setCurrentPage(1) // ソート時にページをリセット
-  }
+    );
+    setCurrentPage(1);
+  };
 
   const renderArrow = (key: string) => {
-    if (sortConfig?.key !== key) return "↕"
-    return sortConfig.direction === "asc" ? "↑" : "↓"
-  }
+    if (sortConfig?.key !== key) return "↕";
+    return sortConfig.direction === "asc" ? "↑" : "↓";
+  };
 
   return (
     <div>
@@ -73,9 +97,11 @@ export function SortableTable({ data, columns }: Props) {
                 onClick={() => handleSort(col.key)}
               >
                 {col.label} {renderArrow(col.key)}
-                {/* ソート機能 */}
                 {col.key === "sales_channel" && (
-                  <Select value={selectedSalesChannel} onValueChange={setSelectedSalesChannel}>
+                  <Select
+                    value={selectedSalesChannel}
+                    onValueChange={setSelectedSalesChannel}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="選択してください" />
                     </SelectTrigger>
@@ -90,7 +116,10 @@ export function SortableTable({ data, columns }: Props) {
                   </Select>
                 )}
                 {col.key === "category" && (
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <Select
+                    value={selectedCategory}
+                    onValueChange={setSelectedCategory}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="選択してください" />
                     </SelectTrigger>
@@ -102,7 +131,10 @@ export function SortableTable({ data, columns }: Props) {
                   </Select>
                 )}
                 {col.key === "tactics" && (
-                  <Select value={selectedTactics} onValueChange={setSelectedTactics}>
+                  <Select
+                    value={selectedTactics}
+                    onValueChange={setSelectedTactics}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="選択してください" />
                     </SelectTrigger>
@@ -114,7 +146,6 @@ export function SortableTable({ data, columns }: Props) {
                     </SelectContent>
                   </Select>
                 )}
-
               </th>
             ))}
           </tr>
@@ -124,7 +155,11 @@ export function SortableTable({ data, columns }: Props) {
             <tr key={idx} className="border-b even:bg-lime-50">
               {columns.map((col) => (
                 <td key={col.key} className="p-2">
-                  {col.format ? col.format(row[col.key]) : row[col.key] ?? "-"}
+                  {col.key === "location_id"
+                    ? branchNameMap[row[col.key]] ?? "未設定"
+                    : col.format
+                    ? col.format(row[col.key])
+                    : row[col.key] ?? "-"}
                 </td>
               ))}
             </tr>
@@ -132,7 +167,6 @@ export function SortableTable({ data, columns }: Props) {
         </tbody>
       </table>
 
-      {/* ページネーション */}
       <div className="flex justify-between items-center mt-2 text-sm">
         <button
           onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
@@ -153,5 +187,5 @@ export function SortableTable({ data, columns }: Props) {
         </button>
       </div>
     </div>
-  )
+  );
 }

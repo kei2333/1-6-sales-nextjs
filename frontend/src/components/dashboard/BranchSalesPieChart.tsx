@@ -1,12 +1,20 @@
-"use client"
+"use client";
 
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from "recharts"
-import { Card, CardContent } from "@/components/ui/card"
+import {
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+} from "recharts";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface Props {
-  data: { label: string; value: number }[]
-  highlightLabel?: string
+  data: { label: string; value: number }[];
+  highlightLabel?: string;
 }
+
 const BRANCH_NAME_MAP: Record<string, string> = {
   "1": "関東広域",
   "2": "北陸",
@@ -14,12 +22,18 @@ const BRANCH_NAME_MAP: Record<string, string> = {
   "4": "近畿",
   "5": "中四国",
   "6": "九州",
-}
+};
 
 const COLORS = [
-  "#0088FE", "#00C49F", "#FFBB28", "#FF8042",
-  "#8884D8", "#FF6666", "#82ca9d", "#ffc658"
-]
+  "#0088FE",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
+  "#8884D8",
+  "#FF6666",
+  "#82ca9d",
+  "#ffc658",
+];
 
 export const BranchSalesPieChart = ({ data, highlightLabel }: Props) => {
   return (
@@ -41,7 +55,7 @@ export const BranchSalesPieChart = ({ data, highlightLabel }: Props) => {
                 isAnimationActive
               >
                 {data.map((entry, index) => {
-                  const isHighlighted = highlightLabel === entry.label
+                  const isHighlighted = highlightLabel === entry.label;
                   return (
                     <Cell
                       key={`branch-slice-${index}`}
@@ -49,24 +63,29 @@ export const BranchSalesPieChart = ({ data, highlightLabel }: Props) => {
                       stroke={isHighlighted ? "#111" : "#fff"}
                       strokeWidth={isHighlighted ? 3 : 1}
                     />
-                  )
+                  );
                 })}
               </Pie>
 
               <Tooltip
-                formatter={(value: number, name: string) => [`¥${value.toLocaleString()}`, name]}
+                formatter={(value: number, name: string) => {
+                  const label = BRANCH_NAME_MAP[name] ?? name;
+                  return [`¥${value.toLocaleString()}`, label];
+                }}
               />
               <Legend
                 layout="vertical"
                 align="right"
                 verticalAlign="middle"
                 iconType="circle"
-                formatter={(value) => BRANCH_NAME_MAP[value as string] || "未設定"}
+                formatter={(value) =>
+                  BRANCH_NAME_MAP[value as string] || "未設定"
+                }
               />
             </PieChart>
           </ResponsiveContainer>
         </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};

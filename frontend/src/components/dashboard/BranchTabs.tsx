@@ -1,11 +1,11 @@
-'use client'
+"use client";
 
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type BranchTabsProps = {
-  value: string | undefined // ← 全拠点は undefined にする
-  onValueChange: (value: string | undefined) => void
-}
+  value: string | undefined; // ← 全拠点は undefined にする
+  onValueChange: (value: string | undefined) => void;
+};
 
 // 支店リスト定義（拡張性◎）
 const branches = [
@@ -16,11 +16,14 @@ const branches = [
   { name: "近畿", locationId: "4" }, // 必要なら追加
   { name: "中四国", locationId: "5" },
   { name: "九州", locationId: "6" },
-]
+];
 
 export function BranchTabs({ value, onValueChange }: BranchTabsProps) {
   return (
-    <Tabs value={value ?? ""} onValueChange={(v) => onValueChange(v || undefined)}>
+    <Tabs
+      value={value ?? ""}
+      onValueChange={(v) => onValueChange(v || undefined)}
+    >
       <TabsList className="mb-4">
         {branches.map((branch) => (
           <TabsTrigger key={branch.name} value={branch.locationId ?? ""}>
@@ -29,5 +32,5 @@ export function BranchTabs({ value, onValueChange }: BranchTabsProps) {
         ))}
       </TabsList>
     </Tabs>
-  )
+  );
 }
