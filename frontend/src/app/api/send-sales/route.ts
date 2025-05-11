@@ -1,31 +1,32 @@
+// app/api/send-sales/route.ts
 import { NextResponse } from 'next/server'
 
 export async function POST(req: Request) {
   try {
-    const url = new URL(req.url)
-    const params = url.searchParams.toString()
-    const target = `https://team6-sales-function-2.azurewebsites.net/api/send_sales?${params}`
+    const body = await req.json();
 
-    const res = await fetch(target, { method: 'POST' })
-    const data = await res.json()
+    const registerUrl = 'https://team6-sales-function-2.azurewebsites.net/api/send_sales';
+    const res = await fetch(registerUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
 
-    // body から location_id, sales_date, amount を抽出
-    const body = Object.fromEntries(url.searchParams.entries())
+    if (!res.ok) throw new Error('売上登録に失敗');
 
-    // 追加: 売上目標テーブルに actual_amount を加算する呼び出し
-    await fetch('https://team6-sales-function-2.azurewebsites.net/api/add_sales_target', {
+    // 🔁 actual_amount を更新
+    await fetch('https://team6-sales-function-2.azurewebsites.net/api/update_actual_amount', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         location_id: body.location_id,
-        sales_date: body.sales_date,
-        actual_amount: body.amount, // 売上金額そのまま
+        sales_date: body.sales_date, // YYYY-MM-DD
       }),
-    })
+    });
 
-    return NextResponse.json(data)
+    return NextResponse.json({ success: true });
   } catch (e) {
-    console.error(e)
-    return NextResponse.json({ error: 'Failed to send' }, { status: 500 })
+    console.error("送信エラー:", e);
+    return NextResponse.json({ error: '送信失敗' }, { status: 500 });
   }
 }
