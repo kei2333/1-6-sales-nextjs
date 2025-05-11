@@ -379,10 +379,10 @@ def get_sales_target(req: func.HttpRequest) -> func.HttpResponse:
     try:
         with conn.cursor(pymysql.cursors.DictCursor) as cursor:
             if location_id == 'all':
-                sql = "SELECT id, target_date, location_id, target_amount, memo FROM sales_target;"
+                sql = "SELECT id, target_date, location_id, target_amount, actual_amount, memo FROM sales_target;"
                 cursor.execute(sql)
             else:
-                sql = "SELECT id, target_date, location_id, target_amount, memo FROM sales_target WHERE location_id = %s;"
+                sql = "SELECT id, target_date, location_id, target_amount, actual_amount, memo FROM sales_target WHERE location_id = %s;"
                 cursor.execute(sql, (location_id,))
 
             sales_targets = cursor.fetchall()
