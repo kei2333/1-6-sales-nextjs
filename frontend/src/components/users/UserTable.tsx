@@ -1,13 +1,24 @@
 "use client";
 
 import {
-  Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
 } from "@/components/ui/table";
 import {
-  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import {
-  Dialog, DialogTrigger, DialogContent, DialogTitle,
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -27,10 +38,15 @@ const roleDisplayMap: { [key: string]: string } = {
   Sales: "営業",
   IT: "サポート",
   Manager: "管理",
-  "権限なし": "権限なし",
+  権限なし: "権限なし",
 };
 const locationOptions: { [key: number]: string } = {
-  1: "関東", 2: "北陸", 3: "東海", 4: "近畿", 5: "中四国", 6: "九州",
+  1: "関東",
+  2: "北陸",
+  3: "東海",
+  4: "近畿",
+  5: "中四国",
+  6: "九州",
 };
 
 export default function UserTable({ location_id }: { location_id: number }) {
@@ -90,7 +106,9 @@ export default function UserTable({ location_id }: { location_id: number }) {
   };
 
   const cancelEdit = () => {
-    if (window.confirm("編集をキャンセルしてもよいですか？内容は破棄されます。")) {
+    if (
+      window.confirm("編集をキャンセルしてもよいですか？内容は破棄されます。")
+    ) {
       setEditingId(null);
       setEditedName("");
       setEditedRole("");
@@ -316,10 +334,14 @@ export default function UserTable({ location_id }: { location_id: number }) {
                 placeholder="メールアドレス (半角)"
                 value={newEmployeeAddress}
                 onChange={(e) =>
-                  setNewEmployeeAddress(e.target.value.replace(/[^\x20-\x7E]/g, ""))
+                  setNewEmployeeAddress(
+                    e.target.value.replace(/[^\x20-\x7E]/g, "")
+                  )
                 }
               />
-              {newEmailError && <p className="text-red-500 text-sm">{newEmailError}</p>}
+              {newEmailError && (
+                <p className="text-red-500 text-sm">{newEmailError}</p>
+              )}
               <Button
                 onClick={handleAddUser}
                 className="bg-lime-500 hover:bg-lime-600 text-white w-full"
@@ -382,7 +404,9 @@ export default function UserTable({ location_id }: { location_id: number }) {
                 {editingId === user.employee_number ? (
                   <select
                     value={editedLocationId}
-                    onChange={(e) => setEditedLocationId(Number(e.target.value))}
+                    onChange={(e) =>
+                      setEditedLocationId(Number(e.target.value))
+                    }
                     className="border rounded px-2 py-1 w-full"
                     aria-label="拠点を選択"
                   >
@@ -404,12 +428,17 @@ export default function UserTable({ location_id }: { location_id: number }) {
                       const val = e.target.value.replace(/[^\x20-\x7E]/g, "");
                       setEditedAddress(val);
                       setEditedEmailError(
-                        emailRegex.test(val) ? "" : "有効なメールアドレス形式を入力してください。"
+                        emailRegex.test(val)
+                          ? ""
+                          : "有効なメールアドレス形式を入力してください。"
                       );
                     }}
                   />
                 ) : (
-                  <span className="truncate max-w-[200px]" title={user.employee_address}>
+                  <span
+                    className="truncate max-w-[200px]"
+                    title={user.employee_address}
+                  >
                     {user.employee_address}
                   </span>
                 )}
@@ -430,7 +459,9 @@ export default function UserTable({ location_id }: { location_id: number }) {
                   <DropdownMenuContent align="end">
                     {editingId === user.employee_number ? (
                       <>
-                        <DropdownMenuItem onClick={() => saveEdit(user.employee_number)}>
+                        <DropdownMenuItem
+                          onClick={() => saveEdit(user.employee_number)}
+                        >
                           保存
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={cancelEdit}>

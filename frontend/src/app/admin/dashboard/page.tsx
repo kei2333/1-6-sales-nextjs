@@ -143,7 +143,7 @@ export default function SalesDashboard() {
     setTotalInPeriod(total);
   }, [salesData, dateRange]);
 
-  // 🎯 今月の目標金額を取得（拠点 or 全拠点合算）
+  // 今月の目標金額を取得（拠点 or 全拠点合算）
   useEffect(() => {
     const fetchTargetAmount = async () => {
       if (isMockMode) return;
@@ -192,7 +192,7 @@ export default function SalesDashboard() {
     fetchTargetAmount();
   }, [selectedBranch, isMockMode]);
 
-  // 🟡 今月の売上合計を取得
+  // 今月の売上合計を取得
   useEffect(() => {
     const today = new Date();
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -442,7 +442,7 @@ export default function SalesDashboard() {
       value,
     }));
 
-    setPieData(pie); // ✅ useEffect の中に入れる
+    setPieData(pie);
   }, [salesData, analysisType, dateRange?.from, dateRange?.to]);
 
   useEffect(() => {

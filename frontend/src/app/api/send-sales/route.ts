@@ -14,7 +14,7 @@ export async function POST(req: Request) {
 
     if (!res.ok) throw new Error('売上登録に失敗');
 
-    // 🔁 actual_amount を更新
+    // Actual_amount を更新
     await fetch('https://team6-sales-function-2.azurewebsites.net/api/update_actual_amount', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

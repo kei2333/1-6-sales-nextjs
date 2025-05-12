@@ -15,13 +15,13 @@ export async function POST(req: Request) {
     const responseText = await res.text();
     if (!res.ok) throw new Error(responseText);
 
-    // 🔁 actual_amount を更新
+    // Actual_amount を更新
     await fetch("https://team6-sales-function-2.azurewebsites.net/api/update_actual_amount", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         location_id: body.location_id,
-        sales_date: body.target_date, // YYYY-MM-DD（例：2025-05-01）
+        sales_date: body.target_date, // YYYY-MM-DD
       }),
     });
 

@@ -10,7 +10,7 @@ declare module "next-auth" {
       role: string;
       location_id: number;
       employee_number: number;
-      employee_name: string; // ✅ 追加
+      employee_name: string; 
     };
     error?: string | null;
   }
@@ -19,7 +19,7 @@ declare module "next-auth" {
     role?: string;
     location_id?: number;
     employee_number?: number;
-    employee_name?: string; // ✅ 追加
+    employee_name?: string; 
   }
 }
 
@@ -32,7 +32,7 @@ declare module "next-auth/jwt" {
     role?: string;
     location_id?: number;
     employee_number?: number;
-    employee_name?: string; // ✅ 追加
+    employee_name?: string; 
     accessToken?: string;
     refreshToken?: string;
     expiresAt?: number;
