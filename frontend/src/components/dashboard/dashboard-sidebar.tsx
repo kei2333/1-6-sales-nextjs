@@ -24,7 +24,7 @@ const menuItems = [
     title: "目標設定",
     icon: Goal,
     href: "/admin/target_setting",
-  }
+  },
 ];
 
 const stores = ["関東広域", "北陸", "東海", "近畿", "中四国", "九州"];
@@ -44,7 +44,7 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="text-lg font-bold px-4 py-2">売上管理おまかせくん</div>
+        <div className="text-xl font-bold px-4 py-2">売上管理おまかせくん</div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -53,8 +53,11 @@ export function AppSidebar() {
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <Link href={item.href} className="flex items-center gap-2 px-2 py-1">
-                      <item.icon size={18} />
+                    <Link
+                      href={item.href}
+                      className="flex items-center gap-2 px-2 py-1 text-lg"
+                    >
+                      <item.icon size={22} />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -65,10 +68,14 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={() => setOpenToday(!openToday)}>
                   <div className="flex items-center justify-between w-full px-2 py-1">
-                    <span className="flex gap-2 items-center">
+                    <span className="flex gap-2 items-center text-base">
                       <span>📅</span> 今日の売上報告
                     </span>
-                    {openToday ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    {openToday ? (
+                      <ChevronUp size={16} />
+                    ) : (
+                      <ChevronDown size={16} />
+                    )}
                   </div>
                 </SidebarMenuButton>
                 {openToday && (
@@ -77,7 +84,7 @@ export function AppSidebar() {
                       <Link
                         key={store}
                         href={`/admin/sales/today/${storeDict[store]}`}
-                        className="text-sm text-muted-foreground hover:text-primary transition"
+                        className="text-base text-muted-foreground hover:text-primary transition"
                       >
                         {store}
                       </Link>
@@ -90,10 +97,14 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={() => setOpenPast(!openPast)}>
                   <div className="flex items-center justify-between w-full px-2 py-1">
-                    <span className="flex gap-2 items-center">
+                    <span className="flex gap-2 items-center text-base">
                       <span>🕒</span> 過去の売上報告
                     </span>
-                    {openPast ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    {openPast ? (
+                      <ChevronUp size={16} />
+                    ) : (
+                      <ChevronDown size={16} />
+                    )}
                   </div>
                 </SidebarMenuButton>
                 {openPast && (
@@ -102,7 +113,7 @@ export function AppSidebar() {
                       <Link
                         key={store}
                         href={`/admin/sales/history/${storeDict[store]}`}
-                        className="text-sm text-muted-foreground hover:text-primary transition"
+                        className="text-base text-muted-foreground hover:text-primary transition"
                       >
                         {store}
                       </Link>
